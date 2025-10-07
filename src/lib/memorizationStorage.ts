@@ -1,7 +1,7 @@
 // Storage for memorized verses per profile per day
 export interface MemorizedVerse {
   day: number;
-  date: string;
+  date: string; // ISO date string for the day it was memorized
 }
 
 export const markVerseAsMemorized = (profileId: string, day: number): void => {
@@ -9,18 +9,20 @@ export const markVerseAsMemorized = (profileId: string, day: number): void => {
   const existing = localStorage.getItem(key);
   const memorized: MemorizedVerse[] = existing ? JSON.parse(existing) : [];
   
-  // Check if already memorized for this day
-  if (memorized.some(m => m.day === day)) {
-    return;
-  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
   
-  // Add new memorization
-  memorized.push({
+  // Remove old memorization for this day (if exists)
+  const filtered = memorized.filter(m => m.day !== day);
+  
+  // Add new memorization with today's date
+  filtered.push({
     day,
-    date: new Date().toISOString()
+    date: todayString
   });
   
-  localStorage.setItem(key, JSON.stringify(memorized));
+  localStorage.setItem(key, JSON.stringify(filtered));
 };
 
 export const isVerseMemorized = (profileId: string, day: number): boolean => {
@@ -29,5 +31,14 @@ export const isVerseMemorized = (profileId: string, day: number): boolean => {
   if (!existing) return false;
   
   const memorized: MemorizedVerse[] = JSON.parse(existing);
-  return memorized.some(m => m.day === day);
+  const verse = memorized.find(m => m.day === day);
+  
+  if (!verse) return false;
+  
+  // Check if it was memorized today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  
+  return verse.date === todayString;
 };

@@ -225,9 +225,6 @@ const ReadingDay = () => {
               >
                 <ChevronLeft className="w-6 h-6" />
               </Button>
-              <Badge className="bg-white/20 text-white px-4 py-2 text-sm">
-                {dayNumber} / {readingPlan.length}
-              </Badge>
               <Button 
                 variant="ghost" 
                 size="icon" 
