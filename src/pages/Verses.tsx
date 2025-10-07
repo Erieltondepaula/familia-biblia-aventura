@@ -3,11 +3,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/contexts/ProfileContext";
 import { useProgress } from "@/contexts/ProgressContext";
 import { awardMemorizationXP } from "@/lib/progressCalculations";
-import { ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Pencil, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Verse { id: string; text: string; memorized: boolean; }
@@ -21,6 +22,8 @@ const Verses = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => { document.title = "Versículos | Jornada Bíblica"; }, []);
   useEffect(() => { localStorage.setItem(key, JSON.stringify(verses)); }, [verses, key]);
@@ -37,6 +40,32 @@ const Verses = () => {
     const xp = awardMemorizationXP();
     addXP(xp);
     toast.success(`Versículo memorizado! +${xp} XP`);
+  };
+
+  const startEdit = (verse: Verse) => {
+    setEditingId(verse.id);
+    setEditText(verse.text);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const saveEdit = (id: string) => {
+    if (!editText.trim()) {
+      toast.error("O versículo não pode estar vazio");
+      return;
+    }
+    setVerses(prev => prev.map(v => v.id === id ? { ...v, text: editText.trim() } : v));
+    setEditingId(null);
+    setEditText("");
+    toast.success("Versículo atualizado!");
+  };
+
+  const deleteVerse = (id: string) => {
+    setVerses(prev => prev.filter(v => v.id !== id));
+    toast.success("Versículo removido!");
   };
 
   return (
@@ -65,14 +94,50 @@ const Verses = () => {
             <Card className="p-6 text-center text-muted-foreground">Nenhum versículo adicionado ainda.</Card>
           )}
           {verses.map(v => (
-            <Card key={v.id} className={`p-6 flex items-center justify-between ${v.memorized ? 'border-success/50 bg-success/5' : ''}`}>
-              <div>
-                <p className="font-semibold">{v.text}</p>
-                <Badge variant="outline" className="mt-2">{v.memorized ? 'Memorizado' : 'Para memorizar'}</Badge>
-              </div>
-              <Button variant={v.memorized ? 'success' : 'default'} disabled={v.memorized} onClick={() => markMemorized(v.id)}>
-                {v.memorized ? (<><CheckCircle2 className="w-4 h-4 mr-2"/> Feito</>) : 'Marcar como memorizado'}
-              </Button>
+            <Card key={v.id} className={`p-6 ${v.memorized ? 'border-success/50 bg-success/5' : ''}`}>
+              {editingId === v.id ? (
+                <div className="space-y-4">
+                  <Textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="min-h-[100px]"
+                    placeholder="Ex.: João 3:16 — Porque Deus amou o mundo..."
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" size="sm" onClick={cancelEdit}>
+                      <X className="w-4 h-4 mr-2" />
+                      Cancelar
+                    </Button>
+                    <Button size="sm" onClick={() => saveEdit(v.id)}>
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="font-semibold mb-2">{v.text}</p>
+                    <Badge variant="outline">{v.memorized ? 'Memorizado' : 'Para memorizar'}</Badge>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button variant="ghost" size="icon" onClick={() => startEdit(v)} title="Editar">
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteVerse(v.id)} title="Remover">
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                    <Button 
+                      variant={v.memorized ? 'success' : 'default'} 
+                      disabled={v.memorized} 
+                      onClick={() => markMemorized(v.id)}
+                      className="ml-2"
+                    >
+                      {v.memorized ? (<><CheckCircle2 className="w-4 h-4 mr-2"/> Feito</>) : 'Memorizado'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </Card>
           ))}
         </div>

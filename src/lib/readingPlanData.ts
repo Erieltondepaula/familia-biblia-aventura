@@ -15,8 +15,8 @@ export const readingPlan: DailyReading[] = [
     date: "2025-01-01",
     book: "Gênesis",
     chapters: ["Gênesis 1", "Gênesis 2"],
-    devotional: "No princípio, Deus criou os céus e a terra. Que privilégio começar nossa jornada pelo início de tudo! Deus, em Sua soberania e sabedoria infinita, trouxe ordem ao caos e luz às trevas. Da mesma forma, Ele deseja trazer ordem e luz à nossa vida diária.",
-    reflection: "Como você pode permitir que Deus traga mais ordem e luz em áreas caóticas da sua vida hoje?",
+    devotional: "No princípio criou Deus. Que palavras gloriosas! Aqui está a base de toda a nossa fé. Antes que houvesse luz, montanhas, oceanos ou humanidade, Deus já existia em Sua eterna majestade. Ele não precisou de matéria-prima, não consultou arquiteto, não convocou ajudantes. Pela Sua palavra trouxe tudo à existência. Que consolo saber que este mesmo Deus governa nossa vida! Se Ele criou os mundos do nada, certamente pode transformar nosso vazio em plenitude, nossas trevas em luz.",
+    reflection: "Se Deus é poderoso o suficiente para criar o universo com Sua palavra, que situação impossível em sua vida você precisa confiar a Ele hoje?",
     keyVerse: "No princípio criou Deus os céus e a terra. - Gênesis 1:1"
   },
   {
@@ -24,8 +24,8 @@ export const readingPlan: DailyReading[] = [
     date: "2025-01-02",
     book: "Gênesis",
     chapters: ["Gênesis 3", "Gênesis 4"],
-    devotional: "A queda do homem nos lembra da seriedade do pecado, mas também da promessa de redenção. Mesmo em meio à desobediência, Deus prometeu um Salvador. Isso nos mostra que Deus sempre tem um plano de restauração.",
-    reflection: "Onde você precisa da restauração de Deus hoje? Como pode buscar Sua graça?",
+    devotional: "A serpente era astuta, mas Deus é soberano. Mesmo no jardim perfeito, o pecado encontrou entrada através da desconfiança na bondade de Deus. Eva duvidou, Adão seguiu, e a humanidade caiu. Mas observe! No mesmo capítulo da queda, Deus pronuncia a primeira promessa do Evangelho. A semente da mulher esmagaria a cabeça da serpente. Cristo foi prometido antes que o primeiro sacrifício fosse feito. A graça de Deus se moveu antes mesmo que o homem buscasse perdão. Que amor incomparável!",
+    reflection: "Onde você tem duvidado da bondade de Deus? Como a promessa da redenção em Cristo pode restaurar sua confiança hoje?",
     keyVerse: "E porei inimizade entre ti e a mulher, e entre a tua semente e a sua semente; esta te ferirá a cabeça, e tu lhe ferirás o calcanhar. - Gênesis 3:15"
   },
   {
@@ -33,8 +33,8 @@ export const readingPlan: DailyReading[] = [
     date: "2025-01-03",
     book: "Gênesis",
     chapters: ["Gênesis 5", "Gênesis 6"],
-    devotional: "Noé achou graça aos olhos do Senhor. Em meio a uma geração corrupta, ele escolheu andar com Deus. Sua obediência, mesmo quando não fazia sentido construir uma arca longe do mar, salvou sua família.",
-    reflection: "Você está disposto a obedecer a Deus mesmo quando Suas instruções parecem não fazer sentido?",
+    devotional: "Noé achou graça! Que palavras preciosas em meio ao juízo iminente. O mundo estava corrompido, a violência enchia a terra, mas Noé encontrou favor divino. Não porque fosse perfeito, mas porque andava com Deus. A graça não é mérito nosso, é favor imerecido. Noé creu e obedeceu quando Deus ordenou construir uma arca onde não havia água. Sua fé o fez trabalhar por 120 anos em um projeto que parecia loucura aos outros. A verdadeira fé obedece mesmo quando não compreende completamente.",
+    reflection: "Você tem andado com Deus mesmo quando o mundo ao seu redor segue outro caminho? Que ato de obediência Deus está chamando você para fazer hoje?",
     keyVerse: "Porém Noé achou graça aos olhos do SENHOR. - Gênesis 6:8"
   },
   {
@@ -42,8 +42,8 @@ export const readingPlan: DailyReading[] = [
     date: "2025-01-04",
     book: "Gênesis",
     chapters: ["Gênesis 7", "Gênesis 8"],
-    devotional: "Deus se lembrou de Noé. Mesmo durante a tempestade e o dilúvio, Deus não esqueceu dele. Da mesma forma, nas tempestades da vida, Deus não se esquece de nós.",
-    reflection: "Quais 'tempestades' você está enfrentando onde precisa confiar que Deus se lembrará de você?",
+    devotional: "E lembrou-se Deus de Noé. Não que Ele tivesse esquecido! Deus não esquece, não dorme, não é distraído. Mas chegou o momento de Deus agir em livramento. Por meses, Noé e sua família estiveram na arca, rodeados de água, sem ver terra. Imagine a fé necessária! Mas Deus tinha Noé em Sua mente o tempo todo. O mesmo Deus que fechou a porta da arca quando o juízo veio, fez soprar o vento quando era hora da restauração. Nossas esperas não significam que Deus se esqueceu. Ele age no tempo perfeito.",
+    reflection: "Em que área da sua vida você precisa confiar que Deus não se esqueceu de você? Como você pode fortalecer sua fé durante a espera?",
     keyVerse: "E lembrou-se Deus de Noé... - Gênesis 8:1"
   },
   {
@@ -51,8 +51,8 @@ export const readingPlan: DailyReading[] = [
     date: "2025-01-05",
     book: "Gênesis",
     chapters: ["Gênesis 9", "Gênesis 10", "Gênesis 11"],
-    devotional: "A aliança do arco-íris mostra a fidelidade de Deus. Cada vez que vemos um arco-íris, somos lembrados de que Deus mantém Suas promessas. Ele é fiel mesmo quando somos infiéis.",
-    reflection: "Quais promessas de Deus você precisa lembrar hoje?",
+    devotional: "O meu arco tenho posto! Que símbolo maravilhoso da aliança divina. Deus colocou Seu arco nas nuvens como memorial eterno de Sua promessa. Não importa quão escuras sejam as nuvens do juízo, o arco-íris declara que a misericórdia triunfa. Cada vez que a chuva cai e o sol brilha através dela, Deus nos lembra: 'Eu mantenho Minhas promessas'. Sua Palavra é mais firme que as montanhas. Ele não pode mentir, não mudará de ideia. Se Deus prometeu, Ele cumprirá. Descanse nesta verdade hoje!",
+    reflection: "Que promessa específica de Deus você precisa reivindicar pela fé hoje? Como o arco-íris pode servir de lembrete visual da fidelidade de Deus?",
     keyVerse: "O meu arco tenho posto nas nuvens; este será por sinal da aliança entre mim e a terra. - Gênesis 9:13"
   }
 ];
