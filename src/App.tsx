@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ReadingDay from "./pages/ReadingDay";
 import HowItWorks from "./pages/HowItWorks";
+import Reflections from "./pages/Reflections";
 import NotFound from "./pages/NotFound";
 import Profiles from "./pages/Profiles";
 import Settings from "./pages/Settings";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/reading/:day" element={<ReadingDay />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/reflections" element={<Reflections />} />
               <Route path="/profiles" element={<Profiles />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/quiz" element={<Quiz />} />

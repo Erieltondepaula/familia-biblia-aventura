@@ -1,28 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import CircularProgress from "@/components/CircularProgress";
 import { 
   BookOpen, 
   CheckCircle2, 
   ArrowLeft,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Lightbulb,
   MessageSquare,
   Star,
-  Sparkles
+  Sparkles,
+  CalendarDays
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
-import { getReadingByDay } from "@/lib/readingPlanData";
+import { useProfile } from "@/contexts/ProfileContext";
+import { getReadingByDay, readingPlan } from "@/lib/readingPlanData";
+import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
+import { calculateLevel } from "@/lib/progressCalculations";
+import LevelUpModal from "@/components/LevelUpModal";
 import { toast } from "sonner";
 
 const ReadingDay = () => {
   const { day } = useParams();
   const navigate = useNavigate();
-  const { markChapterAsRead, isChapterCompleted, addXP } = useProgress();
+  const { currentProfile } = useProfile();
+  const { markChapterAsRead, isChapterCompleted, addXP, xp, level } = useProgress();
   
   const dayNumber = parseInt(day || "1");
   const reading = getReadingByDay(dayNumber);
@@ -33,6 +43,26 @@ const ReadingDay = () => {
   );
   const [notes, setNotes] = useState("");
   const [memorizedVerse, setMemorizedVerse] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [newLevel, setNewLevel] = useState(0);
+
+  // Load saved reflection
+  useEffect(() => {
+    if (currentProfile && reading) {
+      const savedReflection = getReflection(currentProfile.id, dayNumber);
+      setNotes(savedReflection);
+    }
+  }, [currentProfile, dayNumber, reading]);
+
+  // Auto-save reflection
+  useEffect(() => {
+    if (currentProfile && reading) {
+      const timer = setTimeout(() => {
+        saveReflection(currentProfile.id, dayNumber, notes);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [notes, currentProfile, dayNumber, reading]);
 
   if (!reading) {
     return (
@@ -85,12 +115,21 @@ const ReadingDay = () => {
       return;
     }
 
+    const currentLevel = level;
+    
     markChapterAsRead(dayNumber, reading.chapters);
     
     let totalXP = reading.chapters.length * 84; // 84 XP per chapter
     if (notes.trim().length > 0) {
       addXP(50);
       totalXP += 50;
+    }
+
+    // Check if leveled up
+    const levelAfter = calculateLevel(xp + totalXP);
+    if (levelAfter > currentLevel) {
+      setNewLevel(levelAfter);
+      setShowLevelUp(true);
     }
 
     toast.success(`Leitura concluída! +${totalXP} XP`, {
@@ -102,46 +141,112 @@ const ReadingDay = () => {
     }, 2000);
   };
 
+  const goToPreviousDay = () => {
+    if (dayNumber > 1) {
+      navigate(`/reading/${dayNumber - 1}`);
+    }
+  };
+
+  const goToNextDay = () => {
+    if (dayNumber < readingPlan.length) {
+      navigate(`/reading/${dayNumber + 1}`);
+    }
+  };
+
+  const markAllAsRead = () => {
+    const allChapters = new Set(reading.chapters);
+    setCheckedChapters(allChapters);
+    toast.success("Todos os capítulos marcados como lidos!");
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <LevelUpModal level={newLevel} show={showLevelUp} onClose={() => setShowLevelUp(false)} />
+      
       {/* Header */}
       <header className="bg-gradient-hero text-white shadow-elevated">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
-                <ArrowLeft className="w-6 h-6" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link to="/dashboard">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                  <ArrowLeft className="w-6 h-6" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <CalendarDays className="w-6 h-6" />
+                  Dia {reading.day} - {reading.book}
+                </h1>
+                <p className="text-white/80">{new Date().toISOString().split('T')[0]}</p>
+              </div>
+            </div>
+            
+            {/* Day Navigation */}
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-white/20"
+                onClick={goToPreviousDay}
+                disabled={dayNumber <= 1}
+              >
+                <ChevronLeft className="w-6 h-6" />
               </Button>
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">Dia {reading.day} - {reading.book}</h1>
-              <p className="text-white/80">{reading.date}</p>
+              <Badge className="bg-white/20 text-white px-4 py-2 text-sm">
+                {dayNumber} / {readingPlan.length}
+              </Badge>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-white/20"
+                onClick={goToNextDay}
+                disabled={dayNumber >= readingPlan.length}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Progress Card */}
+        {/* Progress Card with Circular Progress */}
         <Card className="p-6 mb-6 shadow-card">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-primary" />
-              Progresso da Leitura
-            </h3>
-            <Badge variant={isCompleted ? "default" : "outline"} className={isCompleted ? "bg-success" : ""}>
-              {Math.round(progress)}%
-            </Badge>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <CircularProgress value={progress} size={100} />
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="font-semibold text-lg flex items-center justify-center md:justify-start gap-2 mb-2">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+                Progresso da Leitura
+              </h3>
+              <p className="text-muted-foreground mb-2">
+                {checkedChapters.size} de {reading.chapters.length} capítulos lidos
+              </p>
+              <Badge variant={isCompleted ? "default" : "outline"} className={isCompleted ? "bg-success" : ""}>
+                {isCompleted ? "✓ Dia Completo" : "Em Progresso"}
+              </Badge>
+            </div>
           </div>
-          <Progress value={progress} className="h-3" />
         </Card>
 
         {/* Chapters Checklist */}
         <Card className="p-8 mb-6 shadow-card">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-primary" />
-            Capítulos de Hoje
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-primary" />
+              Capítulos de Hoje
+            </h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={markAllAsRead}
+              disabled={allChaptersChecked || isCompleted}
+            >
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Marcar Todos
+            </Button>
+          </div>
           <div className="space-y-4">
             {reading.chapters.map((chapter, idx) => (
               <div 
@@ -200,11 +305,18 @@ const ReadingDay = () => {
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[120px] text-base"
           />
-          {notes.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-2">
-              +50 XP ao concluir com anotações
-            </p>
-          )}
+          <div className="flex items-center justify-between mt-2">
+            {notes.length > 0 && (
+              <p className="text-sm text-success">
+                ✓ Reflexão salva automaticamente
+              </p>
+            )}
+            {notes.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                +50 XP ao concluir com anotações
+              </p>
+            )}
+          </div>
         </Card>
 
         {/* Key Verse */}

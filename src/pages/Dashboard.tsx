@@ -10,7 +10,8 @@ import {
   Star,
   Flame,
   TrendingUp,
-  Home
+  Home,
+  MessageSquare
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
@@ -18,6 +19,7 @@ import { useProfile } from "@/contexts/ProfileContext";
 import { getCurrentDayReading } from "@/lib/readingPlanData";
 import { toast } from "sonner";
 import MemorizedVerses from "@/components/MemorizedVerses";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Dashboard = () => {
   const { currentProfile } = useProfile();
@@ -52,7 +54,8 @@ const Dashboard = () => {
                 Jornada Bíblica
               </h1>
             </Link>
-<div className="flex items-center gap-4">
+<div className="flex items-center gap-2">
+  <ThemeToggle />
   <Link to="/profiles">
     <Button variant="ghost" className="text-white hover:bg-white/20">
       Perfis
@@ -233,45 +236,55 @@ const Dashboard = () => {
         </div>
 
 {/* Quick Actions */}
-<div className="grid md:grid-cols-4 gap-4">
-  <Link to="/quiz">
+<div className="grid md:grid-cols-5 gap-4">
+  <Link to="/quiz" className="w-full">
     <Button 
       variant="outline" 
       size="lg" 
-      className="h-auto py-6 flex-col gap-2"
+      className="w-full h-auto py-6 flex-col gap-2"
     >
       <Target className="w-6 h-6" />
       <span>Quiz Diário</span>
     </Button>
   </Link>
-  <Link to="/progress">
+  <Link to="/progress" className="w-full">
     <Button 
       variant="outline" 
       size="lg" 
-      className="h-auto py-6 flex-col gap-2"
+      className="w-full h-auto py-6 flex-col gap-2"
     >
       <TrendingUp className="w-6 h-6" />
       <span>Progresso</span>
     </Button>
   </Link>
-  <Link to="/achievements">
+  <Link to="/achievements" className="w-full">
     <Button 
       variant="outline" 
       size="lg" 
-      className="h-auto py-6 flex-col gap-2"
+      className="w-full h-auto py-6 flex-col gap-2"
     >
       <Trophy className="w-6 h-6" />
       <span>Conquistas</span>
     </Button>
   </Link>
-  <Link to="/verses">
+  <Link to="/verses" className="w-full">
     <Button 
       variant="outline" 
       size="lg" 
-      className="h-auto py-6 flex-col gap-2"
+      className="w-full h-auto py-6 flex-col gap-2"
     >
       <BookOpen className="w-6 h-6" />
       <span>Versículos</span>
+    </Button>
+  </Link>
+  <Link to="/reflections" className="w-full">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="w-full h-auto py-6 flex-col gap-2"
+    >
+      <MessageSquare className="w-6 h-6" />
+      <span>Reflexões</span>
     </Button>
   </Link>
 </div>
