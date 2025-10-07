@@ -77,14 +77,19 @@ const Dashboard = () => {
         <div className="grid lg:grid-cols-3 gap-6 mb-8">
           {/* Main Progress Card */}
           <Card className="lg:col-span-2 p-8 shadow-card">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
                 <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "João"}! 👋</h2>
-                <p className="text-muted-foreground text-lg">Continue sua jornada de fé hoje</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge className="bg-gradient-glory text-accent-foreground text-base px-4 py-2">
+                    {levelName}
+                  </Badge>
+                  <Badge variant="outline" className="text-base px-4 py-2 border-2">
+                    Nível {level}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground text-base mt-2">Continue sua jornada de fé hoje</p>
               </div>
-              <Badge className="bg-gradient-glory text-accent-foreground text-lg px-4 py-2">
-                {levelName} - Nível {level}
-              </Badge>
             </div>
 
             <div className="space-y-6">
