@@ -17,6 +17,7 @@ import Quiz from "./pages/Quiz";
 import ProgressDetails from "./pages/ProgressDetails";
 import Achievements from "./pages/Achievements";
 import Verses from "./pages/Verses";
+import BibleChapter from "./pages/BibleChapter";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/progress" element={<ProgressDetails />} />
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/verses" element={<Verses />} />
+              <Route path="/bible/:book/:chapter" element={<BibleChapter />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
