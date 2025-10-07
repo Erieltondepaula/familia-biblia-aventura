@@ -19,6 +19,7 @@ export interface Sermon {
   date: string;
   preacher: string;
   introduction: string;
+  introTransition: string;
   point1: SermonPoint;
   point2: SermonPoint;
   point3: SermonPoint;

@@ -36,6 +36,7 @@ const SermonEditor = () => {
     date: format(new Date(), 'yyyy-MM-dd'),
     preacher: '',
     introduction: '',
+    introTransition: '',
     point1: { ...emptyPoint },
     point2: { ...emptyPoint },
     point3: { ...emptyPoint },
@@ -59,6 +60,7 @@ const SermonEditor = () => {
           date: sermon.date,
           preacher: sermon.preacher,
           introduction: sermon.introduction,
+          introTransition: sermon.introTransition,
           point1: sermon.point1,
           point2: sermon.point2,
           point3: sermon.point3,
@@ -92,6 +94,7 @@ const SermonEditor = () => {
         date: formData.date,
         preacher: formData.preacher,
         introduction: formData.introduction,
+        introTransition: formData.introTransition,
         point1: formData.point1,
         point2: formData.point2,
         point3: formData.point3,
@@ -111,6 +114,7 @@ const SermonEditor = () => {
         date: formData.date,
         preacher: formData.preacher,
         introduction: formData.introduction,
+        introTransition: formData.introTransition,
         point1: formData.point1,
         point2: formData.point2,
         point3: formData.point3,
@@ -298,6 +302,18 @@ const SermonEditor = () => {
                   maxLength={200}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="introTransition">Transição da Introdução para o Ponto 1</Label>
+                <Textarea
+                  id="introTransition"
+                  value={formData.introTransition}
+                  onChange={(e) => setFormData(prev => ({ ...prev, introTransition: e.target.value }))}
+                  placeholder="Crie uma ponte suave, ligando a ideia geral da introdução ao primeiro ponto..."
+                  className="min-h-[100px]"
+                  maxLength={1000}
+                />
+              </div>
             </TabsContent>
 
             {/* Point 1-4 Tabs */}
@@ -447,6 +463,13 @@ const SermonEditor = () => {
               <div>
                 <h2 className="font-bold text-xl mb-2">Introdução</h2>
                 <p className="whitespace-pre-wrap">{formData.introduction}</p>
+              </div>
+            )}
+
+            {formData.introTransition && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-1">Transição da Introdução para o Ponto 1:</h3>
+                <p className="whitespace-pre-wrap">{formData.introTransition}</p>
               </div>
             )}
 
