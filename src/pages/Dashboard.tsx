@@ -14,10 +14,13 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
+import { useProfile } from "@/contexts/ProfileContext";
 import { getCurrentDayReading } from "@/lib/readingPlanData";
 import { toast } from "sonner";
+import MemorizedVerses from "@/components/MemorizedVerses";
 
 const Dashboard = () => {
+  const { currentProfile } = useProfile();
   const { 
     xp, 
     level, 
@@ -31,6 +34,9 @@ const Dashboard = () => {
 
   const todayReading = getCurrentDayReading();
   const isCompleted = isChapterCompleted(todayReading.day);
+  
+  // Get current date in format: "Dia 1 - 2025-01-07"
+  const currentDate = new Date().toISOString().split('T')[0];
 
 // Removidos toasts de navegação; agora usamos rotas dedicadas
 
@@ -69,7 +75,7 @@ const Dashboard = () => {
           <Card className="lg:col-span-2 p-8 shadow-card">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-3xl font-bold mb-2">Olá, João! 👋</h2>
+                <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "João"}! 👋</h2>
                 <p className="text-muted-foreground text-lg">Continue sua jornada de fé hoje</p>
               </div>
               <Badge className="bg-gradient-glory text-accent-foreground text-lg px-4 py-2">
@@ -152,7 +158,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-2xl font-bold mb-1">Leitura de Hoje</h3>
-                <p className="text-muted-foreground">Dia {todayReading.day} - {todayReading.date}</p>
+                <p className="text-muted-foreground">Dia {todayReading.day} - {currentDate}</p>
               </div>
               {isCompleted ? (
                 <Badge className="bg-success text-white text-lg px-4 py-2">
@@ -167,11 +173,26 @@ const Dashboard = () => {
 
             <div className="space-y-3 mb-6">
               {todayReading.chapters.map((chapter, idx) => (
-                <div key={idx} className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg hover:bg-muted transition-smooth">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <span className="font-bold text-primary">{idx + 1}</span>
+                <div 
+                  key={idx} 
+                  className={`flex items-center gap-4 p-4 rounded-lg transition-smooth ${
+                    isCompleted 
+                      ? 'bg-success/20 border-2 border-success/40' 
+                      : 'bg-muted/50 hover:bg-muted'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    isCompleted ? 'bg-success text-white' : 'bg-primary/10'
+                  }`}>
+                    {isCompleted ? (
+                      <span className="font-bold">✓</span>
+                    ) : (
+                      <span className="font-bold text-primary">{idx + 1}</span>
+                    )}
                   </div>
-                  <span className="font-semibold text-lg">{chapter}</span>
+                  <span className={`font-semibold text-lg ${isCompleted ? 'text-success-foreground' : ''}`}>
+                    {chapter}
+                  </span>
                 </div>
               ))}
             </div>
@@ -185,26 +206,30 @@ const Dashboard = () => {
           </Card>
 
           {/* Quick Info */}
-          <Card className="p-6 shadow-card">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-accent" />
-              Progresso de Hoje
-            </h3>
-            <div className="space-y-4">
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">XP Total</p>
-                <p className="text-2xl font-bold text-primary">{xp} XP</p>
+          <div className="space-y-6">
+            <Card className="p-6 shadow-card">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <Trophy className="w-6 h-6 text-accent" />
+                Progresso de Hoje
+              </h3>
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">XP Total</p>
+                  <p className="text-2xl font-bold text-primary">{xp} XP</p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground mb-1">Próximo Nível</p>
+                  <p className="text-2xl font-bold text-secondary">{xpToNextLevel - xp} XP</p>
+                </div>
+                <div className="p-4 bg-gradient-glory rounded-lg">
+                  <p className="text-sm text-accent-foreground/80 mb-1">Seu Nível</p>
+                  <p className="text-xl font-bold text-accent-foreground">{levelName}</p>
+                </div>
               </div>
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">Próximo Nível</p>
-                <p className="text-2xl font-bold text-secondary">{xpToNextLevel - xp} XP</p>
-              </div>
-              <div className="p-4 bg-gradient-glory rounded-lg">
-                <p className="text-sm text-accent-foreground/80 mb-1">Seu Nível</p>
-                <p className="text-xl font-bold text-accent-foreground">{levelName}</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+
+            <MemorizedVerses />
+          </div>
         </div>
 
 {/* Quick Actions */}

@@ -63,8 +63,8 @@ const ReadingDay = () => {
   const handleMemorizeVerse = () => {
     if (!memorizedVerse) {
       setMemorizedVerse(true);
-      addXP(30);
-      toast.success("Versículo memorizado! +30 XP", {
+      addXP(100);
+      toast.success("Versículo memorizado! +100 XP", {
         description: "Continue memorizando a Palavra!"
       });
     }
@@ -87,10 +87,10 @@ const ReadingDay = () => {
 
     markChapterAsRead(dayNumber, reading.chapters);
     
-    let totalXP = 50; // Base XP for reading
+    let totalXP = reading.chapters.length * 84; // 84 XP per chapter
     if (notes.trim().length > 0) {
-      addXP(20);
-      totalXP += 20;
+      addXP(50);
+      totalXP += 50;
     }
 
     toast.success(`Leitura concluída! +${totalXP} XP`, {
@@ -202,7 +202,7 @@ const ReadingDay = () => {
           />
           {notes.length > 0 && (
             <p className="text-sm text-muted-foreground mt-2">
-              +20 XP ao concluir com anotações
+              +50 XP ao concluir com anotações
             </p>
           )}
         </Card>
@@ -226,7 +226,7 @@ const ReadingDay = () => {
             {memorizedVerse ? (
               <>
                 <CheckCircle2 className="w-5 h-5 mr-2" />
-                Versículo Memorizado! (+30 XP)
+                Versículo Memorizado! (+100 XP)
               </>
             ) : (
               <>

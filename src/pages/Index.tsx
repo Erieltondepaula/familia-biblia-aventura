@@ -32,9 +32,11 @@ const Index = () => {
                     Começar Jornada
                   </Button>
                 </Link>
-                <Button variant="outline" size="xl" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20">
-                  Como Funciona
-                </Button>
+                <Link to="/how-it-works">
+                  <Button variant="outline" size="xl" className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20">
+                    Como Funciona
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="relative">
@@ -134,10 +136,11 @@ const Index = () => {
           <div className="max-w-4xl mx-auto space-y-4">
             {[
               { level: "Nível 0", name: "Iniciante", desc: "Começando a jornada espiritual", color: "bg-muted" },
-              { level: "Níveis 1-20", name: "Intermediário", desc: "Desenvolvendo constância na leitura", color: "bg-primary" },
-              { level: "Níveis 21-60", name: "Experiente", desc: "Conhece bem as Escrituras", color: "bg-secondary" },
-              { level: "Níveis 61-90", name: "Professor", desc: "Capaz de ensinar a outros", color: "bg-gradient-growth" },
-              { level: "Níveis 91-100", name: "Mestre", desc: "Domínio profundo da Palavra", color: "bg-gradient-glory" },
+              { level: "Níveis 1-10", name: "Aprendiz da Palavra", desc: "Aprendendo os fundamentos da Palavra", color: "bg-primary" },
+              { level: "Níveis 11-30", name: "Discípulo Fiel", desc: "Desenvolvendo constância e disciplina", color: "bg-secondary" },
+              { level: "Níveis 31-60", name: "Servo Experiente", desc: "Conhecimento profundo das Escrituras", color: "bg-gradient-growth" },
+              { level: "Níveis 61-90", name: "Mestre da Escritura", desc: "Capaz de ensinar e discipular", color: "bg-gradient-faith" },
+              { level: "Níveis 91-100", name: "Doutor da Fé", desc: "Domínio completo da Palavra de Deus", color: "bg-gradient-glory" },
             ].map((item, idx) => (
               <Card key={idx} className="p-6 shadow-card hover:shadow-elevated transition-smooth">
                 <div className="flex items-center gap-4">

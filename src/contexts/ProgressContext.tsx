@@ -94,7 +94,8 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     setCompletedReadings(prev => [...prev, newReading]);
-    addXP(50);
+    // Award 84 XP per chapter
+    addXP(chapters.length * 84);
   };
 
   const addXP = (amount: number) => {
