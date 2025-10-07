@@ -1,26 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useProfile, RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
 import { useProgress } from "@/contexts/ProgressContext";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, RotateCcw, Calendar } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { getPlanStartDate, setPlanStartDate, getCurrentDayNumber } from "@/lib/readingPlanData";
 
 const Settings = () => {
   const { currentProfile, updateProfile } = useProfile();
   const { resetProgress } = useProgress();
+  const [startDate, setStartDate] = useState("");
 
   useEffect(() => {
     document.title = "Configurações | Jornada Bíblica";
+    const currentStartDate = getPlanStartDate();
+    setStartDate(currentStartDate.toISOString().split('T')[0]);
   }, []);
 
   const handleReset = () => {
     resetProgress();
     toast.success("Plano reiniciado!", { description: "Seu XP e leituras foram zerados para este perfil." });
+  };
+
+  const handleStartDateChange = (newDate: string) => {
+    setStartDate(newDate);
+    const date = new Date(newDate + 'T00:00:00');
+    setPlanStartDate(date);
+    const currentDay = getCurrentDayNumber();
+    toast.success(`Data de início atualizada!`, { 
+      description: `Você está no dia ${currentDay} do plano.` 
+    });
   };
 
   if (!currentProfile) return null;
@@ -103,12 +118,43 @@ const Settings = () => {
         </Card>
 
         <Card className="p-6 space-y-4">
-          <h2 className="text-xl font-bold">Plano de Leitura</h2>
-          <p className="text-sm text-muted-foreground">Recomece sua jornada do zero para este perfil.</p>
-          <Button variant="destructive" onClick={handleReset}>
-            <RotateCcw className="w-4 h-4 mr-2"/>
-            Reiniciar Plano do Zero
-          </Button>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Plano de Leitura
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="startDate">Data de Início do Plano</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => handleStartDateChange(e.target.value)}
+                className="mt-2"
+              />
+              <p className="text-sm text-muted-foreground mt-2">
+                O sistema calculará automaticamente o dia atual baseado nesta data
+              </p>
+            </div>
+
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm font-semibold mb-2">Dia Atual do Plano:</p>
+              <Badge variant="default" className="text-lg">
+                Dia {getCurrentDayNumber()} de 365
+              </Badge>
+            </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground mb-3">
+                Recomece sua jornada do zero para este perfil.
+              </p>
+              <Button variant="destructive" onClick={handleReset} className="w-full">
+                <RotateCcw className="w-4 h-4 mr-2"/>
+                Reiniciar Plano do Zero
+              </Button>
+            </div>
+          </div>
         </Card>
       </main>
     </div>

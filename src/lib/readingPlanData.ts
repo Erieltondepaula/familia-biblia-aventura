@@ -57,10 +57,43 @@ export const readingPlan: DailyReading[] = [
   }
 ];
 
+// Get or set the plan start date
+export const getPlanStartDate = (): Date => {
+  const saved = localStorage.getItem('planStartDate');
+  if (saved) {
+    return new Date(saved);
+  }
+  // Default to today if not set
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  localStorage.setItem('planStartDate', today.toISOString());
+  return today;
+};
+
+export const setPlanStartDate = (date: Date): void => {
+  date.setHours(0, 0, 0, 0);
+  localStorage.setItem('planStartDate', date.toISOString());
+};
+
+// Calculate current day based on start date
+export const getCurrentDayNumber = (): number => {
+  const startDate = getPlanStartDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const diffTime = today.getTime() - startDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Day 1 is the start date, so add 1
+  const dayNumber = diffDays + 1;
+  
+  // Clamp between 1 and total days
+  return Math.max(1, Math.min(dayNumber, readingPlan.length));
+};
+
 export const getCurrentDayReading = (): DailyReading => {
-  // For demo purposes, return day 1
-  // In production, this would calculate based on user's start date
-  return readingPlan[0];
+  const dayNumber = getCurrentDayNumber();
+  return getReadingByDay(dayNumber) || readingPlan[0];
 };
 
 export const getReadingByDay = (day: number): DailyReading | undefined => {
