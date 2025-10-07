@@ -152,10 +152,8 @@ const ReadingDayMcCheyne = () => {
   };
 
   const goToNextDay = () => {
-    if (dayNumber < mcCheyneReadingPlan.length && dayNumber < currentDay) {
+    if (dayNumber < mcCheyneReadingPlan.length) {
       navigate(`/reading/${dayNumber + 1}`);
-    } else if (dayNumber >= currentDay) {
-      toast.error("Aguarde até meia-noite para o próximo dia");
     }
   };
 
