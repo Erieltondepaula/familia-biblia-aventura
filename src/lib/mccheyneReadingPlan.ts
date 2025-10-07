@@ -538,3 +538,7 @@ export const calculateReadingProgress = (checkedChapters: string[], allChapters:
   if (allChapters.length === 0) return 0;
   return Math.round((checkedChapters.length / allChapters.length) * 100);
 };
+
+export const getCurrentDayReading = (): McCheyneReading | undefined => {
+  return getReadingByDay(getCurrentDayNumber());
+};
