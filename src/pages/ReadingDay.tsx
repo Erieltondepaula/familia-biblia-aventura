@@ -203,9 +203,14 @@ const ReadingDay = () => {
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
                   <CalendarDays className="w-6 h-6" />
-                  Dia {reading.day} - {reading.book}
+                  Dia {reading.day}
                 </h1>
-                <p className="text-white/80">{getLocalDateString()}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary" className="text-xs">AT: {reading.oldTestament}</Badge>
+                  <span className="text-white/60">+</span>
+                  <Badge variant="secondary" className="text-xs">NT: {reading.newTestament}</Badge>
+                </div>
+                <p className="text-white/80 text-sm mt-1">{getLocalDateString()}</p>
               </div>
             </div>
             
@@ -331,11 +336,16 @@ const ReadingDay = () => {
 
         {/* Devotional */}
         <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-primary/5 to-transparent">
-          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-            <Lightbulb className="w-6 h-6 text-accent" />
-            Devocional
-          </h2>
-          <p className="text-lg leading-relaxed text-foreground/90">
+          <div className="mb-6">
+            <Badge variant="outline" className="mb-3">
+              📖 Promessa do Dia
+            </Badge>
+            <h2 className="text-2xl font-bold flex items-center gap-2 text-accent">
+              <Lightbulb className="w-6 h-6" />
+              {reading.devotionalTitle}
+            </h2>
+          </div>
+          <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-line">
             {reading.devotional}
           </p>
         </Card>
