@@ -1,4 +1,6 @@
 // Bible verse and chapter data structure
+import { supabase } from '@/integrations/supabase/client';
+
 export interface BibleVerse {
   number: number;
   text: string;
@@ -137,7 +139,25 @@ export const parseChapterReference = (reference: string): { book: string; chapte
   return { book, chapter };
 };
 
-export const isChapterAvailable = (book: string, chapter: number): boolean => {
-  const key = `${book}-${chapter}`;
-  return key in bibleChapters;
+export const isChapterAvailable = async (bookKey: string, chapterNum: number): Promise<boolean> => {
+  try {
+    const { data: book } = await supabase
+      .from('bible_books')
+      .select('id')
+      .eq('book_key', bookKey)
+      .single();
+    
+    if (!book) return false;
+
+    const { data: chapter } = await supabase
+      .from('bible_chapters')
+      .select('id')
+      .eq('book_id', book.id)
+      .eq('chapter_number', chapterNum)
+      .single();
+
+    return !!chapter;
+  } catch {
+    return false;
+  }
 };

@@ -173,9 +173,21 @@ const ReadingDayMcCheyne = () => {
   };
 
   const ChapterRow = ({ chapter, testament }: { chapter: string; testament: 'AT' | 'NT' }) => {
+    const [available, setAvailable] = useState(false);
+    const [loading, setLoading] = useState(true);
     const chapterLink = getChapterLink(chapter);
-    const parsed = chapterLink ? parseChapterReference(chapter) : null;
-    const available = parsed ? isChapterAvailable(parsed.book, parsed.chapter) : false;
+
+    useEffect(() => {
+      const checkAvailability = async () => {
+        const parsed = chapterLink ? parseChapterReference(chapter) : null;
+        if (parsed) {
+          const isAvailable = await isChapterAvailable(parsed.book, parsed.chapter);
+          setAvailable(isAvailable);
+        }
+        setLoading(false);
+      };
+      checkAvailability();
+    }, [chapter, chapterLink]);
 
     return (
       <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
@@ -185,7 +197,9 @@ const ReadingDayMcCheyne = () => {
           className="w-5 h-5"
         />
         <span className="flex-1 font-semibold">{chapter}</span>
-        {available && chapterLink ? (
+        {loading ? (
+          <div className="h-8 w-8" />
+        ) : available && chapterLink ? (
           <Link to={chapterLink}>
             <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Ler capítulo completo">
               <BookOpen className="w-4 h-4" />
