@@ -1,77 +1,89 @@
-// Reading plan with Old Testament + New Testament + Spurgeon's promises
+// Reading plan with Old Testament + New Testament + Morning & Evening devotionals
 export interface DailyReading {
   day: number;
   date: string;
   oldTestament: string; // Ex: "Gênesis 1"
   newTestament: string; // Ex: "Mateus 1"
-  devotionalTitle: string; // Título da promessa
-  devotional: string; // Texto do Spurgeon
-  reflection: string; // Reflexão/aplicação
-  keyVerse: string; // Versículo principal
   book: string; // Para mostrar no header
   chapters: string[]; // Array com os 2 capítulos para checklist
+  morningVerse: string; // Versículo da manhã
+  morningDevotional: string; // Devocional da manhã
+  eveningVerse: string; // Versículo da noite
+  eveningDevotional: string; // Devocional da noite
+  reflection: string; // Pergunta para reflexão pessoal
+  keyVerse: string; // Versículo para memorizar
 }
 
 export const readingPlan: DailyReading[] = [
   {
     day: 1,
     date: "2025-01-01",
-    oldTestament: "Gênesis 3",
-    newTestament: "Romanos 5",
-    book: "Gênesis 3 • Romanos 5",
-    chapters: ["Gênesis 3", "Romanos 5"],
-    devotionalTitle: "A PRIMEIRA PROMESSA DA BÍBLIA",
-    devotional: "Esta é a primeira promessa ao homem caído. Ela contém todo o evangelho e a essência da aliança da graça. Tem sido em grande medida cumprida. O descendente da mulher, precisamente nosso Senhor Jesus, foi ferido em Seus calcanhares, e foi uma terrível ferida. Quão terrível será a ferida final da cabeça da serpente! Isso foi praticamente realizado quando Jesus removeu o pecado, venceu a morte e quebrou o poder de Satanás; mas aguarda uma realização ainda mais completa no Segundo Advento de nosso Senhor e no dia do Juízo. Para nós, a promessa é uma profecia de que seremos afligidos pelos poderes do mal em nossa natureza inferior e, portanto, feridos em nossos calcanhares; mas triunfaremos em Cristo, que põe Seu pé na cabeça da antiga serpente. Ao longo deste ano, talvez tenhamos que aprender a primeira parte desta promessa por experiência, pelas tentações do diabo e pela crueldade dos ímpios, que são sua descendência. Elas podem nos machucar tanto que podemos mancar com o calcanhar dolorido; mas entendamos a segunda parte do texto, e não ficaremos desanimados. Pela fé, nos alegremos que ainda reinaremos em Cristo Jesus, o descendente da mulher.",
-    reflection: "Como você pode descansar na promessa de vitória final sobre o mal, mesmo quando sente as 'feridas no calcanhar' das tentações e provações?",
-    keyVerse: "Porei inimizade entre ti e a mulher, entre a tua descendência e o seu descendente. Este te ferirá a cabeça, e tu lhe ferirás o calcanhar. - Gênesis 3:15"
+    oldTestament: "Gênesis 1",
+    newTestament: "Mateus 1",
+    book: "Gênesis 1 • Mateus 1",
+    chapters: ["Gênesis 1", "Mateus 1"],
+    morningVerse: "Josué 5:12",
+    morningDevotional: "A cansativa peregrinação de Israel chegava ao fim e o descanso prometido fora atingido. Sem mais tendas móveis, serpentes abrasadoras, amalequitas ferozes e desertos vociferantes. Eles haviam chegado na terra que mana leite e mel, e comeriam dos frutos daquela terra. Talvez este ano, amado leitor cristão, esse possa ser o seu caso ou o meu. Consolação eterna é a nossa herança e, se a fé está em diligente atividade, ela lhe proporcionará uma perfeita alegria. Estar com Jesus no descanso que resta ao povo de Deus é certamente uma esperança animadora. Uma parte dos servos de Deus irá se demorar nesta terra para servir ao Senhor. Se essa for a nossa sorte, não há motivos para que aquela mensagem de ano novo não continue sendo verdadeira a nós. 'Porque nós, os que temos crido, entramos no repouso'. O Espírito Santo é o penhor da nossa herança; Ele nos dá a graça que precede nossa glória futura. Iremos, este ano, recolher frutos celestes em solo terrestre, onde a fé e a esperança fazem com que os lugares áridos sejam como o jardim do Senhor.",
+    eveningVerse: "Cantares 1:4",
+    eveningDevotional: "Teremos o maior prazer e a maior alegria em Ti. Não abriremos os portões do novo ano para as dolorosas notas da cítara, mas para as doces melodias da harpa de júbilo e para os altissonantes címbalos da alegria. Nós, os que fomos chamados fiéis e escolhidos, lançaremos fora nossos sofrimentos e levantaremos os estandartes da confiança em nome do Senhor. Eterno Espírito, nosso eficaz Consolador, nós que somos o templo em que Tu habitas, nunca cessaremos de adorar e bendizer o nome de Jesus. Estamos certos, estamos resolvidos sobre isto: Jesus terá sempre a coroa do nosso coração. Nós 'Nos regozijaremos e nos alegraremos'; duas palavras e um único sentido, dupla alegria, bem-aventurança sobre bem-aventurança. 'Nos regozijaremos e nos alegraremos EM TI'; esse final é a alma do texto. Que céus estão depositados em Jesus! Uma vez que, ó doce Senhor Jesus, Tu és a presente porção do Teu povo, favorece-nos, este ano, com um sentimento tal de Tua preciosidade que possamos nos regozijar e nos alegrar em Ti.",
+    reflection: "Como você pode começar este ano com alegria no Senhor, mesmo em meio às dificuldades? Que 'frutos da terra de Canaã' você espera colher neste novo tempo?",
+    keyVerse: "No mesmo ano comeram dos frutos da terra de Canaã. - Josué 5:12"
   },
   {
     day: 2,
     date: "2025-01-02",
-    oldTestament: "Gênesis 4",
-    newTestament: "Romanos 16",
-    book: "Gênesis 4 • Romanos 16",
-    chapters: ["Gênesis 4", "Romanos 16"],
-    devotionalTitle: "CONQUISTA DA VITÓRIA",
-    devotional: "Essa promessa segue bem a de ontem. É evidente que devemos estar em conformidade com a Cabeça de nossa aliança, não apenas com Ele sendo ferido em Seus calcanhares, mas com Sua conquista sobre o mal. Precisamente debaixo de nossos pés o antigo dragão será ferido. Os crentes romanos ficaram entristecidos com o conflito na igreja; mas o Deus deles era 'o Deus da paz' e lhes deu descanso para a alma. O arqui-inimigo tropeçou os pés dos incautos e enganou os corações dos simples; mas ele deve receber o pior de tudo e ser pisoteado por aqueles a quem perturbou. Essa vitória não chegaria ao povo de Deus através de sua própria habilidade ou poder; mas o próprio Deus deseja esmagar a Satanás. Embora estivesse sob os pés deles, no entanto, a ferida seria somente do Senhor. Pisemos bravamente no tentador! Não apenas espíritos inferiores, mas o próprio Príncipe das trevas deve descer diante de nós. Com confiança inquestionável em Deus, busquemos uma vitória rápida. 'EM BREVE'. Feliz palavras! Em breve pisaremos na antiga serpente! Que alegria esmagar o mal! Que desonra para Satanás ter sua cabeça ferida pelos pés humanos! Vamos, pela fé em Jesus, pisar no tentador.",
-    reflection: "Onde você precisa confiar que 'em breve' Deus esmagará a tentação ou o conflito que você enfrenta? Como pode pisar bravamente no tentador hoje?",
-    keyVerse: "E o Deus da paz, em breve, esmagará debaixo dos vossos pés a Satanás. - Romanos 16:20"
+    oldTestament: "Gênesis 2",
+    newTestament: "Mateus 2",
+    book: "Gênesis 2 • Mateus 2",
+    chapters: ["Gênesis 2", "Mateus 2"],
+    morningVerse: "Colossenses 4:2",
+    morningDevotional: "É interessante observar como grande parte da Sagrada Escritura está ocupada com o tema da oração, seja fornecendo exemplos, reforçando o mandamento ou anunciando promessas. Exemplos são abundantes. Aqui, encontramos a luta de Jacó; lá, um Daniel que orava três vezes por dia; um Davi que, com todo seu coração, clamava pelo seu Deus. Podemos estar certos que tudo aquilo que Deus faz proeminente em Sua Palavra, Sua intenção é ser visível em nossas vidas. Se Ele falou muito sobre a oração é porque Ele sabe que temos muita necessidade de orar. Tu não queres coisa alguma? Então, temo que não conheças a tua pobreza. Uma alma sem oração é uma alma sem Cristo. A oração é o balbuciar do crente pueril, o grito do crente guerreiro, o réquiem de morte do santo adormecendo em Jesus; é a respiração, a palavra de ordem, o conforto, a força, a honra de um cristão. Ore para que, este ano, possas ser santo, humilde, zeloso e paciente. O lema para este ano deve ser: 'Perseverai em oração'.",
+    eveningVerse: "Isaías 41:1",
+    eveningDevotional: "Todas as coisas na Terra precisam ser renovadas. Nenhuma coisa criada mantém-se por si mesma. Tampouco a vida do homem pode ser sustentada sem a renovação de Deus. Assim como é necessário revigorar o desgaste do corpo por meio de refeições regulares, também devemos revigorar o desgaste da alma nos alimentando do Livro de Deus, ou pelo ouvir a pregação da Palavra. Quão miseráveis são nossas graças quando os meios de graça são negligenciados! Se a nossa devoção pode viver sem Deus, ela não é uma criação divina. Sem constante restauração não estaremos prontos para as contínuas investidas do inferno, ou para as duras provações vindas do céu. Quando vierem os vendavais, ai da árvore que não tiver sugado seiva fresca e agarrado firmemente a rocha com raízes entrelaçadas. Aproximemo-nos do escabelo da misericórdia divina em humilde súplica, e receberemos o cumprimento da promessa: 'Os que esperam no Senhor renovarão as forças'.",
+    reflection: "Como você pode perseverar em oração este ano? De que forma você precisa ser renovado em suas forças espirituais?",
+    keyVerse: "Perseverai em oração. - Colossenses 4:2"
   },
   {
     day: 3,
     date: "2025-01-03",
-    oldTestament: "Gênesis 28",
-    newTestament: "João 1",
-    book: "Gênesis 28 • João 1",
-    chapters: ["Gênesis 28", "João 1"],
-    devotionalTitle: "DESCANSO EM UMA PROMESSA",
-    devotional: "Nenhuma promessa é de interpretação pessoal. Ela não pertence a um santo, mas a todos os crentes. Se, meu irmão, tu podes com fé deitar-te numa promessa e descansar nela, ela é tua. Onde Jacó 'caiu', permaneceu e descansou, dali tomou posse. Estendendo seu corpo cansado no chão, com as pedras daquele lugar como seus travesseiros, ele pouco imaginava que estava, dessa forma, assumindo a propriedade da terra; e assim aconteceu. Ele viu em seu sonho aquela escada maravilhosa que une terra e céu para todos os verdadeiros crentes; e certamente ele devia ter direito ao solo onde ficava o pé da escada, pois, caso contrário, não poderia alcançar a escada divina. Todas as promessas de Deus são Sim e Amém em Cristo Jesus; e assim como Ele é nosso, toda promessa é nossa, se apenas nos deitarmos nela com fé repousante. Venha, você que está cansado, e use as palavras de teu Senhor como teus travesseiros. Deita-te em paz. Sonha apenas com Ele. Jesus é tua escada de luz. Vê os anjos indo e vindo sobre Ele, entre a tua alma e o teu Deus, e estejas certo de que a promessa é a tua parte dada por Deus e que não será um roubo pegá-la para ti mesmo, como te foi especialmente dito.",
-    reflection: "Que promessa específica de Deus você precisa tomar como 'travesseiro' e descansar nela pela fé hoje?",
-    keyVerse: "A terra em que agora estás deitado, Eu ta darei, a ti e à tua descendência. - Gênesis 28:13"
+    oldTestament: "Gênesis 3",
+    newTestament: "Mateus 3",
+    book: "Gênesis 3 • Mateus 3",
+    chapters: ["Gênesis 3", "Mateus 3"],
+    morningVerse: "Isaías 49:8",
+    morningDevotional: "Jesus Cristo é, Ele próprio, a essência da aliança. Ele é propriedade de todo cristão. Crente, podes estimar aquilo que obtiveste em Cristo? 'Porque nele habita corporalmente toda a plenitude da divindade'. Considere que tudo aquilo que Cristo, como Deus e homem, já teve ou tem, é teu por puro e gratuito favor. Nosso bendito Jesus, como Deus, é onisciente, onipresente e onipotente. Tem Ele poder? Esse poder é teu para lhe sustentar e fortalecer. Tem Ele amor? Não há sequer uma gota de amor em Seu coração que não seja tua. Você pode mergulhar no imenso oceano de Seu amor e dizer: 'É meu'. E tudo o que Ele tem, como homem perfeito, é teu. A aceitação de Deus a Cristo é a tua aceitação, pois não sabes que o amor do Pai, que estava sobre o perfeito Cristo, está agora sobre ti? Aquela perfeita justiça que Jesus manifestou quando, por meio de Sua vida imaculada, Ele guardou toda a lei, é tua, e é imputada a ti. Cristo está na aliança.",
+    eveningVerse: "Lucas 3:4",
+    eveningDevotional: "A voz que clamava no deserto exigiu uma vereda para o Senhor, uma vereda preparada no deserto. 'Todo o vale se encherá'. Pensamentos baixos e vis sobre Deus devem ser abandonados; toda dúvida e todo desespero devem ser removidos. 'E se abaixará todo o monte e outeiro'. Orgulho humano autossuficiente, arrogância e autojustiça devem ser aplainados. Comunhão divina nunca é concedida aos altivos. O Senhor tem prazer nos humildes. 'E o que é tortuoso se endireitará'. O coração vacilante deve tomar um caminho firme na decisão por Deus e pela santidade. Minha alma, cuide-se para ser honesta e verdadeira em todas as coisas. 'E os caminhos escabrosos se aplanarão'. Tropeços decorrentes do pecado devem ser removidos. Oh, que esta noite o Senhor possa encontrar em meu coração uma estrada preparada pela Sua graça; que Ele possa fazer uma triunfal marcha através dos limites mais extremos da minha alma.",
+    reflection: "Que 'vales' de dúvida e 'montes' de orgulho precisam ser nivelados em seu coração para que Jesus possa fazer Sua morada completa em você?",
+    keyVerse: "Preparai o caminho do Senhor; Endireitai as suas veredas. - Lucas 3:4"
   },
   {
     day: 4,
     date: "2025-01-04",
-    oldTestament: "Oséias 2",
-    newTestament: "Filipenses 4",
-    book: "Oséias 2 • Filipenses 4",
-    chapters: ["Oséias 2", "Filipenses 4"],
-    devotionalTitle: "EM TRANQUILO REPOUSO",
-    devotional: "Sim, os santos devem ter paz. A passagem da qual essa palavra graciosa é tirada fala de paz 'bestas-feras do campo, e com as aves do céu, e com os répteis da terra'. Isso é paz com inimigos terrestres, com males misteriosos e com pequenos aborrecimentos! Qualquer uma dessas coisas pode nos impedir de repousar, mas nenhuma delas o fará. O Senhor destruirá completamente as coisas que ameaçam o Seu povo: 'e tirarei da terra o arco, e a espada, e a guerra'. A paz será profunda, de fato, quando todos os instrumentos de inquietação forem quebrados em pedaços. Com esta paz virá o descanso. 'Pois assim dá Ele aos Seus amados o sono'. Totalmente supridos e divinamente acalmados, os crentes se deitam em tranquilo repouso. Esse descanso será um descanso seguro. Uma coisa é repousar, mas outra é 'repousar em segurança'. Somos levados à terra da promessa, à casa do Pai, ao quarto do amor e ao seio de Cristo. Certamente agora podemos 'repousar em segurança'. É mais seguro para um crente repousar em paz do que sentar-se e se preocupar. 'Ele me faz repousar em pastos verdejantes'. Nós nunca descansamos até que o Consolador nos faça repousar.",
-    reflection: "Quais 'bestas-feras' ou 'pequenos aborrecimentos' estão roubando seu descanso? Como você pode confiar que Deus removerá esses instrumentos de inquietação?",
-    keyVerse: "E farei o Meu povo repousar em segurança. - Oséias 2:18"
+    oldTestament: "Gênesis 4",
+    newTestament: "Mateus 4",
+    book: "Gênesis 4 • Mateus 4",
+    chapters: ["Gênesis 4", "Mateus 4"],
+    morningVerse: "2 Pedro 3:18",
+    morningDevotional: "'Crescei na graça', não apenas em uma graça, mas em toda a graça. Crescei naquela graça que tem raiz, ou seja, a fé. Acredite nas promessas com mais firmeza. Crescei também no amor. Peça para que seu amor possa crescer, ser mais intenso, mais prático, influenciando cada pensamento, palavra e ação. Crescei também na humildade, e procure saber mais de sua própria insignificância. À medida que crescemos para baixo em humildade, busquemos também crescer para cima, nos aproximando de Deus em oração e comunhão mais íntima com Jesus. Que Deus permita que o Espírito Santo nos faça 'crescer no conhecimento de nosso Senhor e Salvador'. Conhecer nEle a 'vida eterna', e avançar no conhecimento dEle, é crescer em felicidade. Procure saber mais sobre Ele em Sua natureza divina, em Seu relacionamento humano, em Sua obra acabada, em Sua morte, em Sua ressurreição, em Sua gloriosa intercessão e em Seu majestoso advento futuro.",
+    eveningVerse: "Gênesis 42:8",
+    eveningDevotional: "Nossos desejos foram direcionados ao crescimento de nosso conhecimento do Senhor Jesus. Agora será proveitoso considerar um tema afim, que é o conhecimento de nosso celestial José sobre nós. Esse conhecimento foi abençoadamente perfeito muito antes de termos qualquer conhecimento dEle. Ele nos conheceu antes de nascermos, antes de termos consciência, antes de O conhecermos. Seu conhecimento de nós é exato, profundo, completo. Ele sabe nossas fraquezas, nossos pecados, nossas necessidades. E esse conhecimento não O afasta de nós, mas O move à compaixão e à graça. Como José conhecia seus irmãos que não o reconheceram, assim Jesus nos conhece perfeitamente, mesmo quando nossa compreensão dEle é turva e limitada. Que conforto saber que somos plenamente conhecidos por Aquele que nos ama perfeitamente!",
+    reflection: "Em quais áreas de sua vida espiritual você precisa crescer? Como o conhecimento perfeito que Jesus tem de você pode confortá-lo hoje?",
+    keyVerse: "Antes crescei na graça e conhecimento de nosso Senhor e Salvador, Jesus Cristo. - 2 Pedro 3:18"
   },
   {
     day: 5,
     date: "2025-01-05",
-    oldTestament: "Isaías 41",
-    newTestament: "2 Coríntios 12",
-    book: "Isaías 41 • 2 Coríntios 12",
-    chapters: ["Isaías 41", "2 Coríntios 12"],
-    devotionalTitle: "UMA GARANTIA MARAVILHOSA",
-    devotional: "Quando chamados a servir ou a sofrer, avaliamos nossas forças e descobrimos que são menores do que pensávamos e menos do que precisamos. Mas não deixemos nosso coração afundar dentro de nós enquanto tivermos tal palavra para recorrer, pois ela nos garante tudo o que possivelmente precisamos. Deus tem força onipotente; essa força Ele pode transmitir a nós, e Sua promessa é que Ele o fará. Ele será o alimento de nossas almas e a saúde de nossos corações, e assim Ele nos dará força. Não há como dizer quanta força Deus pode colocar em um homem. Quando a força divina chega, a fraqueza humana não é mais um obstáculo. Não nos lembramos de períodos de trabalho e provação em que recebemos uma força tão especial que nos admiramos? Em meio ao perigo estávamos calmos, sob luto nos resignamos, na calúnia nos contivemos e, na doença fomos pacientes. O fato é que Deus dá força inesperada quando provações incomuns surgem sobre nós. Emergimos de nossas personalidades fracas. Os covardes pelejam varonilmente, os tolos recebem sabedoria, e os mudos recebem na mesma hora o que devem falar. Minha própria fraqueza me faz encolher, mas a promessa de Deus me torna corajoso. Senhor, fortalece-me 'segundo a Tua palavra'.",
-    reflection: "Em que área você se sente fraco hoje? Como pode reivindicar a promessa de que Deus o fortalecerá com força onipotente?",
-    keyVerse: "Eu te fortaleço. - Isaías 41:10"
+    oldTestament: "Gênesis 5",
+    newTestament: "Mateus 5",
+    book: "Gênesis 5 • Mateus 5",
+    chapters: ["Gênesis 5", "Mateus 5"],
+    morningVerse: "Salmo 84:11",
+    morningDevotional: "'O Senhor não negará bem algum aos que andam na retidão'. Este versículo contém uma promessa maravilhosa. Deus é tanto um Sol para iluminar quanto um Escudo para proteger. Não há bem que Ele retenha daqueles que andam retamente. Considere a generosidade desta promessa. Não diz 'Ele concederá alguns bens', mas 'nenhum bem negará'. Seja temporal ou espiritual, se for realmente um bem, Deus o concederá aos justos. Às vezes pensamos que algo seria bom para nós, mas Deus em Sua sabedoria não o concede porque não seria realmente benéfico. Podemos estar certos de que se algo é verdadeiramente bom, o Senhor não o reterá. Ele dará graça na terra e glória no céu. Entre estes dois extremos, todas as bênçãos intermediárias estão incluídas. Que consolo para os santos! Nenhum bem será retido!",
+    eveningVerse: "Salmo 5:11",
+    eveningDevotional: "'Mas alegrem-se todos os que confiam em ti; exultem eternamente, porquanto tu os defendes; e em ti se gloriem os que amam o teu nome'. A condição de alegria perpétua é depositar nossa confiança em Deus. O crente está sempre seguro. Ele coloca sua confiança no Senhor, não em si mesmo, não em suas riquezas, não em sua sabedoria, mas no Senhor seu Deus. Por isso ele se alegra. Esta alegria não é superficial nem temporária - é eterna. 'Exultem eternamente', diz o texto. Há uma fonte inesgotável de alegria para aqueles que confiam no Senhor. O mundo pode nos decepcionar, mas Deus nunca falhará. Amigos podem nos abandonar, mas Deus permanece fiel. Circunstâncias podem mudar, mas Deus é imutável. Portanto, nossa alegria nEle pode ser perpétua. Que privilégio é amar o nome do Senhor e se gloriar nEle continuamente!",
+    reflection: "Você tem experimentado alegria perpétua ao confiar no Senhor? Que 'bens' você precisa reconhecer que Deus, em Sua sabedoria, pode estar retendo porque não seriam verdadeiramente benéficos?",
+    keyVerse: "O Senhor não negará bem algum aos que andam na retidão. - Salmo 84:11"
   }
 ];
 

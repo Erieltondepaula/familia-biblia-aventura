@@ -331,19 +331,35 @@ const ReadingDay = () => {
           </div>
         </Card>
 
-        {/* Devotional */}
-        <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-primary/5 to-transparent">
+        {/* Morning Devotional */}
+        <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent">
           <div className="mb-6">
             <Badge variant="outline" className="mb-3">
-              📖 Promessa do Dia
+              🌅 Devocional da Manhã
             </Badge>
-            <h2 className="text-2xl font-bold flex items-center gap-2 text-accent">
-              <Lightbulb className="w-6 h-6" />
-              {reading.devotionalTitle}
+            <h2 className="text-xl font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
+              <Lightbulb className="w-5 h-5" />
+              {reading.morningVerse}
             </h2>
           </div>
-          <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-line">
-            {reading.devotional}
+          <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-line">
+            {reading.morningDevotional}
+          </p>
+        </Card>
+
+        {/* Evening Devotional */}
+        <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent">
+          <div className="mb-6">
+            <Badge variant="outline" className="mb-3">
+              🌙 Devocional da Noite
+            </Badge>
+            <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+              <Star className="w-5 h-5" />
+              {reading.eveningVerse}
+            </h2>
+          </div>
+          <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-line">
+            {reading.eveningDevotional}
           </p>
         </Card>
 
