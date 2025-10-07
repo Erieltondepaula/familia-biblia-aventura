@@ -373,7 +373,7 @@ const ReadingDay = () => {
             {reading.reflection}
           </p>
           <Textarea
-            placeholder="Escreva suas reflexões pessoais aqui..."
+            placeholder="Exemplo: 'Hoje percebi que preciso confiar mais em Deus nas minhas decisões do trabalho. Vou orar todas as manhãs antes de começar o dia...'"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[120px] text-base"
