@@ -1,0 +1,123 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
+
+interface CompletedReading {
+  day: number;
+  chapters: string[];
+  completedAt: Date;
+}
+
+interface ProgressContextType {
+  xp: number;
+  level: number;
+  levelName: string;
+  completedReadings: CompletedReading[];
+  currentStreak: number;
+  totalDaysRead: number;
+  bibleProgress: number;
+  xpToNextLevel: number;
+  markChapterAsRead: (day: number, chapters: string[]) => void;
+  addXP: (amount: number) => void;
+  isChapterCompleted: (day: number) => boolean;
+}
+
+const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
+
+export const useProgress = () => {
+  const context = useContext(ProgressContext);
+  if (!context) {
+    throw new Error('useProgress must be used within a ProgressProvider');
+  }
+  return context;
+};
+
+export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Load from localStorage or use defaults
+  const [xp, setXp] = useState<number>(() => {
+    const saved = localStorage.getItem('userXP');
+    return saved ? parseInt(saved) : 0;
+  });
+
+  const [completedReadings, setCompletedReadings] = useState<CompletedReading[]>(() => {
+    const saved = localStorage.getItem('completedReadings');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Calculate derived values
+  const level = calculateLevel(xp);
+  const levelName = getLevelName(level);
+  const totalDaysRead = completedReadings.length;
+  const bibleProgress = calculateBibleProgress(completedReadings.reduce((acc, r) => acc + r.chapters.length, 0));
+  const xpToNextLevel = xpForNextLevel(xp);
+
+  // Calculate streak
+  const currentStreak = React.useMemo(() => {
+    if (completedReadings.length === 0) return 0;
+    
+    const sortedReadings = [...completedReadings].sort((a, b) => b.day - a.day);
+    let streak = 1;
+    
+    for (let i = 0; i < sortedReadings.length - 1; i++) {
+      if (sortedReadings[i].day - sortedReadings[i + 1].day === 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  }, [completedReadings]);
+
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    localStorage.setItem('userXP', xp.toString());
+  }, [xp]);
+
+  useEffect(() => {
+    localStorage.setItem('completedReadings', JSON.stringify(completedReadings));
+  }, [completedReadings]);
+
+  const markChapterAsRead = (day: number, chapters: string[]) => {
+    // Check if already completed
+    if (completedReadings.some(r => r.day === day)) {
+      return;
+    }
+
+    const newReading: CompletedReading = {
+      day,
+      chapters,
+      completedAt: new Date()
+    };
+
+    setCompletedReadings(prev => [...prev, newReading]);
+    addXP(50); // Award XP for completing reading
+  };
+
+  const addXP = (amount: number) => {
+    setXp(prev => prev + amount);
+  };
+
+  const isChapterCompleted = (day: number): boolean => {
+    return completedReadings.some(r => r.day === day);
+  };
+
+  const value: ProgressContextType = {
+    xp,
+    level,
+    levelName,
+    completedReadings,
+    currentStreak,
+    totalDaysRead,
+    bibleProgress,
+    xpToNextLevel,
+    markChapterAsRead,
+    addXP,
+    isChapterCompleted
+  };
+
+  return (
+    <ProgressContext.Provider value={value}>
+      {children}
+    </ProgressContext.Provider>
+  );
+};
