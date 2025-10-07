@@ -22,7 +22,7 @@ import {
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useProfile } from "@/contexts/ProfileContext";
-import { getReadingByDay, readingPlan } from "@/lib/readingPlanData";
+import { getReadingByDay, readingPlan, getCurrentDayNumber } from "@/lib/readingPlanData";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
@@ -81,6 +81,9 @@ const ReadingDay = () => {
       </div>
     );
   }
+
+  const currentDay = getCurrentDayNumber();
+  const isFutureDay = dayNumber > currentDay;
 
   const allChaptersChecked = reading.chapters.every(ch => checkedChapters.has(ch));
   const progress = (checkedChapters.size / reading.chapters.length) * 100;
@@ -156,8 +159,14 @@ const ReadingDay = () => {
   };
 
   const goToNextDay = () => {
-    if (dayNumber < readingPlan.length) {
+    const currentDay = getCurrentDayNumber();
+    // Only allow navigation to next day if it's not a future day
+    if (dayNumber < readingPlan.length && dayNumber < currentDay) {
       navigate(`/reading/${dayNumber + 1}`);
+    } else if (dayNumber >= currentDay) {
+      toast.error("Não é possível acessar dias futuros", {
+        description: "Aguarde até meia-noite para o próximo dia"
+      });
     }
   };
 
@@ -170,6 +179,16 @@ const ReadingDay = () => {
   return (
     <div className="min-h-screen bg-background">
       <LevelUpModal level={newLevel} show={showLevelUp} onClose={() => setShowLevelUp(false)} />
+      
+      {isFutureDay && (
+        <div className="bg-destructive/10 border-b-2 border-destructive/20 py-3">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-destructive font-semibold">
+              ⚠️ Este dia ainda não está disponível. Aguarde até meia-noite para acessá-lo.
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Header */}
       <header className="bg-gradient-hero text-white shadow-elevated">
@@ -209,7 +228,8 @@ const ReadingDay = () => {
                 size="icon" 
                 className="text-white hover:bg-white/20"
                 onClick={goToNextDay}
-                disabled={dayNumber >= readingPlan.length}
+                disabled={dayNumber >= currentDay}
+                title={dayNumber >= currentDay ? "Aguarde até meia-noite" : "Próximo dia"}
               >
                 <ChevronRight className="w-6 h-6" />
               </Button>
@@ -219,6 +239,28 @@ const ReadingDay = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {isFutureDay ? (
+          <Card className="p-12 text-center">
+            <CalendarDays className="w-24 h-24 text-muted-foreground mx-auto mb-6" />
+            <h2 className="text-3xl font-bold mb-4">Dia Bloqueado</h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Este dia ainda não está disponível. O sistema libera um novo dia automaticamente à meia-noite (00:00).
+            </p>
+            <div className="p-6 bg-muted/30 rounded-lg mb-6">
+              <p className="text-sm font-semibold text-muted-foreground mb-2">Dia atual do plano:</p>
+              <Badge variant="default" className="text-xl px-6 py-3">
+                Dia {currentDay} de 365
+              </Badge>
+            </div>
+            <Link to="/dashboard">
+              <Button size="lg">
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Voltar ao Dashboard
+              </Button>
+            </Link>
+          </Card>
+        ) : (
+          <>
         {/* Progress Card with Circular Progress */}
         <Card className="p-6 mb-6 shadow-card">
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -382,6 +424,8 @@ const ReadingDay = () => {
             {isCompleted ? "Concluído" : "Finalizar Leitura"}
           </Button>
         </Card>
+          </>
+        )}
       </div>
     </div>
   );
