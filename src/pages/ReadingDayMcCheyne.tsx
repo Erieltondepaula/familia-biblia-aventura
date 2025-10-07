@@ -29,7 +29,7 @@ import {
   mcCheyneReadingPlan,
   calculateReadingProgress 
 } from "@/lib/mccheyneReadingPlan";
-
+import { parseChapterReference, isChapterAvailable, bookNameMap } from "@/lib/bibleData";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
@@ -162,6 +162,49 @@ const ReadingDayMcCheyne = () => {
     }
   };
 
+  const getChapterLink = (chapterRef: string): string | null => {
+    const parsed = parseChapterReference(chapterRef);
+    if (!parsed) return null;
+    
+    const mappedBook = bookNameMap[parsed.book];
+    if (!mappedBook) return null;
+    
+    return `/bible/${mappedBook}/${parsed.chapter}`;
+  };
+
+  const ChapterRow = ({ chapter, testament }: { chapter: string; testament: 'AT' | 'NT' }) => {
+    const chapterLink = getChapterLink(chapter);
+    const available = chapterLink ? isChapterAvailable(
+      Object.keys(bookNameMap).find(k => bookNameMap[k] === chapterLink.split('/')[2]) || '',
+      parseInt(chapterLink.split('/')[3])
+    ) : false;
+
+    return (
+      <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+        <Checkbox
+          checked={checkedChapters.has(chapter)}
+          onCheckedChange={() => handleChapterToggle(chapter)}
+          className="w-5 h-5"
+        />
+        <span className="flex-1 font-semibold">{chapter}</span>
+        {available && chapterLink && (
+          <Link to={chapterLink}>
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+              <BookOpen className="w-4 h-4" />
+            </Button>
+          </Link>
+        )}
+        <Badge variant="outline" className={
+          testament === 'AT' 
+            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+            : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+        }>
+          {testament}
+        </Badge>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <LevelUpModal level={newLevel} show={showLevelUp} onClose={() => setShowLevelUp(false)} />
@@ -269,24 +312,8 @@ const ReadingDayMcCheyne = () => {
                 <Badge variant="secondary" className="ml-auto">2 capítulos</Badge>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                  <Checkbox
-                    checked={checkedChapters.has(reading.familyOT)}
-                    onCheckedChange={() => handleChapterToggle(reading.familyOT)}
-                    className="w-5 h-5"
-                  />
-                  <span className="flex-1 font-semibold">{reading.familyOT}</span>
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">AT</Badge>
-                </div>
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                  <Checkbox
-                    checked={checkedChapters.has(reading.familyNT)}
-                    onCheckedChange={() => handleChapterToggle(reading.familyNT)}
-                    className="w-5 h-5"
-                  />
-                  <span className="flex-1 font-semibold">{reading.familyNT}</span>
-                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">NT</Badge>
-                </div>
+                <ChapterRow chapter={reading.familyOT} testament="AT" />
+                <ChapterRow chapter={reading.familyNT} testament="NT" />
               </div>
             </Card>
 
