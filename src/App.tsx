@@ -7,7 +7,7 @@ import { ProgressProvider } from "@/contexts/ProgressContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import ReadingDay from "./pages/ReadingDay";
+import ReadingDayMcCheyne from "./pages/ReadingDayMcCheyne";
 import HowItWorks from "./pages/HowItWorks";
 import Reflections from "./pages/Reflections";
 import NotFound from "./pages/NotFound";
@@ -31,7 +31,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/reading/:day" element={<ReadingDay />} />
+              <Route path="/reading/:day" element={<ReadingDayMcCheyne />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/reflections" element={<Reflections />} />
               <Route path="/profiles" element={<Profiles />} />

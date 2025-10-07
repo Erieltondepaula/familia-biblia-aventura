@@ -17,6 +17,7 @@ interface ProgressContextType {
   totalDaysRead: number;
   bibleProgress: number;
   xpToNextLevel: number;
+  totalChaptersRead: () => number;
   markChapterAsRead: (day: number, chapters: string[]) => void;
   addXP: (amount: number) => void;
   isChapterCompleted: (day: number) => boolean;
@@ -106,6 +107,10 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return completedReadings.some(r => r.day === day);
   };
 
+  const totalChaptersRead = (): number => {
+    return completedReadings.reduce((acc, r) => acc + r.chapters.length, 0);
+  };
+
   const resetProgress = () => {
     setXp(0);
     setCompletedReadings([]);
@@ -123,6 +128,7 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       totalDaysRead,
       bibleProgress,
       xpToNextLevel,
+      totalChaptersRead,
       markChapterAsRead,
       addXP,
       isChapterCompleted,

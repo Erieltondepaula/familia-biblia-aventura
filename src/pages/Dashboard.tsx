@@ -11,12 +11,13 @@ import {
   Flame,
   TrendingUp,
   Home,
-  MessageSquare
+  MessageSquare,
+  Users
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useProfile } from "@/contexts/ProfileContext";
-import { getCurrentDayReading } from "@/lib/readingPlanData";
+import { getCurrentDayReading, getAllChapters } from "@/lib/mccheyneReadingPlan";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { toast } from "sonner";
 import MemorizedVerses from "@/components/MemorizedVerses";
@@ -37,6 +38,7 @@ const Dashboard = () => {
 
   const todayReading = getCurrentDayReading();
   const isCompleted = isChapterCompleted(todayReading.day);
+  const todayChapters = getAllChapters(todayReading);
   
   // Get current date in Brazilian format: dd/mm/yyyy
   const currentDate = getLocalDateString();
@@ -126,10 +128,10 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-semibold flex items-center gap-2">
                     <Target className="w-5 h-5 text-secondary" />
-                    {todayReading.book}
+                    Plano M'Cheyne
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    Em progresso
+                    4 capítulos/dia
                   </span>
                 </div>
                 <Progress value={20} className="h-3" />
@@ -180,30 +182,42 @@ const Dashboard = () => {
               )}
             </div>
 
-            <div className="space-y-3 mb-6">
-              {todayReading.chapters.map((chapter, idx) => (
-                <div 
-                  key={idx} 
-                  className={`flex items-center gap-4 p-4 rounded-lg transition-smooth ${
-                    isCompleted 
-                      ? 'bg-success/20 border-2 border-success/40' 
-                      : 'bg-muted/50 hover:bg-muted'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    isCompleted ? 'bg-success text-white' : 'bg-primary/10'
-                  }`}>
-                    {isCompleted ? (
-                      <span className="font-bold">✓</span>
-                    ) : (
-                      <span className="font-bold text-primary">{idx + 1}</span>
-                    )}
-                  </div>
-                  <span className={`font-semibold text-lg ${isCompleted ? 'text-success-foreground' : ''}`}>
-                    {chapter}
-                  </span>
+            <div className="space-y-4 mb-6">
+              {/* Family Reading */}
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-l-4 border-blue-500">
+                <div className="flex items-center gap-2 mb-3">
+                  <Home className="w-4 h-4 text-blue-600" />
+                  <span className="font-bold text-sm text-blue-700 dark:text-blue-400">Leitura Familiar</span>
                 </div>
-              ))}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900">AT</Badge>
+                    <span className="font-semibold">{todayReading.familyOT}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900">NT</Badge>
+                    <span className="font-semibold">{todayReading.familyNT}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal Reading */}
+              <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border-l-4 border-purple-500">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-4 h-4 text-purple-600" />
+                  <span className="font-bold text-sm text-purple-700 dark:text-purple-400">Leitura Pessoal</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900">AT</Badge>
+                    <span className="font-semibold">{todayReading.personalOT}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900">NT</Badge>
+                    <span className="font-semibold">{todayReading.personalNT}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Link to={`/reading/${todayReading.day}`}>
