@@ -2,6 +2,8 @@
 // Complete annual Bible reading plan with 4 chapters per day
 // Organized by calendar date (month-day)
 
+import { generateDevotionalContent, getRandomMemorizationVerse } from './devotionalContent';
+
 export interface McCheyneReading {
   day: number; // Day of year (1-365)
   month: number; // 1-12
@@ -15,6 +17,7 @@ export interface McCheyneReading {
   eveningVerse: string;
   eveningDevotional: string;
   reflection: string;
+  verseOfDay: string;
 }
 
 // Helper to get all chapters as array
@@ -27,7 +30,7 @@ export const getAllChapters = (reading: McCheyneReading): string[] => {
   ];
 };
 
-// Helper to create reading entry
+// Helper to create reading entry with devotional content
 const createReading = (
   day: number,
   month: number,
@@ -36,20 +39,19 @@ const createReading = (
   familyNT: string,
   personalOT: string,
   personalNT: string
-): McCheyneReading => ({
-  day,
-  month,
-  dayOfMonth,
-  familyOT,
-  familyNT,
-  personalOT,
-  personalNT,
-  morningVerse: "",
-  morningDevotional: "",
-  eveningVerse: "",
-  eveningDevotional: "",
-  reflection: ""
-});
+): McCheyneReading => {
+  const devotional = generateDevotionalContent(familyOT, familyNT, personalOT, personalNT, day);
+  return {
+    day,
+    month,
+    dayOfMonth,
+    familyOT,
+    familyNT,
+    personalOT,
+    personalNT,
+    ...devotional
+  };
+};
 
 // Complete M'Cheyne plan for 365 days
 export const mcCheyneReadingPlan: McCheyneReading[] = [

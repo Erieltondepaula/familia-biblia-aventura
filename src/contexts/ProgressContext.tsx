@@ -56,15 +56,32 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const bibleProgress = calculateBibleProgress(completedReadings.reduce((acc, r) => acc + r.chapters.length, 0));
   const xpToNextLevel = xpForNextLevel(xp);
 
-  // Calculate streak
+  // Calculate streak with automatic reset if a day was missed
   const currentStreak = React.useMemo(() => {
     if (completedReadings.length === 0) return 0;
     
+    // Sort readings by day (most recent first)
     const sortedReadings = [...completedReadings].sort((a, b) => b.day - a.day);
-    let streak = 1;
     
+    // Get current day number (1-365)
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const currentDayNumber = Math.floor((today.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    // Check if user missed yesterday - if so, reset streak
+    const mostRecentReading = sortedReadings[0];
+    const daysSinceLast = currentDayNumber - mostRecentReading.day;
+    
+    // If more than 1 day has passed since last reading, streak is broken
+    if (daysSinceLast > 1) {
+      return 0;
+    }
+    
+    // Calculate consecutive days
+    let streak = 1;
     for (let i = 0; i < sortedReadings.length - 1; i++) {
-      if (sortedReadings[i].day - sortedReadings[i + 1].day === 1) {
+      const dayDiff = sortedReadings[i].day - sortedReadings[i + 1].day;
+      if (dayDiff === 1) {
         streak++;
       } else {
         break;

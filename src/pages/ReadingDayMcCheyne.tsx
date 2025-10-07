@@ -206,7 +206,7 @@ const ReadingDayMcCheyne = () => {
                 size="icon" 
                 className="text-white hover:bg-white/20"
                 onClick={goToNextDay}
-                disabled={dayNumber >= currentDay}
+                disabled={dayNumber >= mcCheyneReadingPlan.length}
               >
                 <ChevronRight className="w-6 h-6" />
               </Button>
@@ -366,10 +366,10 @@ const ReadingDayMcCheyne = () => {
             <Card className="p-8 mb-6 shadow-card bg-gradient-glory">
               <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-accent-foreground">
                 <Star className="w-6 h-6" />
-                Versículo para Memorizar
+                Versículo do Dia para Memorizar
               </h2>
               <p className="text-xl font-semibold leading-relaxed text-accent-foreground mb-6 italic">
-                "{reading.morningVerse}"
+                "{reading.verseOfDay}"
               </p>
               <Button
                 variant={memorizedVerse ? "success" : "default"}
