@@ -1,15 +1,59 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getChapter } from '@/lib/bibleData';
+import { getBibleChapter } from '@/lib/bibleDatabase';
+import { BibleChapter as BibleChapterType } from '@/lib/bibleData';
 import BibleReader from '@/components/BibleReader';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 const BibleChapter = () => {
   const { book, chapter } = useParams();
   const navigate = useNavigate();
+  const [chapterData, setChapterData] = useState<BibleChapterType | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const chapterData = book && chapter ? getChapter(book, parseInt(chapter)) : null;
+  useEffect(() => {
+    const loadChapter = async () => {
+      if (!book || !chapter) {
+        setError('Parâmetros inválidos');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getBibleChapter(book, parseInt(chapter));
+        
+        if (!data) {
+          setError('Capítulo não encontrado no banco de dados.');
+          setChapterData(null);
+        } else {
+          // Converter para o formato esperado pelo BibleReader
+          const formattedData: BibleChapterType = {
+            book: data.book.book_name,
+            chapter: data.chapter.chapter_number,
+            verses: data.verses.map(v => ({
+              number: v.verse_number,
+              text: v.text
+            }))
+          };
+          setChapterData(formattedData);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar capítulo:', err);
+        setError('Erro ao carregar capítulo. Tente novamente.');
+      }
+      
+      setLoading(false);
+    };
+
+    loadChapter();
+  }, [book, chapter]);
 
   useEffect(() => {
     document.title = chapterData 
@@ -17,13 +61,31 @@ const BibleChapter = () => {
       : 'Bíblia 365';
   }, [chapterData]);
 
-  if (!chapterData) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Capítulo não encontrado</h2>
+          <Card className="p-8">
+            <p className="text-lg">Carregando capítulo...</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !chapterData) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center max-w-2xl mx-auto">
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error || 'Capítulo não encontrado'}
+            </AlertDescription>
+          </Alert>
           <p className="text-muted-foreground mb-6">
-            O capítulo solicitado ainda não está disponível.
+            Este capítulo ainda não foi carregado no banco de dados. 
+            Estamos trabalhando para adicionar todo o conteúdo da Bíblia em breve.
           </p>
           <Button onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="mr-2 w-4 h-4" />
