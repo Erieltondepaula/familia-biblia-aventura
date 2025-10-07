@@ -174,10 +174,8 @@ const ReadingDayMcCheyne = () => {
 
   const ChapterRow = ({ chapter, testament }: { chapter: string; testament: 'AT' | 'NT' }) => {
     const chapterLink = getChapterLink(chapter);
-    const available = chapterLink ? isChapterAvailable(
-      Object.keys(bookNameMap).find(k => bookNameMap[k] === chapterLink.split('/')[2]) || '',
-      parseInt(chapterLink.split('/')[3])
-    ) : false;
+    const parsed = chapterLink ? parseChapterReference(chapter) : null;
+    const available = parsed ? isChapterAvailable(parsed.book, parsed.chapter) : false;
 
     return (
       <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
@@ -187,12 +185,16 @@ const ReadingDayMcCheyne = () => {
           className="w-5 h-5"
         />
         <span className="flex-1 font-semibold">{chapter}</span>
-        {available && chapterLink && (
+        {available && chapterLink ? (
           <Link to={chapterLink}>
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Ler capítulo completo">
               <BookOpen className="w-4 h-4" />
             </Button>
           </Link>
+        ) : (
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 opacity-30" disabled title="Capítulo não disponível">
+            <BookOpen className="w-4 h-4" />
+          </Button>
         )}
         <Badge variant="outline" className={
           testament === 'AT' 
@@ -325,24 +327,8 @@ const ReadingDayMcCheyne = () => {
                 <Badge variant="secondary" className="ml-auto">2 capítulos</Badge>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
-                  <Checkbox
-                    checked={checkedChapters.has(reading.personalOT)}
-                    onCheckedChange={() => handleChapterToggle(reading.personalOT)}
-                    className="w-5 h-5"
-                  />
-                  <span className="flex-1 font-semibold">{reading.personalOT}</span>
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">AT</Badge>
-                </div>
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
-                  <Checkbox
-                    checked={checkedChapters.has(reading.personalNT)}
-                    onCheckedChange={() => handleChapterToggle(reading.personalNT)}
-                    className="w-5 h-5"
-                  />
-                  <span className="flex-1 font-semibold">{reading.personalNT}</span>
-                  <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">NT</Badge>
-                </div>
+                <ChapterRow chapter={reading.personalOT} testament="AT" />
+                <ChapterRow chapter={reading.personalNT} testament="NT" />
               </div>
             </Card>
 
