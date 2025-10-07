@@ -256,7 +256,7 @@ const Dashboard = () => {
         </div>
 
 {/* Quick Actions */}
-<div className="grid md:grid-cols-5 gap-4">
+<div className="grid md:grid-cols-4 lg:grid-cols-7 gap-4">
   <Link to="/quiz" className="w-full">
     <Button 
       variant="outline" 
@@ -267,13 +267,23 @@ const Dashboard = () => {
       <span>Quiz Diário</span>
     </Button>
   </Link>
-  <Link to="/progress" className="w-full">
+  <Link to="/statistics" className="w-full">
     <Button 
       variant="outline" 
       size="lg" 
       className="w-full h-auto py-6 flex-col gap-2"
     >
       <TrendingUp className="w-6 h-6" />
+      <span>Estatísticas</span>
+    </Button>
+  </Link>
+  <Link to="/progress" className="w-full">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="w-full h-auto py-6 flex-col gap-2"
+    >
+      <Flame className="w-6 h-6" />
       <span>Progresso</span>
     </Button>
   </Link>
@@ -295,6 +305,16 @@ const Dashboard = () => {
     >
       <BookOpen className="w-6 h-6" />
       <span>Versículos</span>
+    </Button>
+  </Link>
+  <Link to="/sermons" className="w-full">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="w-full h-auto py-6 flex-col gap-2"
+    >
+      <Star className="w-6 h-6" />
+      <span>Sermões</span>
     </Button>
   </Link>
   <Link to="/reflections" className="w-full">

@@ -18,6 +18,8 @@ import ProgressDetails from "./pages/ProgressDetails";
 import Achievements from "./pages/Achievements";
 import Verses from "./pages/Verses";
 import BibleChapter from "./pages/BibleChapter";
+import Statistics from "./pages/Statistics";
+import Sermons from "./pages/Sermons";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,8 @@ const App = () => (
               <Route path="/achievements" element={<Achievements />} />
               <Route path="/verses" element={<Verses />} />
               <Route path="/bible/:book/:chapter" element={<BibleChapter />} />
+              <Route path="/statistics" element={<Statistics />} />
+              <Route path="/sermons" element={<Sermons />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
