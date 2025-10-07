@@ -29,7 +29,7 @@ import {
   mcCheyneReadingPlan,
   calculateReadingProgress 
 } from "@/lib/mccheyneReadingPlan";
-import { getLocalDateString } from "@/lib/dateUtils";
+
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
@@ -97,6 +97,11 @@ const ReadingDayMcCheyne = () => {
   const allChaptersChecked = allChapters.every(ch => checkedChapters.has(ch));
   const progress = calculateReadingProgress(Array.from(checkedChapters), allChapters);
   const totalBibleProgress = Math.round((totalChaptersRead() / (365 * 4)) * 100);
+  
+  // Data correspondente ao dia do plano no ano atual
+  const readingDate = new Date(new Date().getFullYear(), reading.month - 1, reading.dayOfMonth);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const readingDateStr = `${pad(readingDate.getDate())}/${pad(readingDate.getMonth() + 1)}/${readingDate.getFullYear()}`;
 
   const handleChapterToggle = (chapter: string) => {
     const newChecked = new Set(checkedChapters);
@@ -162,10 +167,10 @@ const ReadingDayMcCheyne = () => {
       <LevelUpModal level={newLevel} show={showLevelUp} onClose={() => setShowLevelUp(false)} />
       
       {isFutureDay && (
-        <div className="bg-destructive/10 border-b-2 border-destructive/20 py-3">
+        <div className="bg-primary/10 border-b-2 border-primary/20 py-3">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-destructive font-semibold">
-              ⚠️ Este dia ainda não está disponível. Aguarde até meia-noite.
+            <p className="text-primary font-semibold">
+              Você está visualizando um dia futuro do plano. Navegação liberada.
             </p>
           </div>
         </div>
@@ -186,7 +191,7 @@ const ReadingDayMcCheyne = () => {
                   <CalendarDays className="w-6 h-6" />
                   Dia {reading.day} - Plano M'Cheyne
                 </h1>
-                <p className="text-white/80 text-sm mt-1">{getLocalDateString()}</p>
+                <p className="text-white/80 text-sm mt-1">{readingDateStr}</p>
               </div>
             </div>
             
@@ -216,7 +221,7 @@ const ReadingDayMcCheyne = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {isFutureDay ? (
+        {false ? (
           <Card className="p-12 text-center">
             <CalendarDays className="w-24 h-24 text-muted-foreground mx-auto mb-6" />
             <h2 className="text-3xl font-bold mb-4">Dia Bloqueado</h2>
