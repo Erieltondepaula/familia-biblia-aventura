@@ -23,6 +23,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useProfile } from "@/contexts/ProfileContext";
 import { getReadingByDay, readingPlan } from "@/lib/readingPlanData";
+import { getLocalDateString } from "@/lib/dateUtils";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
@@ -178,7 +179,7 @@ const ReadingDay = () => {
                   <CalendarDays className="w-6 h-6" />
                   Dia {reading.day} - {reading.book}
                 </h1>
-                <p className="text-white/80">{new Date().toISOString().split('T')[0]}</p>
+                <p className="text-white/80">{getLocalDateString()}</p>
               </div>
             </div>
             

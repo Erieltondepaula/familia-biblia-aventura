@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getPlanStartDate, setPlanStartDate, getCurrentDayNumber } from "@/lib/readingPlanData";
+import { getLocalDateForInput, dateFromInputString } from "@/lib/dateUtils";
 
 const Settings = () => {
   const { currentProfile, updateProfile } = useProfile();
@@ -20,7 +21,10 @@ const Settings = () => {
   useEffect(() => {
     document.title = "Configurações | Jornada Bíblica";
     const currentStartDate = getPlanStartDate();
-    setStartDate(currentStartDate.toISOString().split('T')[0]);
+    const year = currentStartDate.getFullYear();
+    const month = String(currentStartDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentStartDate.getDate()).padStart(2, '0');
+    setStartDate(`${year}-${month}-${day}`);
   }, []);
 
   const handleReset = () => {
@@ -30,7 +34,7 @@ const Settings = () => {
 
   const handleStartDateChange = (newDate: string) => {
     setStartDate(newDate);
-    const date = new Date(newDate + 'T00:00:00');
+    const date = dateFromInputString(newDate);
     setPlanStartDate(date);
     const currentDay = getCurrentDayNumber();
     toast.success(`Data de início atualizada!`, { 

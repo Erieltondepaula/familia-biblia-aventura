@@ -57,25 +57,30 @@ export const readingPlan: DailyReading[] = [
   }
 ];
 
-// Get or set the plan start date
+// Get or set the plan start date (uses local timezone)
 export const getPlanStartDate = (): Date => {
   const saved = localStorage.getItem('planStartDate');
   if (saved) {
-    return new Date(saved);
+    const [year, month, day] = saved.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(0, 0, 0, 0);
+    return date;
   }
   // Default to today if not set
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  localStorage.setItem('planStartDate', today.toISOString());
+  const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  localStorage.setItem('planStartDate', dateString);
   return today;
 };
 
 export const setPlanStartDate = (date: Date): void => {
   date.setHours(0, 0, 0, 0);
-  localStorage.setItem('planStartDate', date.toISOString());
+  const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  localStorage.setItem('planStartDate', dateString);
 };
 
-// Calculate current day based on start date
+// Calculate current day based on start date (uses local timezone)
 export const getCurrentDayNumber = (): number => {
   const startDate = getPlanStartDate();
   const today = new Date();

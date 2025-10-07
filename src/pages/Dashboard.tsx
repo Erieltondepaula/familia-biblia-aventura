@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useProfile } from "@/contexts/ProfileContext";
 import { getCurrentDayReading } from "@/lib/readingPlanData";
+import { getLocalDateString } from "@/lib/dateUtils";
 import { toast } from "sonner";
 import MemorizedVerses from "@/components/MemorizedVerses";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -37,8 +38,8 @@ const Dashboard = () => {
   const todayReading = getCurrentDayReading();
   const isCompleted = isChapterCompleted(todayReading.day);
   
-  // Get current date in format: "Dia 1 - 2025-01-07"
-  const currentDate = new Date().toISOString().split('T')[0];
+  // Get current date in Brazilian format: dd/mm/yyyy
+  const currentDate = getLocalDateString();
 
 // Removidos toasts de navegação; agora usamos rotas dedicadas
 
