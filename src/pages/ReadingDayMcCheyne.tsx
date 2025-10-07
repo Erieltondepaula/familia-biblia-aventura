@@ -95,8 +95,8 @@ const ReadingDayMcCheyne = () => {
   const isFutureDay = dayNumber > currentDay;
   const allChapters = getAllChapters(reading);
   const allChaptersChecked = allChapters.every(ch => checkedChapters.has(ch));
-  const progress = (checkedChapters.size / allChapters.length) * 100;
-  const totalBibleProgress = calculateReadingProgress(totalChaptersRead());
+  const progress = calculateReadingProgress(Array.from(checkedChapters), allChapters);
+  const totalBibleProgress = Math.round((totalChaptersRead() / (365 * 4)) * 100);
 
   const handleChapterToggle = (chapter: string) => {
     const newChecked = new Set(checkedChapters);
