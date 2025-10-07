@@ -25,6 +25,7 @@ import { useProfile } from "@/contexts/ProfileContext";
 import { getReadingByDay, readingPlan } from "@/lib/readingPlanData";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
+import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
 import { toast } from "sonner";
@@ -47,11 +48,14 @@ const ReadingDay = () => {
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(0);
 
-  // Load saved reflection
+  // Load saved reflection and memorization status
   useEffect(() => {
     if (currentProfile && reading) {
       const savedReflection = getReflection(currentProfile.id, dayNumber);
       setNotes(savedReflection);
+      
+      const alreadyMemorized = isVerseMemorized(currentProfile.id, dayNumber);
+      setMemorizedVerse(alreadyMemorized);
     }
   }, [currentProfile, dayNumber, reading]);
 
@@ -92,8 +96,11 @@ const ReadingDay = () => {
   };
 
   const handleMemorizeVerse = () => {
+    if (!currentProfile) return;
+    
     if (!memorizedVerse) {
       setMemorizedVerse(true);
+      markVerseAsMemorized(currentProfile.id, dayNumber);
       addXP(100);
       toast.success("Versículo memorizado! +100 XP", {
         description: "Continue memorizando a Palavra!"
