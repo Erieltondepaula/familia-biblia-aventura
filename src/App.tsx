@@ -20,6 +20,7 @@ import Verses from "./pages/Verses";
 import BibleChapter from "./pages/BibleChapter";
 import Statistics from "./pages/Statistics";
 import Sermons from "./pages/Sermons";
+import SermonEditor from "./pages/SermonEditor";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,8 @@ const App = () => (
               <Route path="/bible/:book/:chapter" element={<BibleChapter />} />
               <Route path="/statistics" element={<Statistics />} />
               <Route path="/sermons" element={<Sermons />} />
+              <Route path="/sermon-editor" element={<SermonEditor />} />
+              <Route path="/sermon-editor/:id" element={<SermonEditor />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

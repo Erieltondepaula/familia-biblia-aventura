@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { 
-  saveSermon, 
-  updateSermon, 
   deleteSermon, 
   getSermonsByProfile,
   Sermon 
@@ -50,19 +48,7 @@ const Sermons = () => {
   const { currentProfile } = useProfile();
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingSermon, setEditingSermon] = useState<Sermon | null>(null);
   const [deleteSermonId, setDeleteSermonId] = useState<string | null>(null);
-
-  // Form state
-  const [formData, setFormData] = useState({
-    title: '',
-    date: format(new Date(), 'yyyy-MM-dd'),
-    preacher: '',
-    reference: '',
-    notes: '',
-    tags: ''
-  });
 
   useEffect(() => {
     document.title = 'Sermões - Bíblia 365';
@@ -78,61 +64,12 @@ const Sermons = () => {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      preacher: '',
-      reference: '',
-      notes: '',
-      tags: ''
-    });
-    setEditingSermon(null);
+  const handleEdit = (sermonId: string) => {
+    navigate(`/sermon-editor/${sermonId}`);
   };
 
-  const handleSubmit = () => {
-    if (!currentProfile) return;
-    if (!formData.title || !formData.reference) {
-      toast.error('Preencha título e referência bíblica');
-      return;
-    }
-
-    const tagsArray = formData.tags
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-
-    if (editingSermon) {
-      updateSermon(editingSermon.id, {
-        ...formData,
-        tags: tagsArray
-      });
-      toast.success('Sermão atualizado!');
-    } else {
-      saveSermon({
-        ...formData,
-        profileId: currentProfile.id,
-        tags: tagsArray
-      });
-      toast.success('Sermão salvo!');
-    }
-
-    loadSermons();
-    setIsDialogOpen(false);
-    resetForm();
-  };
-
-  const handleEdit = (sermon: Sermon) => {
-    setEditingSermon(sermon);
-    setFormData({
-      title: sermon.title,
-      date: sermon.date,
-      preacher: sermon.preacher,
-      reference: sermon.reference,
-      notes: sermon.notes,
-      tags: sermon.tags.join(', ')
-    });
-    setIsDialogOpen(true);
+  const handleCreate = () => {
+    navigate('/sermon-editor');
   };
 
   const handleDelete = () => {
@@ -147,7 +84,7 @@ const Sermons = () => {
   const filteredSermons = sermons.filter(sermon =>
     sermon.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sermon.preacher.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    sermon.reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    sermon.textBase.toLowerCase().includes(searchQuery.toLowerCase()) ||
     sermon.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -166,91 +103,10 @@ const Sermons = () => {
               Organize suas anotações de sermões
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 w-4 h-4" />
-                Novo Sermão
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingSermon ? 'Editar Sermão' : 'Novo Sermão'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="title">Título do Sermão *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Ex: O Amor de Cristo"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="date">Data</Label>
-                    <Input
-                      id="date"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="preacher">Pregador</Label>
-                    <Input
-                      id="preacher"
-                      value={formData.preacher}
-                      onChange={(e) => setFormData(prev => ({ ...prev, preacher: e.target.value }))}
-                      placeholder="Nome do pregador"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="reference">Referência Bíblica *</Label>
-                  <Input
-                    id="reference"
-                    value={formData.reference}
-                    onChange={(e) => setFormData(prev => ({ ...prev, reference: e.target.value }))}
-                    placeholder="Ex: João 3:16-21"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
-                  <Input
-                    id="tags"
-                    value={formData.tags}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                    placeholder="Ex: salvação, graça, amor"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="notes">Anotações</Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Suas anotações sobre o sermão..."
-                    className="min-h-[200px]"
-                  />
-                </div>
-
-                <Button onClick={handleSubmit} className="w-full">
-                  {editingSermon ? 'Atualizar' : 'Salvar'} Sermão
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={handleCreate}>
+            <Plus className="mr-2 w-4 h-4" />
+            Novo Sermão
+          </Button>
         </div>
       </div>
 
@@ -281,7 +137,7 @@ const Sermons = () => {
             }
           </p>
           {!searchQuery && (
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={handleCreate}>
               <Plus className="mr-2 w-4 h-4" />
               Adicionar Primeiro Sermão
             </Button>
@@ -308,7 +164,7 @@ const Sermons = () => {
                   )}
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4" />
-                    <span className="font-medium text-primary">{sermon.reference}</span>
+                    <span className="font-medium text-primary">{sermon.textBase}</span>
                   </div>
                 </div>
               </div>
@@ -323,9 +179,9 @@ const Sermons = () => {
                 </div>
               )}
 
-              {sermon.notes && (
+              {sermon.introduction && (
                 <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                  {sermon.notes}
+                  {sermon.introduction}
                 </p>
               )}
 
@@ -334,7 +190,7 @@ const Sermons = () => {
                   size="sm"
                   variant="outline"
                   className="flex-1"
-                  onClick={() => handleEdit(sermon)}
+                  onClick={() => handleEdit(sermon.id)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Editar

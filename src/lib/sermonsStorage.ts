@@ -1,12 +1,31 @@
 // Sermons storage and management
+export interface SermonPoint {
+  title: string;
+  development: string;
+  affirmation: string;
+  citation: string;
+  references: string;
+  catchPhrase: string;
+  application: string;
+  transition: string;
+}
+
 export interface Sermon {
   id: string;
   profileId: string;
   title: string;
+  theme: string;
+  textBase: string;
   date: string;
   preacher: string;
-  reference: string; // Bible reference
-  notes: string;
+  introduction: string;
+  point1: SermonPoint;
+  point2: SermonPoint;
+  point3: SermonPoint;
+  point4: SermonPoint;
+  conclusion: string;
+  prayer: string;
+  appeal: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;
@@ -69,8 +88,9 @@ export const searchSermons = (profileId: string, query: string): Sermon[] => {
   return sermons.filter(s => 
     s.title.toLowerCase().includes(lowerQuery) ||
     s.preacher.toLowerCase().includes(lowerQuery) ||
-    s.reference.toLowerCase().includes(lowerQuery) ||
-    s.notes.toLowerCase().includes(lowerQuery) ||
+    s.textBase.toLowerCase().includes(lowerQuery) ||
+    s.theme.toLowerCase().includes(lowerQuery) ||
+    s.introduction.toLowerCase().includes(lowerQuery) ||
     s.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
   );
 };
