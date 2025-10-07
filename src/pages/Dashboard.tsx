@@ -32,29 +32,7 @@ const Dashboard = () => {
   const todayReading = getCurrentDayReading();
   const isCompleted = isChapterCompleted(todayReading.day);
 
-  const handleQuizClick = () => {
-    toast.info("Quiz em breve!", {
-      description: "Essa funcionalidade estará disponível na próxima versão"
-    });
-  };
-
-  const handleProgressClick = () => {
-    toast.info("Relatório detalhado em breve!", {
-      description: "Visualização completa do seu progresso estará disponível em breve"
-    });
-  };
-
-  const handleAchievementsClick = () => {
-    toast.info("Conquistas em breve!", {
-      description: "Sistema de conquistas e badges estará disponível em breve"
-    });
-  };
-
-  const handleVersesClick = () => {
-    toast.info("Versículos memorizados em breve!", {
-      description: "Sistema de memorização estará disponível em breve"
-    });
-  };
+// Removidos toasts de navegação; agora usamos rotas dedicadas
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,14 +46,18 @@ const Dashboard = () => {
                 Jornada Bíblica
               </h1>
             </Link>
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => toast.info("Em breve!")}>
-                Perfis
-              </Button>
-              <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => toast.info("Em breve!")}>
-                Configurações
-              </Button>
-            </div>
+<div className="flex items-center gap-4">
+  <Link to="/profiles">
+    <Button variant="ghost" className="text-white hover:bg-white/20">
+      Perfis
+    </Button>
+  </Link>
+  <Link to="/settings">
+    <Button variant="ghost" className="text-white hover:bg-white/20">
+      Configurações
+    </Button>
+  </Link>
+</div>
           </div>
         </div>
       </header>
@@ -225,45 +207,49 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 gap-4">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-auto py-6 flex-col gap-2"
-            onClick={handleQuizClick}
-          >
-            <Target className="w-6 h-6" />
-            <span>Quiz Diário</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-auto py-6 flex-col gap-2"
-            onClick={handleProgressClick}
-          >
-            <TrendingUp className="w-6 h-6" />
-            <span>Progresso</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-auto py-6 flex-col gap-2"
-            onClick={handleAchievementsClick}
-          >
-            <Trophy className="w-6 h-6" />
-            <span>Conquistas</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="h-auto py-6 flex-col gap-2"
-            onClick={handleVersesClick}
-          >
-            <BookOpen className="w-6 h-6" />
-            <span>Versículos</span>
-          </Button>
-        </div>
+{/* Quick Actions */}
+<div className="grid md:grid-cols-4 gap-4">
+  <Link to="/quiz">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="h-auto py-6 flex-col gap-2"
+    >
+      <Target className="w-6 h-6" />
+      <span>Quiz Diário</span>
+    </Button>
+  </Link>
+  <Link to="/progress">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="h-auto py-6 flex-col gap-2"
+    >
+      <TrendingUp className="w-6 h-6" />
+      <span>Progresso</span>
+    </Button>
+  </Link>
+  <Link to="/achievements">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="h-auto py-6 flex-col gap-2"
+    >
+      <Trophy className="w-6 h-6" />
+      <span>Conquistas</span>
+    </Button>
+  </Link>
+  <Link to="/verses">
+    <Button 
+      variant="outline" 
+      size="lg" 
+      className="h-auto py-6 flex-col gap-2"
+    >
+      <BookOpen className="w-6 h-6" />
+      <span>Versículos</span>
+    </Button>
+  </Link>
+</div>
       </div>
     </div>
   );

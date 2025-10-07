@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface CompletedReading {
   day: number;
@@ -19,6 +20,7 @@ interface ProgressContextType {
   markChapterAsRead: (day: number, chapters: string[]) => void;
   addXP: (amount: number) => void;
   isChapterCompleted: (day: number) => boolean;
+  resetProgress: () => void;
 }
 
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
@@ -32,23 +34,20 @@ export const useProgress = () => {
 };
 
 export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load from localStorage or use defaults
-  const [xp, setXp] = useState<number>(() => {
-    const saved = localStorage.getItem('userXP');
-    return saved ? parseInt(saved) : 0;
-  });
+  const { currentProfile } = useProfile();
+  const profileId = currentProfile?.id || 'default';
 
-  const [completedReadings, setCompletedReadings] = useState<CompletedReading[]>(() => {
-    const saved = localStorage.getItem('completedReadings');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // State per profile (loaded on profile change)
+  const [xp, setXp] = useState<number>(0);
 
-  // Calculate derived values
-  const level = calculateLevel(xp);
-  const levelName = getLevelName(level);
-  const totalDaysRead = completedReadings.length;
-  const bibleProgress = calculateBibleProgress(completedReadings.reduce((acc, r) => acc + r.chapters.length, 0));
-  const xpToNextLevel = xpForNextLevel(xp);
+  const [completedReadings, setCompletedReadings] = useState<CompletedReading[]>([]);
+
+// Calculate derived values
+const level = calculateLevel(xp);
+const levelName = getLevelName(level);
+const totalDaysRead = completedReadings.length;
+const bibleProgress = calculateBibleProgress(completedReadings.reduce((acc, r) => acc + r.chapters.length, 0));
+const xpToNextLevel = xpForNextLevel(xp);
 
   // Calculate streak
   const currentStreak = React.useMemo(() => {
@@ -68,38 +67,45 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return streak;
   }, [completedReadings]);
 
-  // Save to localStorage whenever state changes
-  useEffect(() => {
-    localStorage.setItem('userXP', xp.toString());
-  }, [xp]);
+// Save to localStorage whenever state changes (per profile)
+useEffect(() => {
+  localStorage.setItem(`userXP_${profileId}`, xp.toString());
+}, [xp, profileId]);
 
-  useEffect(() => {
-    localStorage.setItem('completedReadings', JSON.stringify(completedReadings));
-  }, [completedReadings]);
+useEffect(() => {
+  localStorage.setItem(`completedReadings_${profileId}`, JSON.stringify(completedReadings));
+}, [completedReadings, profileId]);
 
-  const markChapterAsRead = (day: number, chapters: string[]) => {
-    // Check if already completed
-    if (completedReadings.some(r => r.day === day)) {
-      return;
-    }
+const markChapterAsRead = (day: number, chapters: string[]) => {
+  // Check if already completed
+  if (completedReadings.some(r => r.day === day)) {
+    return;
+  }
 
-    const newReading: CompletedReading = {
-      day,
-      chapters,
-      completedAt: new Date()
-    };
-
-    setCompletedReadings(prev => [...prev, newReading]);
-    addXP(50); // Award XP for completing reading
+  const newReading: CompletedReading = {
+    day,
+    chapters,
+    completedAt: new Date()
   };
 
-  const addXP = (amount: number) => {
-    setXp(prev => prev + amount);
-  };
+  setCompletedReadings(prev => [...prev, newReading]);
+  addXP(50); // Award XP for completing reading
+};
 
-  const isChapterCompleted = (day: number): boolean => {
-    return completedReadings.some(r => r.day === day);
-  };
+const addXP = (amount: number) => {
+  setXp(prev => prev + amount);
+};
+
+const isChapterCompleted = (day: number): boolean => {
+  return completedReadings.some(r => r.day === day);
+};
+
+const resetProgress = () => {
+  setXp(0);
+  setCompletedReadings([]);
+  localStorage.removeItem(`userXP_${profileId}`);
+  localStorage.removeItem(`completedReadings_${profileId}`);
+};
 
   const value: ProgressContextType = {
     xp,
@@ -115,9 +121,22 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     isChapterCompleted
   };
 
-  return (
-    <ProgressContext.Provider value={value}>
-      {children}
-    </ProgressContext.Provider>
-  );
+return (
+  <ProgressContext.Provider value={{
+    xp,
+    level,
+    levelName,
+    completedReadings,
+    currentStreak,
+    totalDaysRead,
+    bibleProgress,
+    xpToNextLevel,
+    markChapterAsRead,
+    addXP,
+    isChapterCompleted,
+    resetProgress
+  }}>
+    {children}
+  </ProgressContext.Provider>
+);
 };
