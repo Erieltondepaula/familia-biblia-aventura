@@ -93,7 +93,7 @@ export const chapterExistsInDatabase = async (
     .select('id')
     .eq('book_id', book.id)
     .eq('chapter_number', chapterNumber)
-    .single();
+    .maybeSingle();
 
   return !error && !!data;
 };
