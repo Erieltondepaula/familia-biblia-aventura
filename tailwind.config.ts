@@ -12,6 +12,19 @@ export default {
         "2xl": "1400px",
       },
     },
+    screens: {
+      'xs': '475px',   // smartphone pequeno
+      'sm': '640px',   // smartphone
+      'md': '768px',   // tablet
+      'lg': '1024px',  // notebook
+      'xl': '1280px',  // desktop
+      '2xl': '1536px', // desktop grande
+      '3xl': '1920px', // Full HD
+      '4xl': '2560px', // 2K/QHD
+      '5xl': '3840px', // 4K/UHD
+      '6xl': '5120px', // 5K
+      '7xl': '7680px', // 8K / TVs até 300"
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
