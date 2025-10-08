@@ -181,8 +181,13 @@ const ReadingDayMcCheyne = () => {
       const checkAvailability = async () => {
         const parsed = chapterLink ? parseChapterReference(chapter) : null;
         if (parsed) {
-          const isAvailable = await isChapterAvailable(parsed.book, parsed.chapter);
-          setAvailable(isAvailable);
+          const mappedKey = bookNameMap[parsed.book];
+          if (mappedKey) {
+            const isAvailable = await isChapterAvailable(mappedKey, parsed.chapter);
+            setAvailable(isAvailable);
+          } else {
+            setAvailable(false);
+          }
         }
         setLoading(false);
       };
