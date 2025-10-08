@@ -162,37 +162,37 @@ const ReadingDayMcCheyne = () => {
     }
   };
 
-  const getChapterLink = (chapterRef: string): string | null => {
+  // Mapeamento de livros para URLs do bibliaonline.com.br
+  const bookUrlMap: { [key: string]: string } = {
+    'Gênesis': 'gn', 'Êxodo': 'ex', 'Levítico': 'lv', 'Números': 'nm', 'Deuteronômio': 'dt',
+    'Josué': 'js', 'Juízes': 'jz', 'Rute': 'rt', '1 Samuel': '1sm', '2 Samuel': '2sm',
+    '1 Reis': '1rs', '2 Reis': '2rs', '1 Crônicas': '1cr', '2 Crônicas': '2cr',
+    'Esdras': 'ed', 'Neemias': 'ne', 'Ester': 'et', 'Jó': 'job', 'Salmos': 'sl',
+    'Provérbios': 'pv', 'Eclesiastes': 'ec', 'Cantares': 'ct', 'Isaías': 'is',
+    'Jeremias': 'jr', 'Lamentações': 'lm', 'Ezequiel': 'ez', 'Daniel': 'dn',
+    'Oséias': 'os', 'Joel': 'jl', 'Amós': 'am', 'Obadias': 'ob', 'Jonas': 'jn',
+    'Miquéias': 'mq', 'Naum': 'na', 'Habacuque': 'hc', 'Sofonias': 'sf',
+    'Ageu': 'ag', 'Zacarias': 'zc', 'Malaquias': 'ml',
+    'Mateus': 'mt', 'Marcos': 'mc', 'Lucas': 'lc', 'João': 'jo', 'Atos': 'at',
+    'Romanos': 'rm', '1 Coríntios': '1co', '2 Coríntios': '2co', 'Gálatas': 'gl',
+    'Efésios': 'ef', 'Filipenses': 'fp', 'Colossenses': 'cl', '1 Tessalonicenses': '1ts',
+    '2 Tessalonicenses': '2ts', '1 Timóteo': '1tm', '2 Timóteo': '2tm', 'Tito': 'tt',
+    'Filemom': 'fm', 'Hebreus': 'hb', 'Tiago': 'tg', '1 Pedro': '1pe', '2 Pedro': '2pe',
+    '1 João': '1jo', '2 João': '2jo', '3 João': '3jo', 'Judas': 'jd', 'Apocalipse': 'ap'
+  };
+
+  const getBibliaOnlineLink = (chapterRef: string): string | null => {
     const parsed = parseChapterReference(chapterRef);
     if (!parsed) return null;
     
-    const mappedBook = bookNameMap[parsed.book];
-    if (!mappedBook) return null;
+    const bookAbbrev = bookUrlMap[parsed.book];
+    if (!bookAbbrev) return null;
     
-    return `/bible/${mappedBook}/${parsed.chapter}`;
+    return `https://www.bibliaonline.com.br/acf/${bookAbbrev}/${parsed.chapter}`;
   };
 
   const ChapterRow = ({ chapter, testament }: { chapter: string; testament: 'AT' | 'NT' }) => {
-    const [available, setAvailable] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const chapterLink = getChapterLink(chapter);
-
-    useEffect(() => {
-      const checkAvailability = async () => {
-        const parsed = chapterLink ? parseChapterReference(chapter) : null;
-        if (parsed) {
-          const mappedKey = bookNameMap[parsed.book];
-          if (mappedKey) {
-            const isAvailable = await isChapterAvailable(mappedKey, parsed.chapter);
-            setAvailable(isAvailable);
-          } else {
-            setAvailable(false);
-          }
-        }
-        setLoading(false);
-      };
-      checkAvailability();
-    }, [chapter, chapterLink]);
+    const chapterLink = getBibliaOnlineLink(chapter);
 
     return (
       <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
@@ -202,16 +202,14 @@ const ReadingDayMcCheyne = () => {
           className="w-5 h-5"
         />
         <span className="flex-1 font-semibold">{chapter}</span>
-        {loading ? (
-          <div className="h-8 w-8" />
-        ) : available && chapterLink ? (
-          <Link to={chapterLink}>
-            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Ler capítulo completo">
+        {chapterLink ? (
+          <a href={chapterLink} target="_blank" rel="noopener noreferrer">
+            <Button size="sm" variant="ghost" className="h-8 w-8 p-0" title="Ler no Bíblia Online">
               <BookOpen className="w-4 h-4" />
             </Button>
-          </Link>
+          </a>
         ) : (
-          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 opacity-30" disabled title="Capítulo não disponível">
+          <Button size="sm" variant="ghost" className="h-8 w-8 p-0 opacity-30" disabled title="Link não disponível">
             <BookOpen className="w-4 h-4" />
           </Button>
         )}
