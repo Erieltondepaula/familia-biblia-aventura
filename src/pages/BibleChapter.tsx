@@ -6,6 +6,7 @@ import BibleReader from '@/components/BibleReader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 const BibleChapter = () => {
@@ -64,9 +65,18 @@ const BibleChapter = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <Card className="p-8">
-            <p className="text-lg">Carregando capítulo...</p>
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-32" />
+          <Card className="p-8 space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/2" />
+            <div className="space-y-3 mt-6">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+            </div>
           </Card>
         </div>
       </div>

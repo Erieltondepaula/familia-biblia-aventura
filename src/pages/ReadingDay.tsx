@@ -23,7 +23,6 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useProfile } from "@/contexts/ProfileContext";
 import { getReadingByDay, readingPlan, getCurrentDayNumber } from "@/lib/readingPlanData";
-import { getLocalDateString } from "@/lib/dateUtils";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
@@ -210,7 +209,6 @@ const ReadingDay = () => {
                   <span className="text-white/60">+</span>
                   <Badge variant="secondary" className="text-xs">NT: {reading.newTestament}</Badge>
                 </div>
-                <p className="text-white/80 text-sm mt-1">{getLocalDateString()}</p>
               </div>
             </div>
             

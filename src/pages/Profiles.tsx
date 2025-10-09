@@ -6,12 +6,23 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Link } from "react-router-dom";
 import { useProfile, RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
 import { ArrowLeft, UserPlus, CheckCircle2, Trash2 } from "lucide-react";
 
 const Profiles = () => {
   const { profiles, currentProfile, setCurrentProfile, addProfile, updateProfile, deleteProfile } = useProfile();
+  const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     age: 10,
@@ -60,7 +71,7 @@ const Profiles = () => {
                     <Button variant="outline" onClick={() => setCurrentProfile(p.id)}>Ativar</Button>
                   )}
                   {p.id !== 'default' && (
-                    <Button variant="destructive" onClick={() => deleteProfile(p.id)}>
+                    <Button variant="destructive" onClick={() => setProfileToDelete(p.id)}>
                       <Trash2 className="w-4 h-4 mr-1"/> Remover
                     </Button>
                   )}
@@ -192,6 +203,31 @@ const Profiles = () => {
           )}
         </div>
       </main>
+
+      <AlertDialog open={profileToDelete !== null} onOpenChange={() => setProfileToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O perfil e todos os seus dados serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (profileToDelete) {
+                  deleteProfile(profileToDelete);
+                  setProfileToDelete(null);
+                }
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

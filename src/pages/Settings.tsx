@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getPlanStartDate, setPlanStartDate, getCurrentDayNumber } from "@/lib/readingPlanData";
 import { getLocalDateForInput, dateFromInputString } from "@/lib/dateUtils";
+import { exportReadingPlanToPDF, exportReadingPlanToExcel } from "@/lib/exportService";
 
 const Settings = () => {
   const { currentProfile, updateProfile } = useProfile();
@@ -158,6 +159,69 @@ const Settings = () => {
                 Reiniciar Plano do Zero
               </Button>
             </div>
+          </div>
+        </Card>
+
+        <Card className="p-6 space-y-4">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            Plano de Leitura
+          </h2>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="startDate">Data de Início do Plano</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={startDate}
+                onChange={(e) => handleStartDateChange(e.target.value)}
+                className="mt-2"
+              />
+              <p className="text-sm text-muted-foreground mt-2">
+                O sistema calculará automaticamente o dia atual baseado nesta data
+              </p>
+            </div>
+
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm font-semibold mb-2">Dia Atual do Plano:</p>
+              <Badge variant="default" className="text-lg">
+                Dia {getCurrentDayNumber()} de 365
+              </Badge>
+            </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground mb-3">
+                Recomece sua jornada do zero para este perfil.
+              </p>
+              <Button variant="destructive" onClick={handleReset} className="w-full">
+                <RotateCcw className="w-4 h-4 mr-2"/>
+                Reiniciar Plano do Zero
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="lg:col-span-2 p-6 space-y-4">
+          <h2 className="text-xl font-bold">Exportar Plano de Leitura</h2>
+          <p className="text-muted-foreground">
+            Baixe o plano completo de leitura M'Cheyne (365 dias) nos formatos PDF ou Excel.
+          </p>
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              onClick={exportReadingPlanToPDF}
+              className="flex-1"
+            >
+              Exportar para PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={exportReadingPlanToExcel}
+              className="flex-1"
+            >
+              Exportar para Excel
+            </Button>
           </div>
         </Card>
       </main>

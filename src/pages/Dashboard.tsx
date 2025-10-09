@@ -43,8 +43,6 @@ const Dashboard = () => {
   // Get current date in Brazilian format: dd/mm/yyyy
   const currentDate = getLocalDateString();
 
-// Removidos toasts de navegação; agora usamos rotas dedicadas
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
