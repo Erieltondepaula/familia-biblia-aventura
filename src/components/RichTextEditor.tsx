@@ -1,6 +1,8 @@
+// Copie todo este código e cole no arquivo src/components/RichTextEditor.tsx
+
 import { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Bold, Italic, Underline, Highlighter } from 'lucide-react';
+import { Bold, Italic, Underline, Highlighter, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RichTextEditorProps {
@@ -19,6 +21,16 @@ const HIGHLIGHT_COLORS = [
   { name: 'Roxo', color: '#DDD6FE', class: 'bg-purple-200' },
   { name: 'Laranja', color: '#FED7AA', class: 'bg-orange-200' },
 ];
+
+const FONT_COLORS = [
+  { name: 'Preto (Padrão)', color: '#000000', class: 'bg-black' },
+  { name: 'Vermelho', color: '#EF4444', class: 'bg-red-500' },
+  { name: 'Azul', color: '#3B82F6', class: 'bg-blue-500' },
+  { name: 'Verde', color: '#22C55E', class: 'bg-green-500' },
+  { name: 'Roxo', color: '#8B5CF6', class: 'bg-purple-500' },
+  { name: 'Laranja', color: '#F97316', class: 'bg-orange-500' },
+];
+
 
 export const RichTextEditor = ({ value, onChange, placeholder, className, minHeight = '150px' }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
@@ -44,6 +56,12 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, minHei
     document.execCommand('hiliteColor', false, color);
     editorRef.current?.focus();
   };
+
+  const applyFontColor = (color: string) => {
+    document.execCommand('foreColor', false, color);
+    editorRef.current?.focus();
+  };
+
 
   return (
     <div className={cn("border rounded-md", className)}>
@@ -82,7 +100,9 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, minHei
 
         <div className="w-px h-6 bg-border mx-1" />
 
+        {/* Paleta de Marca-Texto */}
         <div className="flex items-center gap-1">
+          {/* CORREÇÃO APLICADA AQUI: removido o 'title' do ícone */}
           <Highlighter className="w-4 h-4 text-muted-foreground mr-1" />
           {HIGHLIGHT_COLORS.map((colorOption) => (
             <button
@@ -90,13 +110,34 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, minHei
               type="button"
               onClick={() => applyHighlight(colorOption.color)}
               className={cn(
-                "h-6 w-6 rounded border-2 border-gray-300 hover:border-gray-500 transition-colors",
+                "h-6 w-6 rounded border-2 border-transparent hover:border-gray-500 transition-colors",
                 colorOption.class
               )}
               title={colorOption.name}
             />
           ))}
         </div>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Paleta de Cor de Fonte */}
+        <div className="flex items-center gap-1">
+            {/* CORREÇÃO APLICADA AQUI: removido o 'title' do ícone */}
+            <Palette className="w-4 h-4 text-muted-foreground mr-1" />
+            {FONT_COLORS.map((colorOption) => (
+            <button
+                key={colorOption.name}
+                type="button"
+                onClick={() => applyFontColor(colorOption.color)}
+                className={cn(
+                "h-6 w-6 rounded border-2 border-transparent hover:border-gray-500 transition-colors",
+                colorOption.class
+                )}
+                title={colorOption.name}
+            />
+            ))}
+        </div>
+
       </div>
 
       {/* Editor */}

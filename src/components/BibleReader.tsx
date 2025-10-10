@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useProfile } from '@/hooks/useProfile';
 import { BibleChapter } from '@/lib/bibleData';
 import { 
   HighlightColor, 
   HighlightStyle, 
+  VerseHighlight, // <-- 1. IMPORT THE CORRECT TYPE
   saveHighlight, 
   getHighlight, 
   removeHighlight 
@@ -30,13 +31,14 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<HighlightColor>('yellow');
   const [note, setNote] = useState('');
-  const [verseHighlights, setVerseHighlights] = useState<Record<number, any>>({});
+  // 2. USE THE 'VerseHighlight' TYPE INSTEAD OF 'any'
+  const [verseHighlights, setVerseHighlights] = useState<Record<number, Partial<VerseHighlight>>>({});
 
   useEffect(() => {
     if (!currentProfile) return;
     
-    // Load all highlights for this chapter
-    const highlights: Record<number, any> = {};
+    // 3. USE THE 'VerseHighlight' TYPE HERE AS WELL
+    const highlights: Record<number, Partial<VerseHighlight>> = {};
     chapter.verses.forEach(verse => {
       const highlight = getHighlight(
         currentProfile.id,
@@ -65,22 +67,20 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const applyHighlight = (color: HighlightColor) => {
     if (!selectedVerse || !currentProfile) return;
     
-    saveHighlight({
+    const newHighlight: VerseHighlight = {
+      ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
       book: chapter.book,
       chapter: chapter.chapter,
       verse: selectedVerse,
       color,
       note: note || undefined
-    });
+    };
+    saveHighlight(newHighlight);
 
     setVerseHighlights(prev => ({
       ...prev,
-      [selectedVerse]: {
-        ...prev[selectedVerse],
-        color,
-        note: note || undefined
-      }
+      [selectedVerse]: newHighlight
     }));
 
     toast.success('Marcação aplicada!');
@@ -89,25 +89,20 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const applyStyle = (style: HighlightStyle) => {
     if (!selectedVerse || !currentProfile) return;
     
-    const currentHighlight = verseHighlights[selectedVerse] || {};
-    
-    saveHighlight({
+    const newHighlight: VerseHighlight = {
+      ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
       book: chapter.book,
       chapter: chapter.chapter,
       verse: selectedVerse,
-      color: currentHighlight.color,
       style,
       note: note || undefined
-    });
+    };
+    saveHighlight(newHighlight);
 
     setVerseHighlights(prev => ({
       ...prev,
-      [selectedVerse]: {
-        ...prev[selectedVerse],
-        style,
-        note: note || undefined
-      }
+      [selectedVerse]: newHighlight
     }));
 
     toast.success('Estilo aplicado!');
@@ -131,24 +126,19 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const saveNote = () => {
     if (!selectedVerse || !currentProfile) return;
     
-    const currentHighlight = verseHighlights[selectedVerse] || {};
-    
-    saveHighlight({
+    const newHighlight: VerseHighlight = {
+      ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
       book: chapter.book,
       chapter: chapter.chapter,
       verse: selectedVerse,
-      color: currentHighlight.color,
-      style: currentHighlight.style,
       note
-    });
+    };
+    saveHighlight(newHighlight);
 
     setVerseHighlights(prev => ({
       ...prev,
-      [selectedVerse]: {
-        ...prev[selectedVerse],
-        note
-      }
+      [selectedVerse]: newHighlight
     }));
 
     toast.success('Anotação salva!');
@@ -160,14 +150,12 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
     
     let className = 'cursor-pointer p-2 rounded transition-colors ';
     
-    // Apply color
     if (highlight.color === 'yellow') className += 'bg-yellow-200/60 dark:bg-yellow-900/40 ';
     if (highlight.color === 'green') className += 'bg-green-200/60 dark:bg-green-900/40 ';
     if (highlight.color === 'red') className += 'bg-red-200/60 dark:bg-red-900/40 ';
     if (highlight.color === 'blue') className += 'bg-blue-200/60 dark:bg-blue-900/40 ';
     if (highlight.color === 'purple') className += 'bg-purple-200/60 dark:bg-purple-900/40 ';
     
-    // Apply style
     if (highlight.style === 'bold') className += 'font-bold ';
     if (highlight.style === 'underline') className += 'underline decoration-2 ';
     
@@ -180,7 +168,6 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Bible Text */}
       <div className="lg:col-span-2">
         <Card className="p-6">
           <div className="mb-6">
@@ -209,7 +196,6 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
         </Card>
       </div>
 
-      {/* Toolbar */}
       <div className="lg:col-span-1">
         <Card className="p-6 sticky top-6">
           <h3 className="text-lg font-semibold mb-4">
@@ -224,65 +210,29 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
                 </p>
               </div>
 
-              {/* Color Palette */}
               <div>
                 <p className="text-sm font-medium mb-2">Cores</p>
                 <div className="flex gap-2 flex-wrap">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-10 h-10 p-0 bg-yellow-300 hover:bg-yellow-400"
-                    onClick={() => applyHighlight('yellow')}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-10 h-10 p-0 bg-green-300 hover:bg-green-400"
-                    onClick={() => applyHighlight('green')}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-10 h-10 p-0 bg-red-300 hover:bg-red-400"
-                    onClick={() => applyHighlight('red')}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-10 h-10 p-0 bg-blue-300 hover:bg-blue-400"
-                    onClick={() => applyHighlight('blue')}
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-10 h-10 p-0 bg-purple-300 hover:bg-purple-400"
-                    onClick={() => applyHighlight('purple')}
-                  />
+                  <Button size="sm" variant="outline" className="w-10 h-10 p-0 bg-yellow-300 hover:bg-yellow-400" onClick={() => applyHighlight('yellow')} />
+                  <Button size="sm" variant="outline" className="w-10 h-10 p-0 bg-green-300 hover:bg-green-400" onClick={() => applyHighlight('green')} />
+                  <Button size="sm" variant="outline" className="w-10 h-10 p-0 bg-red-300 hover:bg-red-400" onClick={() => applyHighlight('red')} />
+                  <Button size="sm" variant="outline" className="w-10 h-10 p-0 bg-blue-300 hover:bg-blue-400" onClick={() => applyHighlight('blue')} />
+                  <Button size="sm" variant="outline" className="w-10 h-10 p-0 bg-purple-300 hover:bg-purple-400" onClick={() => applyHighlight('purple')} />
                 </div>
               </div>
 
-              {/* Styles */}
               <div>
                 <p className="text-sm font-medium mb-2">Estilos</p>
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => applyStyle('bold')}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => applyStyle('bold')}>
                     <Bold className="w-4 h-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => applyStyle('underline')}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => applyStyle('underline')}>
                     <Underline className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Note */}
               <div>
                 <p className="text-sm font-medium mb-2">Anotação</p>
                 <Textarea
@@ -291,22 +241,12 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
                   placeholder="Adicione uma anotação..."
                   className="min-h-[100px]"
                 />
-                <Button
-                  size="sm"
-                  className="w-full mt-2"
-                  onClick={saveNote}
-                >
+                <Button size="sm" className="w-full mt-2" onClick={saveNote}>
                   Salvar Anotação
                 </Button>
               </div>
 
-              {/* Clear */}
-              <Button
-                size="sm"
-                variant="destructive"
-                className="w-full"
-                onClick={clearHighlight}
-              >
+              <Button size="sm" variant="destructive" className="w-full" onClick={clearHighlight}>
                 <Eraser className="w-4 h-4 mr-2" />
                 Limpar Marcações
               </Button>

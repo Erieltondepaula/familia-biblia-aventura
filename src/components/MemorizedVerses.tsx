@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Star } from "lucide-react";
-import { useProfile } from "@/contexts/ProfileContext";
+import { useProfile } from "@/hooks/useProfile"; // <-- CORREÇÃO APLICADA AQUI
 import { useState, useEffect } from "react";
 
 interface Verse {
@@ -13,20 +13,22 @@ interface Verse {
 const MemorizedVerses = () => {
   const { currentProfile } = useProfile();
   const key = `verses_${currentProfile?.id || 'default'}`;
-  const [verses, setVerses] = useState<Verse[]>(() => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [verses, setVerses] = useState<Verse[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem(key);
-    setVerses(saved ? JSON.parse(saved) : []);
-  }, [key]);
+    // Apenas carrega os versos se houver um perfil ativo
+    if (currentProfile) {
+      const saved = localStorage.getItem(key);
+      setVerses(saved ? JSON.parse(saved) : []);
+    } else {
+      setVerses([]); // Limpa os versos se não houver perfil
+    }
+  }, [key, currentProfile]);
 
   const memorizedVerses = verses.filter(v => v.memorized);
   
   if (memorizedVerses.length === 0) {
-    return null;
+    return null; // Não renderiza nada se não houver versos memorizados
   }
 
   return (
