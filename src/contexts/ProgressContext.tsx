@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useProfile } from '@/hooks/useProfile';
 
 interface CompletedReading {
   day: number;
   chapters: string[];
-  completedAt: Date;
+  completedAt: string;
 }
 
-interface ProgressContextType {
+export interface ProgressContextType {
   xp: number;
   level: number;
   levelName: string;
@@ -24,111 +24,96 @@ interface ProgressContextType {
   resetProgress: () => void;
 }
 
-const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
+export const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
-export const useProgress = () => {
-  const context = useContext(ProgressContext);
-  if (!context) {
-    throw new Error('useProgress must be used within a ProgressProvider');
-  }
-  return context;
-};
-
-export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { currentProfile } = useProfile();
-  const profileId = currentProfile?.id || 'default';
+  const profileId = currentProfile?.id;
 
   const [xp, setXp] = useState<number>(0);
   const [completedReadings, setCompletedReadings] = useState<CompletedReading[]>([]);
 
-  // Load data when profile changes
   useEffect(() => {
-    const savedXp = localStorage.getItem(`userXP_${profileId}`);
-    setXp(savedXp ? parseInt(savedXp) : 0);
-    const savedReadings = localStorage.getItem(`completedReadings_${profileId}`);
-    setCompletedReadings(savedReadings ? JSON.parse(savedReadings) : []);
+    if (profileId) {
+      const savedXp = localStorage.getItem(`userXP_${profileId}`);
+      setXp(savedXp ? parseInt(savedXp, 10) : 0);
+      const savedReadings = localStorage.getItem(`completedReadings_${profileId}`);
+      setCompletedReadings(savedReadings ? JSON.parse(savedReadings) : []);
+    } else {
+      setXp(0);
+      setCompletedReadings([]);
+    }
   }, [profileId]);
 
-  // Calculate derived values
   const level = calculateLevel(xp);
   const levelName = getLevelName(level);
   const totalDaysRead = completedReadings.length;
-  const bibleProgress = calculateBibleProgress(completedReadings.reduce((acc, r) => acc + r.chapters.length, 0));
   const xpToNextLevel = xpForNextLevel(xp);
 
-  // Calculate streak with automatic reset if a day was missed
-  const currentStreak = React.useMemo(() => {
+  const totalChaptersRead = (): number => completedReadings.reduce((acc, r) => acc + r.chapters.length, 0);
+  const bibleProgress = calculateBibleProgress(totalChaptersRead());
+
+  const currentStreak = useMemo(() => {
     if (completedReadings.length === 0) return 0;
-    
-    // Sort readings by day (most recent first)
-    const sortedReadings = [...completedReadings].sort((a, b) => b.day - a.day);
-    
-    // Get current day number (1-365)
+
+    const sortedReadings = [...completedReadings].sort(
+      (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    );
+
     const today = new Date();
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
-    const currentDayNumber = Math.floor((today.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    
-    // Check if user missed yesterday - if so, reset streak
-    const mostRecentReading = sortedReadings[0];
-    const daysSinceLast = currentDayNumber - mostRecentReading.day;
-    
-    // If more than 1 day has passed since last reading, streak is broken
-    if (daysSinceLast > 1) {
-      return 0;
-    }
-    
-    // Calculate consecutive days
+    today.setHours(0, 0, 0, 0);
+
+    const mostRecentReadingDate = new Date(sortedReadings[0].completedAt);
+    mostRecentReadingDate.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.round((today.getTime() - mostRecentReadingDate.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays > 1) return 0;
+
     let streak = 1;
     for (let i = 0; i < sortedReadings.length - 1; i++) {
-      const dayDiff = sortedReadings[i].day - sortedReadings[i + 1].day;
-      if (dayDiff === 1) {
-        streak++;
-      } else {
-        break;
-      }
+      const currentDate = new Date(sortedReadings[i].completedAt);
+      const previousDate = new Date(sortedReadings[i + 1].completedAt);
+      currentDate.setHours(0, 0, 0, 0);
+      previousDate.setHours(0, 0, 0, 0);
+
+      const dayDiff = (currentDate.getTime() - previousDate.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (dayDiff === 1) streak++;
+      else if (dayDiff > 1) break;
     }
-    
+
     return streak;
   }, [completedReadings]);
 
-  // Save to localStorage whenever state changes
-  useEffect(() => {
-    localStorage.setItem(`userXP_${profileId}`, xp.toString());
-  }, [xp, profileId]);
-
-  useEffect(() => {
-    localStorage.setItem(`completedReadings_${profileId}`, JSON.stringify(completedReadings));
-  }, [completedReadings, profileId]);
+  const saveProgress = (newXp: number, newReadings: CompletedReading[]) => {
+    if (!profileId) return;
+    localStorage.setItem(`userXP_${profileId}`, newXp.toString());
+    localStorage.setItem(`completedReadings_${profileId}`, JSON.stringify(newReadings));
+  };
 
   const markChapterAsRead = (day: number, chapters: string[]) => {
-    if (completedReadings.some(r => r.day === day)) {
-      return;
-    }
+    if (completedReadings.some(r => r.day === day) || !profileId) return;
 
-    const newReading: CompletedReading = {
-      day,
-      chapters,
-      completedAt: new Date()
-    };
+    const newReading: CompletedReading = { day, chapters, completedAt: new Date().toISOString() };
+    const newReadings = [...completedReadings, newReading];
+    const newXp = xp + chapters.length * 84;
 
-    setCompletedReadings(prev => [...prev, newReading]);
-    // Award 84 XP per chapter
-    addXP(chapters.length * 84);
+    setCompletedReadings(newReadings);
+    setXp(newXp);
+    saveProgress(newXp, newReadings);
   };
 
   const addXP = (amount: number) => {
-    setXp(prev => prev + amount);
+    if (!profileId) return;
+    const newXp = xp + amount;
+    setXp(newXp);
+    saveProgress(newXp, completedReadings);
   };
 
-  const isChapterCompleted = (day: number): boolean => {
-    return completedReadings.some(r => r.day === day);
-  };
-
-  const totalChaptersRead = (): number => {
-    return completedReadings.reduce((acc, r) => acc + r.chapters.length, 0);
-  };
+  const isChapterCompleted = (day: number): boolean => completedReadings.some(r => r.day === day);
 
   const resetProgress = () => {
+    if (!profileId) return;
     setXp(0);
     setCompletedReadings([]);
     localStorage.removeItem(`userXP_${profileId}`);
@@ -136,22 +121,31 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <ProgressContext.Provider value={{
-      xp,
-      level,
-      levelName,
-      completedReadings,
-      currentStreak,
-      totalDaysRead,
-      bibleProgress,
-      xpToNextLevel,
-      totalChaptersRead,
-      markChapterAsRead,
-      addXP,
-      isChapterCompleted,
-      resetProgress
-    }}>
+    <ProgressContext.Provider
+      value={{
+        xp,
+        level,
+        levelName,
+        completedReadings,
+        currentStreak,
+        totalDaysRead,
+        bibleProgress,
+        xpToNextLevel,
+        totalChaptersRead,
+        markChapterAsRead,
+        addXP,
+        isChapterCompleted,
+        resetProgress
+      }}
+    >
       {children}
     </ProgressContext.Provider>
   );
+};
+
+// ✅ Hook useProgress integrado
+export const useProgress = (): ProgressContextType => {
+  const context = useContext(ProgressContext);
+  if (!context) throw new Error("useProgress must be used within a ProgressProvider");
+  return context;
 };

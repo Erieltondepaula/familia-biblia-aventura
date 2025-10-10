@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useEffect, useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export type RoleType = "pai" | "mae" | "filho";
 export type Difficulty = "crianca" | "adolescente" | "adulto";
@@ -6,89 +8,106 @@ export type BibleVersion = "ACF" | "NVI" | "NTLH";
 
 export interface Profile {
   id: string;
+  user_id: string;
   name: string;
   age: number;
   role: RoleType;
   difficulty: Difficulty;
-  color?: string;
-  bibleVersion: BibleVersion;
+  bible_version: BibleVersion;
 }
 
-interface ProfileContextType {
+export interface ProfileContextType {
   profiles: Profile[];
   currentProfile: Profile | null;
+  loading: boolean;
   setCurrentProfile: (id: string) => void;
-  addProfile: (data: Omit<Profile, "id">) => void;
-  updateProfile: (id: string, updates: Partial<Profile>) => void;
-  deleteProfile: (id: string) => void;
+  addProfile: (data: Omit<Profile, "id" | "user_id">) => Promise<void>;
+  updateProfile: (id: string, updates: Partial<Omit<Profile, "id" | "user_id">>) => Promise<void>;
+  deleteProfile: (id: string) => Promise<void>;
 }
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
-
-export const useProfile = () => {
-  const ctx = useContext(ProfileContext);
-  if (!ctx) throw new Error("useProfile must be used within a ProfileProvider");
-  return ctx;
-};
-
-const defaultProfile: Profile = {
-  id: "default",
-  name: "Você",
-  age: 30,
-  role: "pai",
-  difficulty: "adulto",
-  color: "#1E90FF",
-  bibleVersion: "NVI",
-};
+export const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profiles, setProfiles] = useState<Profile[]>(() => {
-    const saved = localStorage.getItem("profiles");
-    return saved ? JSON.parse(saved) : [defaultProfile];
-  });
-  const [currentId, setCurrentId] = useState<string>(() => {
-    const saved = localStorage.getItem("currentProfileId");
-    return saved || profiles[0]?.id || defaultProfile.id;
-  });
+  const { user } = useAuth();
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [currentProfile, setCurrentProfileState] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfiles = useCallback(async () => {
+    if (!user) {
+      setProfiles([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const { data, error } = await supabase.from('profiles').select('*').eq('user_id', user.id);
+    if (error) {
+      console.error("Erro ao buscar perfis:", error);
+      setProfiles([]);
+    } else if (data) {
+      setProfiles(data as Profile[]);
+    }
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
-    localStorage.setItem("profiles", JSON.stringify(profiles));
+    fetchProfiles();
+  }, [fetchProfiles]);
+
+  useEffect(() => {
+    if (profiles.length > 0) {
+      const savedProfileId = localStorage.getItem('currentProfileId');
+      const profileToSet = profiles.find(p => p.id === savedProfileId) || profiles[0];
+      setCurrentProfileState(profileToSet);
+    } else {
+      setCurrentProfileState(null);
+    }
   }, [profiles]);
 
-  useEffect(() => {
-    localStorage.setItem("currentProfileId", currentId);
-  }, [currentId]);
-
-  const currentProfile = useMemo(
-    () => profiles.find(p => p.id === currentId) || profiles[0] || null,
-    [profiles, currentId]
-  );
-
-  const setCurrentProfile = (id: string) => setCurrentId(id);
-
-  const addProfile = (data: Omit<Profile, "id">) => {
-    const id = crypto.randomUUID?.() || String(Date.now());
-    const profile: Profile = { id, ...data };
-    setProfiles(prev => [...prev, profile]);
-    setCurrentId(id);
+  const setCurrentProfile = (id: string) => {
+    const profile = profiles.find(p => p.id === id);
+    if (profile) {
+      setCurrentProfileState(profile);
+      localStorage.setItem('currentProfileId', id);
+    }
   };
 
-  const updateProfile = (id: string, updates: Partial<Profile>) => {
-    setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates } : p)));
+  const addProfile = async (data: Omit<Profile, "id" | "user_id">) => {
+    if (!user) return;
+    const { data: newProfile, error } = await supabase.from('profiles').insert({ ...data, user_id: user.id }).select().single();
+    if (error) console.error("Erro ao adicionar perfil:", error);
+    else if (newProfile) {
+      setProfiles(prev => [...prev, newProfile as Profile]);
+      setCurrentProfile(newProfile.id);
+    }
   };
 
-  const deleteProfile = (id: string) => {
-    setProfiles(prev => prev.filter(p => p.id !== id));
-    if (currentId === id) {
-      const remaining = profiles.filter(p => p.id !== id);
-      setCurrentId(remaining[0]?.id || defaultProfile.id);
+  const updateProfile = async (id: string, updates: Partial<Omit<Profile, "id" | "user_id">>) => {
+    const { error } = await supabase.from('profiles').update(updates).eq('id', id);
+    if (error) console.error("Erro ao atualizar perfil:", error);
+    else {
+      setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates } as Profile : p)));
+    }
+  };
+
+  const deleteProfile = async (id: string) => {
+    const { error } = await supabase.from('profiles').delete().eq('id', id);
+    if (error) console.error("Erro ao deletar perfil:", error);
+    else {
+      const newProfiles = profiles.filter(p => p.id !== id);
+      setProfiles(newProfiles);
+      if (currentProfile?.id === id) {
+        const nextProfile = newProfiles[0] || null;
+        setCurrentProfileState(nextProfile);
+        if (nextProfile) localStorage.setItem('currentProfileId', nextProfile.id);
+        else localStorage.removeItem('currentProfileId');
+      }
     }
   };
 
   return (
-    <ProfileContext.Provider
-      value={{ profiles, currentProfile, setCurrentProfile, addProfile, updateProfile, deleteProfile }}
-    >
+    <ProfileContext.Provider value={{ profiles, currentProfile, loading, setCurrentProfile, addProfile, updateProfile, deleteProfile }}>
       {children}
     </ProfileContext.Provider>
   );
