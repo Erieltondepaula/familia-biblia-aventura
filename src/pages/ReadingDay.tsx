@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useProgress } from "@/contexts/ProgressContext";
-import { useProfile } from "@/contexts/ProfileContext";
+import { useProfile } from "@/hooks/useProfile";
 import { getReadingByDay, readingPlan, getCurrentDayNumber } from "@/lib/readingPlanData";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
@@ -49,13 +49,16 @@ const ReadingDay = () => {
 
   // Load saved reflection and memorization status
   useEffect(() => {
-    if (currentProfile && reading) {
-      const savedReflection = getReflection(currentProfile.id, dayNumber);
-      setNotes(savedReflection);
-      
-      const alreadyMemorized = isVerseMemorized(currentProfile.id, dayNumber);
-      setMemorizedVerse(alreadyMemorized);
-    }
+    const loadData = async () => {
+      if (currentProfile && reading) {
+        const savedReflection = getReflection(currentProfile.id, dayNumber);
+        setNotes(savedReflection);
+        
+        const alreadyMemorized = await isVerseMemorized(currentProfile.id, dayNumber);
+        setMemorizedVerse(alreadyMemorized);
+      }
+    };
+    loadData();
   }, [currentProfile, dayNumber, reading]);
 
   // Auto-save reflection
@@ -97,16 +100,22 @@ const ReadingDay = () => {
     setCheckedChapters(newChecked);
   };
 
-  const handleMemorizeVerse = () => {
+  const handleMemorizeVerse = async () => {
     if (!currentProfile) return;
     
     if (!memorizedVerse) {
       setMemorizedVerse(true);
-      markVerseAsMemorized(currentProfile.id, dayNumber);
-      addXP(100);
-      toast.success("Versículo memorizado! +100 XP", {
-        description: "Continue memorizando a Palavra!"
-      });
+      try {
+        await markVerseAsMemorized(currentProfile.id, dayNumber);
+        await addXP(100);
+        toast.success("Versículo memorizado! +100 XP", {
+          description: "Continue memorizando a Palavra!"
+        });
+      } catch (error) {
+        console.error('Erro ao memorizar versículo:', error);
+        setMemorizedVerse(false);
+        toast.error("Erro ao salvar. Tente novamente.");
+      }
     }
   };
 

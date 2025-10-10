@@ -83,12 +83,17 @@ const ChapterRow = ({ chapter, testament, isChecked, onToggle, note, onNoteChang
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(note || "");
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!profileId) return;
     onNoteChange(chapter, editText);
-    saveChapterNote(profileId, chapter, editText);
-    setIsEditing(false);
-    toast.success("Anotação salva!");
+    try {
+      await saveChapterNote(profileId, chapter, editText);
+      setIsEditing(false);
+      toast.success("Anotação salva!");
+    } catch (error) {
+      console.error('Erro ao salvar anotação:', error);
+      toast.error("Erro ao salvar anotação. Tente novamente.");
+    }
   };
 
   const handleCancel = () => {
@@ -185,25 +190,28 @@ const ReadingDayMcCheyne = () => {
   const isCompleted = reading ? isChapterCompleted(reading.day) : false;
 
   useEffect(() => {
-    if (currentProfile && reading) {
-      const savedReflection = getReflection(currentProfile.id, dayNumber);
-      setNotes(savedReflection);
-      
-      const alreadyMemorized = isVerseMemorized(currentProfile.id, dayNumber);
-      setMemorizedVerse(alreadyMemorized);
+    const loadData = async () => {
+      if (currentProfile && reading) {
+        const savedReflection = getReflection(currentProfile.id, dayNumber);
+        setNotes(savedReflection);
+        
+        const alreadyMemorized = await isVerseMemorized(currentProfile.id, dayNumber);
+        setMemorizedVerse(alreadyMemorized);
 
-      if (isCompleted) {
-        const allChaps = getAllChapters(reading);
-        setCheckedChapters(new Set(allChaps));
+        if (isCompleted) {
+          const allChaps = getAllChapters(reading);
+          setCheckedChapters(new Set(allChaps));
+        }
+
+        const chapters = [reading.familyOT, reading.familyNT, reading.personalOT, reading.personalNT];
+        const loadedNotes: Record<string, string> = {};
+        for (const chapter of chapters) {
+          loadedNotes[chapter] = await getChapterNote(currentProfile.id, chapter);
+        }
+        setChapterNotes(loadedNotes);
       }
-
-      const chapters = [reading.familyOT, reading.familyNT, reading.personalOT, reading.personalNT];
-      const loadedNotes: Record<string, string> = {};
-      chapters.forEach(chapter => {
-        loadedNotes[chapter] = getChapterNote(currentProfile.id, chapter);
-      });
-      setChapterNotes(loadedNotes);
-    }
+    };
+    loadData();
   }, [currentProfile, dayNumber, reading, isCompleted]);
 
   useEffect(() => {
@@ -249,13 +257,19 @@ const ReadingDayMcCheyne = () => {
     setCheckedChapters(newChecked);
   };
 
-  const handleMemorizeVerse = () => {
+  const handleMemorizeVerse = async () => {
     if (!currentProfile || memorizedVerse) return;
     
-    setMemorizedVerse(true);
-    markVerseAsMemorized(currentProfile.id, dayNumber);
-    addXP(100);
-    toast.success("Versículo memorizado! +100 XP");
+    try {
+      setMemorizedVerse(true);
+      await markVerseAsMemorized(currentProfile.id, dayNumber);
+      await addXP(100);
+      toast.success("Versículo memorizado! +100 XP");
+    } catch (error) {
+      console.error('Erro ao memorizar versículo:', error);
+      setMemorizedVerse(false);
+      toast.error("Erro ao salvar. Tente novamente.");
+    }
   };
 
   const handleCompleteReading = () => {

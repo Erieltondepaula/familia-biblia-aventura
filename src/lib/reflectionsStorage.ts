@@ -12,6 +12,12 @@ export interface ChapterNote {
   date: string;
 }
 
+import { 
+  saveChapterNote as saveChapterNoteSupabase, 
+  getChapterNote as getChapterNoteSupabase,
+  getAllChapterNotes as getAllChapterNotesSupabase
+} from './supabaseStorage';
+
 export const saveReflection = (profileId: string, day: number, notes: string) => {
   const key = `reflections_${profileId}`;
   const existing = localStorage.getItem(key);
@@ -48,39 +54,15 @@ export const getAllReflections = (profileId: string): Reflection[] => {
   return existing ? JSON.parse(existing) : [];
 };
 
-// Chapter-specific notes functions
-export const saveChapterNote = (profileId: string, chapterRef: string, notes: string) => {
-  const key = `chapter_notes_${profileId}`;
-  const existing = localStorage.getItem(key);
-  const chapterNotes: ChapterNote[] = existing ? JSON.parse(existing) : [];
-  
-  // Remove existing note for this chapter
-  const filtered = chapterNotes.filter(cn => cn.chapterRef !== chapterRef);
-  
-  // Add new note if not empty
-  if (notes.trim()) {
-    filtered.push({
-      chapterRef,
-      notes: notes.trim(),
-      date: new Date().toISOString()
-    });
-  }
-  
-  localStorage.setItem(key, JSON.stringify(filtered));
+// Chapter-specific notes functions - usar Supabase
+export const saveChapterNote = async (profileId: string, chapterRef: string, notes: string) => {
+  return saveChapterNoteSupabase(profileId, chapterRef, notes);
 };
 
-export const getChapterNote = (profileId: string, chapterRef: string): string => {
-  const key = `chapter_notes_${profileId}`;
-  const existing = localStorage.getItem(key);
-  if (!existing) return "";
-  
-  const chapterNotes: ChapterNote[] = JSON.parse(existing);
-  const note = chapterNotes.find(cn => cn.chapterRef === chapterRef);
-  return note?.notes || "";
+export const getChapterNote = async (profileId: string, chapterRef: string): Promise<string> => {
+  return getChapterNoteSupabase(profileId, chapterRef);
 };
 
-export const getAllChapterNotes = (profileId: string): ChapterNote[] => {
-  const key = `chapter_notes_${profileId}`;
-  const existing = localStorage.getItem(key);
-  return existing ? JSON.parse(existing) : [];
+export const getAllChapterNotes = async (profileId: string) => {
+  return getAllChapterNotesSupabase(profileId);
 };

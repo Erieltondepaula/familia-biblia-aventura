@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode, useCallback } from 'react';
 import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
 import { useProfile } from '@/hooks/useProfile';
+import { 
+  getReadingProgress, 
+  saveReadingProgress, 
+  getProfileStats, 
+  updateProfileStats,
+  addXPToProfile 
+} from '@/lib/supabaseStorage';
 
 interface CompletedReading {
   day: number;
@@ -32,18 +39,42 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const [xp, setXp] = useState<number>(0);
   const [completedReadings, setCompletedReadings] = useState<CompletedReading[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (profileId) {
-      const savedXp = localStorage.getItem(`userXP_${profileId}`);
-      setXp(savedXp ? parseInt(savedXp, 10) : 0);
-      const savedReadings = localStorage.getItem(`completedReadings_${profileId}`);
-      setCompletedReadings(savedReadings ? JSON.parse(savedReadings) : []);
-    } else {
+  // Carregar progresso do Supabase
+  const loadProgress = useCallback(async () => {
+    if (!profileId) {
       setXp(0);
       setCompletedReadings([]);
+      setLoading(false);
+      return;
     }
+
+    setLoading(true);
+    try {
+      // Buscar estatísticas do perfil
+      const stats = await getProfileStats(profileId);
+      if (stats) {
+        setXp(stats.total_xp);
+      }
+
+      // Buscar progresso de leitura
+      const readings = await getReadingProgress(profileId);
+      const formattedReadings: CompletedReading[] = readings.map(r => ({
+        day: r.day,
+        chapters: r.chapters,
+        completedAt: r.completed_at
+      }));
+      setCompletedReadings(formattedReadings);
+    } catch (error) {
+      console.error('Erro ao carregar progresso:', error);
+    }
+    setLoading(false);
   }, [profileId]);
+
+  useEffect(() => {
+    loadProgress();
+  }, [loadProgress]);
 
   const level = calculateLevel(xp);
   const levelName = getLevelName(level);
@@ -85,40 +116,88 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
     return streak;
   }, [completedReadings]);
 
-  const saveProgress = (newXp: number, newReadings: CompletedReading[]) => {
-    if (!profileId) return;
-    localStorage.setItem(`userXP_${profileId}`, newXp.toString());
-    localStorage.setItem(`completedReadings_${profileId}`, JSON.stringify(newReadings));
-  };
-
-  const markChapterAsRead = (day: number, chapters: string[]) => {
+  const markChapterAsRead = async (day: number, chapters: string[]) => {
     if (completedReadings.some(r => r.day === day) || !profileId) return;
 
-    const newReading: CompletedReading = { day, chapters, completedAt: new Date().toISOString() };
-    const newReadings = [...completedReadings, newReading];
-    const newXp = xp + chapters.length * 84;
+    const xpEarned = chapters.length * 84;
+    
+    try {
+      // Salvar progresso no Supabase
+      await saveReadingProgress(profileId, day, chapters, xpEarned);
+      await addXPToProfile(profileId, xpEarned);
 
-    setCompletedReadings(newReadings);
-    setXp(newXp);
-    saveProgress(newXp, newReadings);
+      // Atualizar estado local
+      const newReading: CompletedReading = { 
+        day, 
+        chapters, 
+        completedAt: new Date().toISOString() 
+      };
+      const newReadings = [...completedReadings, newReading];
+      const newXp = xp + xpEarned;
+
+      setCompletedReadings(newReadings);
+      setXp(newXp);
+    } catch (error) {
+      console.error('Erro ao marcar capítulo como lido:', error);
+      throw error;
+    }
   };
 
-  const addXP = (amount: number) => {
+  const addXP = async (amount: number) => {
     if (!profileId) return;
-    const newXp = xp + amount;
-    setXp(newXp);
-    saveProgress(newXp, completedReadings);
+    
+    try {
+      await addXPToProfile(profileId, amount);
+      setXp(prev => prev + amount);
+    } catch (error) {
+      console.error('Erro ao adicionar XP:', error);
+      throw error;
+    }
   };
 
   const isChapterCompleted = (day: number): boolean => completedReadings.some(r => r.day === day);
 
-  const resetProgress = () => {
+  const resetProgress = async () => {
     if (!profileId) return;
-    setXp(0);
-    setCompletedReadings([]);
-    localStorage.removeItem(`userXP_${profileId}`);
-    localStorage.removeItem(`completedReadings_${profileId}`);
+    
+    try {
+      await updateProfileStats(profileId, {
+        total_xp: 0,
+        level: 0,
+        current_streak: 0
+      });
+      
+      setXp(0);
+      setCompletedReadings([]);
+    } catch (error) {
+      console.error('Erro ao resetar progresso:', error);
+      throw error;
+    }
   };
+
+  if (loading) {
+    return (
+      <ProgressContext.Provider
+        value={{
+          xp: 0,
+          level: 0,
+          levelName: 'Iniciante',
+          completedReadings: [],
+          currentStreak: 0,
+          totalDaysRead: 0,
+          bibleProgress: 0,
+          xpToNextLevel: 1000,
+          totalChaptersRead: () => 0,
+          markChapterAsRead: async () => {},
+          addXP: async () => {},
+          isChapterCompleted: () => false,
+          resetProgress: async () => {}
+        }}
+      >
+        {children}
+      </ProgressContext.Provider>
+    );
+  }
 
   return (
     <ProgressContext.Provider
