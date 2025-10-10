@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProgress } from "@/hooks/useProgress";
 import { ArrowLeft, TrendingUp } from "lucide-react";
 
 const ProgressDetails = () => {
@@ -32,7 +32,7 @@ const ProgressDetails = () => {
               <span className="font-semibold">Experiência</span>
               <span className="text-sm text-muted-foreground">{xp} / {xpToNextLevel} XP</span>
             </div>
-            <Progress value={(xp / xpToNextLevel) * 100} className="h-3" />
+            <Progress value={xpToNextLevel > 0 ? (xp / xpToNextLevel) * 100 : 0} className="h-3" />
           </div>
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -41,10 +41,10 @@ const ProgressDetails = () => {
             </div>
             <Progress value={bibleProgress} className="h-3" />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge className="bg-gradient-glory text-accent-foreground">{levelName} - Nível {level}</Badge>
-            <Badge variant="outline">Streak: {currentStreak}</Badge>
-            <Badge variant="outline">Dias lidos: {totalDaysRead}</Badge>
+            <Badge variant="outline">Sequência: {currentStreak} dias</Badge>
+            <Badge variant="outline">Total de Dias Lidos: {totalDaysRead}</Badge>
           </div>
         </Card>
 
@@ -54,7 +54,7 @@ const ProgressDetails = () => {
             {completedReadings.length === 0 && (
               <p className="text-muted-foreground">Nenhuma leitura concluída ainda.</p>
             )}
-            {completedReadings.map(r => (
+            {completedReadings.sort((a, b) => b.day - a.day).map(r => (
               <div key={r.day} className="flex items-center justify-between p-3 rounded-lg border">
                 <div>
                   <p className="font-semibold">Dia {r.day}</p>

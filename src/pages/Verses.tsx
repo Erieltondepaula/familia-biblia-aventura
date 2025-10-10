@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
-import { useProfile } from "@/contexts/ProfileContext";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProfile } from "@/hooks/useProfile";
+import { useProgress } from "@/hooks/useProgress"; // <-- ATUALIZE ESTA LINHA
 import { awardMemorizationXP } from "@/lib/progressCalculations";
 import { ArrowLeft, BookOpen, CheckCircle2, Pencil, Trash2, Save, X } from "lucide-react";
 import { toast } from "sonner";
@@ -17,16 +17,27 @@ const Verses = () => {
   const { currentProfile } = useProfile();
   const { addXP } = useProgress();
   const key = `verses_${currentProfile?.id || 'default'}`;
-  const [verses, setVerses] = useState<Verse[]>(() => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [verses, setVerses] = useState<Verse[]>([]);
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
-  useEffect(() => { document.title = "Versículos | Jornada Bíblica"; }, []);
-  useEffect(() => { localStorage.setItem(key, JSON.stringify(verses)); }, [verses, key]);
+  useEffect(() => { 
+    document.title = "Versículos | Jornada Bíblica"; 
+  }, []);
+
+  useEffect(() => {
+    if (currentProfile) {
+        const saved = localStorage.getItem(key);
+        setVerses(saved ? JSON.parse(saved) : []);
+    }
+  }, [key, currentProfile]);
+  
+  useEffect(() => {
+    if (currentProfile) {
+        localStorage.setItem(key, JSON.stringify(verses));
+    }
+  }, [verses, key, currentProfile]);
 
   const addVerse = () => {
     if (!text.trim()) return;

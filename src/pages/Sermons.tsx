@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+// Copie todo este código e cole no arquivo src/pages/Sermons.tsx
+
+import { useState, useEffect, useCallback } from 'react'; // Adicionado 'useCallback'
 import { useNavigate } from 'react-router-dom';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useProfile } from '@/hooks/useProfile';
 import { 
   deleteSermon, 
   getSermonsByProfile,
@@ -9,16 +11,7 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,19 +43,20 @@ const Sermons = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteSermonId, setDeleteSermonId] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = 'Sermões - Bíblia 365';
-    loadSermons();
-  }, [currentProfile]);
-
-  const loadSermons = () => {
+  // CORREÇÃO APLICADA AQUI: A função 'loadSermons' agora usa 'useCallback'
+  const loadSermons = useCallback(() => {
     if (currentProfile) {
       const loadedSermons = getSermonsByProfile(currentProfile.id);
       setSermons(loadedSermons.sort((a, b) => 
         new Date(b.date).getTime() - new Date(a.date).getTime()
       ));
     }
-  };
+  }, [currentProfile]);
+
+  useEffect(() => {
+    document.title = 'Sermões - Bíblia 365';
+    loadSermons();
+  }, [currentProfile, loadSermons]); // CORREÇÃO APLICADA AQUI: 'loadSermons' adicionado à lista
 
   const handleEdit = (sermonId: string) => {
     navigate(`/sermon-editor/${sermonId}`);
@@ -92,13 +86,13 @@ const Sermons = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4">
           <ArrowLeft className="mr-2 w-4 h-4" />
           Voltar ao Dashboard
         </Button>
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 mt-4">
           <div>
-            <h1 className="text-4xl font-bold">Sermões</h1>
+            <h1 className="text-3xl md:text-4xl font-bold">Sermões</h1>
             <p className="text-muted-foreground mt-2">
               Organize suas anotações de sermões
             </p>
@@ -146,8 +140,8 @@ const Sermons = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSermons.map((sermon) => (
-            <Card key={sermon.id} className="p-6 hover:shadow-lg transition-shadow">
-              <div className="mb-4">
+            <Card key={sermon.id} className="p-6 hover:shadow-lg transition-shadow flex flex-col">
+              <div className="flex-grow mb-4">
                 <h3 className="text-xl font-semibold mb-2">{sermon.title}</h3>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
@@ -181,11 +175,11 @@ const Sermons = () => {
 
               {sermon.introduction && (
                 <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                  {sermon.introduction}
+                  {sermon.introduction.replace(/<[^>]*>?/gm, '')} {/* Remove HTML tags para preview */}
                 </p>
               )}
 
-              <div className="flex gap-2">
+              <div className="mt-auto flex gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -193,7 +187,7 @@ const Sermons = () => {
                   onClick={() => handleEdit(sermon.id)}
                 >
                   <Edit className="w-4 h-4 mr-2" />
-                  Editar
+                  Ver / Editar
                 </Button>
                 <Button
                   size="sm"

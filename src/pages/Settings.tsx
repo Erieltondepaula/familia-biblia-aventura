@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useProfile, RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProfile } from "@/hooks/useProfile";
+import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
+import { useProgress } from "@/hooks/useProgress";
 import { ArrowLeft, RotateCcw, Calendar } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getPlanStartDate, setPlanStartDate, getCurrentDayNumber } from "@/lib/readingPlanData";
-import { getLocalDateForInput, dateFromInputString } from "@/lib/dateUtils";
+import { dateFromInputString } from "@/lib/dateUtils";
+// IMPORTAÇÃO CORRIGIDA
 import { exportReadingPlanToPDF, exportReadingPlanToExcel } from "@/lib/exportService";
 
 const Settings = () => {
@@ -29,6 +31,7 @@ const Settings = () => {
   }, []);
 
   const handleReset = () => {
+    if (!currentProfile) return;
     resetProgress();
     toast.success("Plano reiniciado!", { description: "Seu XP e leituras foram zerados para este perfil." });
   };
@@ -38,12 +41,18 @@ const Settings = () => {
     const date = dateFromInputString(newDate);
     setPlanStartDate(date);
     const currentDay = getCurrentDayNumber();
-    toast.success(`Data de início atualizada!`, { 
-      description: `Você está no dia ${currentDay} do plano.` 
+    toast.success(`Data de início atualizada!`, {
+      description: `Você está no dia ${currentDay} do plano.`
     });
   };
 
-  if (!currentProfile) return null;
+  if (!currentProfile) {
+    return (
+        <div className="flex items-center justify-center min-h-screen">
+            Carregando perfil...
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,7 +114,7 @@ const Settings = () => {
           </div>
           <div>
             <Label>Versão da Bíblia</Label>
-            <RadioGroup value={currentProfile.bibleVersion} onValueChange={(v) => updateProfile(currentProfile.id, { bibleVersion: v as BibleVersion })} className="flex gap-4">
+            <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="ACF" id="ver-acf" />
                 <Label htmlFor="ver-acf">ACF</Label>
@@ -127,7 +136,7 @@ const Settings = () => {
             <Calendar className="w-5 h-5 text-primary" />
             Plano de Leitura
           </h2>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="startDate">Data de Início do Plano</Label>
@@ -155,47 +164,7 @@ const Settings = () => {
                 Recomece sua jornada do zero para este perfil.
               </p>
               <Button variant="destructive" onClick={handleReset} className="w-full">
-                <RotateCcw className="w-4 h-4 mr-2"/>
-                Reiniciar Plano do Zero
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 space-y-4">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            Plano de Leitura
-          </h2>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="startDate">Data de Início do Plano</Label>
-              <Input
-                id="startDate"
-                type="date"
-                value={startDate}
-                onChange={(e) => handleStartDateChange(e.target.value)}
-                className="mt-2"
-              />
-              <p className="text-sm text-muted-foreground mt-2">
-                O sistema calculará automaticamente o dia atual baseado nesta data
-              </p>
-            </div>
-
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm font-semibold mb-2">Dia Atual do Plano:</p>
-              <Badge variant="default" className="text-lg">
-                Dia {getCurrentDayNumber()} de 365
-              </Badge>
-            </div>
-
-            <div className="pt-4 border-t">
-              <p className="text-sm text-muted-foreground mb-3">
-                Recomece sua jornada do zero para este perfil.
-              </p>
-              <Button variant="destructive" onClick={handleReset} className="w-full">
-                <RotateCcw className="w-4 h-4 mr-2"/>
+                <RotateCcw className="w-4 h-4 mr-2" />
                 Reiniciar Plano do Zero
               </Button>
             </div>
@@ -208,15 +177,15 @@ const Settings = () => {
             Baixe o plano completo de leitura M'Cheyne (365 dias) nos formatos PDF ou Excel.
           </p>
           <div className="flex gap-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={exportReadingPlanToPDF}
               className="flex-1"
             >
               Exportar para PDF
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={exportReadingPlanToExcel}
               className="flex-1"
             >

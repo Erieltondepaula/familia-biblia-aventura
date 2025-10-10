@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import CircularProgress from "@/components/CircularProgress";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { 
-  BookOpen, 
-  CheckCircle2, 
+import {
+  BookOpen,
+  CheckCircle2,
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
@@ -20,24 +19,151 @@ import {
   CalendarDays,
   Home,
   Users,
-  FileText
+  FileText,
+  X,
+  Save
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useProgress } from "@/contexts/ProgressContext";
-import { useProfile } from "@/contexts/ProfileContext";
-import { 
-  getReadingByDay, 
+import { useProgress } from "@/hooks/useProgress";
+import { useProfile } from "@/hooks/useProfile";
+import {
+  getReadingByDay,
   getAllChapters,
   getCurrentDayNumber,
   mcCheyneReadingPlan,
-  calculateReadingProgress 
+  calculateReadingProgress
 } from "@/lib/mccheyneReadingPlan";
-import { parseChapterReference, isChapterAvailable, bookNameMap } from "@/lib/bibleData";
+import { parseChapterReference } from "@/lib/bibleData";
 import { saveReflection, getReflection, saveChapterNote, getChapterNote } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
 import { toast } from "sonner";
+
+// Helper function to create bible online link
+const getBibliaOnlineLink = (chapterRef: string): string | null => {
+    const bookUrlMap: { [key: string]: string } = {
+        'Gênesis': 'gn', 'Êxodo': 'ex', 'Levítico': 'lv', 'Números': 'nm', 'Deuteronômio': 'dt',
+        'Josué': 'js', 'Juízes': 'jz', 'Rute': 'rt', '1 Samuel': '1sm', '2 Samuel': '2sm',
+        '1 Reis': '1rs', '2 Reis': '2rs', '1 Crônicas': '1cr', '2 Crônicas': '2cr',
+        'Esdras': 'ed', 'Neemias': 'ne', 'Ester': 'et', 'Jó': 'job', 'Salmos': 'sl',
+        'Provérbios': 'pv', 'Eclesiastes': 'ec', 'Cantares': 'ct', 'Isaías': 'is',
+        'Jeremias': 'jr', 'Lamentações': 'lm', 'Ezequiel': 'ez', 'Daniel': 'dn',
+        'Oséias': 'os', 'Joel': 'jl', 'Amós': 'am', 'Obadias': 'ob', 'Jonas': 'jn',
+        'Miquéias': 'mq', 'Naum': 'na', 'Habacuque': 'hc', 'Sofonias': 'sf',
+        'Ageu': 'ag', 'Zacarias': 'zc', 'Malaquias': 'ml',
+        'Mateus': 'mt', 'Marcos': 'mc', 'Lucas': 'lc', 'João': 'jo', 'Atos': 'at',
+        'Romanos': 'rm', '1 Coríntios': '1co', '2 Coríntios': '2co', 'Gálatas': 'gl',
+        'Efésios': 'ef', 'Filipenses': 'fp', 'Colossenses': 'cl', '1 Tessalonicenses': '1ts',
+        '2 Tessalonicenses': '2ts', '1 Timóteo': '1tm', '2 Timóteo': '2tm', 'Tito': 'tt',
+        'Filemom': 'fm', 'Hebreus': 'hb', 'Tiago': 'tg', '1 Pedro': '1pe', '2 Pedro': '2pe',
+        '1 João': '1jo', '2 João': '2jo', '3 João': '3jo', 'Judas': 'jd', 'Apocalipse': 'ap'
+    };
+    const parsed = parseChapterReference(chapterRef);
+    if (!parsed) return null;
+    const bookAbbrev = bookUrlMap[parsed.book];
+    if (!bookAbbrev) return null;
+    return `https://www.bibliaonline.com.br/acf/${bookAbbrev}/${parsed.chapter}`;
+};
+
+
+// Tipos para as propriedades do ChapterRow
+interface ChapterRowProps {
+  chapter: string;
+  testament: 'AT' | 'NT';
+  isChecked: boolean;
+  onToggle: (chapter: string) => void;
+  note: string;
+  onNoteChange: (chapter: string, value: string) => void;
+  profileId: string | undefined;
+}
+
+const ChapterRow = ({ chapter, testament, isChecked, onToggle, note, onNoteChange, profileId }: ChapterRowProps) => {
+  const chapterLink = getBibliaOnlineLink(chapter);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(note || "");
+
+  const handleSave = () => {
+    if (!profileId) return;
+    onNoteChange(chapter, editText);
+    saveChapterNote(profileId, chapter, editText);
+    setIsEditing(false);
+    toast.success("Anotação salva!");
+  };
+
+  const handleCancel = () => {
+    setEditText(note || "");
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setEditText(note || "");
+    setIsEditing(true);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 3xl:gap-5 5xl:gap-8 p-4 3xl:p-6 5xl:p-8 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+        <Checkbox
+          checked={isChecked}
+          onCheckedChange={() => onToggle(chapter)}
+          className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10"
+        />
+        <span className="flex-1 font-semibold text-base 3xl:text-lg 5xl:text-2xl">{chapter}</span>
+        {chapterLink ? (
+          <a href={chapterLink} target="_blank" rel="noopener noreferrer">
+            <Button size="sm" variant="ghost" className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0" title="Ler no Bíblia Online">
+              <BookOpen className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
+            </Button>
+          </a>
+        ) : (
+          <Button size="sm" variant="ghost" className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0 opacity-30" disabled title="Link não disponível">
+            <BookOpen className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
+          </Button>
+        )}
+        <Badge variant="outline" className={`3xl:text-base 5xl:text-lg 5xl:px-3 5xl:py-1 ${
+          testament === 'AT'
+            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+            : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+          }`}>
+          {testament}
+        </Badge>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0"
+          title="Anotações"
+          onClick={handleEdit}
+          disabled={isEditing}
+        >
+          <FileText className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
+        </Button>
+      </div>
+      
+      {isEditing && (
+          <div className="pl-4 3xl:pl-6 5xl:pl-8">
+            <RichTextEditor
+              value={editText}
+              onChange={(value) => setEditText(value)}
+              placeholder={`Suas anotações sobre ${chapter}...`}
+              minHeight="120px"
+            />
+            <div className="flex gap-2 justify-end mt-2">
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
+                <X className="w-4 h-4 mr-1" />
+                Cancelar
+              </Button>
+              <Button size="sm" onClick={handleSave}>
+                <Save className="w-4 h-4 mr-1" />
+                Salvar Anotação
+              </Button>
+            </div>
+          </div>
+      )}
+    </div>
+  );
+};
+
 
 const ReadingDayMcCheyne = () => {
   const { day } = useParams();
@@ -47,18 +173,17 @@ const ReadingDayMcCheyne = () => {
   
   const dayNumber = parseInt(day || "1");
   const reading = getReadingByDay(dayNumber);
-  const isCompleted = isChapterCompleted(dayNumber);
-
+  
   const [checkedChapters, setCheckedChapters] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState("");
   const [memorizedVerse, setMemorizedVerse] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(0);
   
-  // Chapter notes state
   const [chapterNotes, setChapterNotes] = useState<Record<string, string>>({});
 
-  // Load saved data
+  const isCompleted = reading ? isChapterCompleted(reading.day) : false;
+
   useEffect(() => {
     if (currentProfile && reading) {
       const savedReflection = getReflection(currentProfile.id, dayNumber);
@@ -72,7 +197,6 @@ const ReadingDayMcCheyne = () => {
         setCheckedChapters(new Set(allChaps));
       }
 
-      // Load chapter notes
       const chapters = [reading.familyOT, reading.familyNT, reading.personalOT, reading.personalNT];
       const loadedNotes: Record<string, string> = {};
       chapters.forEach(chapter => {
@@ -82,7 +206,6 @@ const ReadingDayMcCheyne = () => {
     }
   }, [currentProfile, dayNumber, reading, isCompleted]);
 
-  // Auto-save reflection
   useEffect(() => {
     if (currentProfile && reading) {
       const timer = setTimeout(() => {
@@ -91,18 +214,6 @@ const ReadingDayMcCheyne = () => {
       return () => clearTimeout(timer);
     }
   }, [notes, currentProfile, dayNumber, reading]);
-
-  // Auto-save chapter notes
-  useEffect(() => {
-    if (currentProfile && reading) {
-      const timer = setTimeout(() => {
-        Object.entries(chapterNotes).forEach(([chapter, note]) => {
-          saveChapterNote(currentProfile.id, chapter, note);
-        });
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [chapterNotes, currentProfile, reading]);
 
   if (!reading) {
     return (
@@ -124,7 +235,6 @@ const ReadingDayMcCheyne = () => {
   const progress = calculateReadingProgress(Array.from(checkedChapters), allChapters);
   const totalBibleProgress = Math.round((totalChaptersRead() / (365 * 4)) * 100);
   
-  // Data correspondente ao dia do plano no ano atual
   const readingDate = new Date(new Date().getFullYear(), reading.month - 1, reading.dayOfMonth);
   const pad = (n: number) => String(n).padStart(2, '0');
   const readingDateStr = `${pad(readingDate.getDate())}/${pad(readingDate.getMonth() + 1)}/${readingDate.getFullYear()}`;
@@ -162,7 +272,7 @@ const ReadingDayMcCheyne = () => {
     const currentLevel = level;
     markChapterAsRead(dayNumber, allChapters);
     
-    let totalXP = allChapters.length * 84; // 84 XP per chapter
+    let totalXP = allChapters.length * 84;
     if (notes.trim().length > 0) {
       addXP(50);
       totalXP += 50;
@@ -188,101 +298,11 @@ const ReadingDayMcCheyne = () => {
     }
   };
 
-  // Mapeamento de livros para URLs do bibliaonline.com.br
-  const bookUrlMap: { [key: string]: string } = {
-    'Gênesis': 'gn', 'Êxodo': 'ex', 'Levítico': 'lv', 'Números': 'nm', 'Deuteronômio': 'dt',
-    'Josué': 'js', 'Juízes': 'jz', 'Rute': 'rt', '1 Samuel': '1sm', '2 Samuel': '2sm',
-    '1 Reis': '1rs', '2 Reis': '2rs', '1 Crônicas': '1cr', '2 Crônicas': '2cr',
-    'Esdras': 'ed', 'Neemias': 'ne', 'Ester': 'et', 'Jó': 'job', 'Salmos': 'sl',
-    'Provérbios': 'pv', 'Eclesiastes': 'ec', 'Cantares': 'ct', 'Isaías': 'is',
-    'Jeremias': 'jr', 'Lamentações': 'lm', 'Ezequiel': 'ez', 'Daniel': 'dn',
-    'Oséias': 'os', 'Joel': 'jl', 'Amós': 'am', 'Obadias': 'ob', 'Jonas': 'jn',
-    'Miquéias': 'mq', 'Naum': 'na', 'Habacuque': 'hc', 'Sofonias': 'sf',
-    'Ageu': 'ag', 'Zacarias': 'zc', 'Malaquias': 'ml',
-    'Mateus': 'mt', 'Marcos': 'mc', 'Lucas': 'lc', 'João': 'jo', 'Atos': 'at',
-    'Romanos': 'rm', '1 Coríntios': '1co', '2 Coríntios': '2co', 'Gálatas': 'gl',
-    'Efésios': 'ef', 'Filipenses': 'fp', 'Colossenses': 'cl', '1 Tessalonicenses': '1ts',
-    '2 Tessalonicenses': '2ts', '1 Timóteo': '1tm', '2 Timóteo': '2tm', 'Tito': 'tt',
-    'Filemom': 'fm', 'Hebreus': 'hb', 'Tiago': 'tg', '1 Pedro': '1pe', '2 Pedro': '2pe',
-    '1 João': '1jo', '2 João': '2jo', '3 João': '3jo', 'Judas': 'jd', 'Apocalipse': 'ap'
-  };
-
-  const getBibliaOnlineLink = (chapterRef: string): string | null => {
-    const parsed = parseChapterReference(chapterRef);
-    if (!parsed) return null;
-    
-    const bookAbbrev = bookUrlMap[parsed.book];
-    if (!bookAbbrev) return null;
-    
-    return `https://www.bibliaonline.com.br/acf/${bookAbbrev}/${parsed.chapter}`;
-  };
-
   const handleChapterNoteChange = (chapter: string, value: string) => {
     setChapterNotes(prev => ({
       ...prev,
       [chapter]: value
     }));
-  };
-
-  const ChapterRow = ({ chapter, testament }: { chapter: string; testament: 'AT' | 'NT' }) => {
-    const chapterLink = getBibliaOnlineLink(chapter);
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-      <div className="space-y-2">
-        <div className="flex items-center gap-3 3xl:gap-5 5xl:gap-8 p-4 3xl:p-6 5xl:p-8 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-          <Checkbox
-            checked={checkedChapters.has(chapter)}
-            onCheckedChange={() => handleChapterToggle(chapter)}
-            className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10"
-          />
-          <span className="flex-1 font-semibold text-base 3xl:text-lg 5xl:text-2xl">{chapter}</span>
-          {chapterLink ? (
-            <a href={chapterLink} target="_blank" rel="noopener noreferrer">
-              <Button size="sm" variant="ghost" className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0" title="Ler no Bíblia Online">
-                <BookOpen className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
-              </Button>
-            </a>
-          ) : (
-            <Button size="sm" variant="ghost" className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0 opacity-30" disabled title="Link não disponível">
-              <BookOpen className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
-            </Button>
-          )}
-          <Badge variant="outline" className={`3xl:text-base 5xl:text-lg 5xl:px-3 5xl:py-1 ${
-            testament === 'AT' 
-              ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-          }`}>
-            {testament}
-          </Badge>
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button 
-                size="sm" 
-                variant="ghost" 
-                className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0"
-                title="Anotações"
-              >
-                <FileText className="w-4 h-4 3xl:w-6 3xl:h-6 5xl:w-8 5xl:h-8" />
-              </Button>
-            </CollapsibleTrigger>
-          </Collapsible>
-        </div>
-        
-        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleContent>
-            <div className="pl-4 3xl:pl-6 5xl:pl-8">
-              <RichTextEditor
-                value={chapterNotes[chapter] || ""}
-                onChange={(value) => handleChapterNoteChange(chapter, value)}
-                placeholder={`Suas anotações sobre ${chapter}...`}
-                minHeight="120px"
-              />
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
-    );
   };
 
   return (
@@ -299,7 +319,6 @@ const ReadingDayMcCheyne = () => {
         </div>
       )}
       
-      {/* Header */}
       <header className="bg-gradient-hero text-white shadow-elevated">
         <div className="container mx-auto px-4 py-6 3xl:py-8 5xl:py-12">
           <div className="flex items-center justify-between">
@@ -318,7 +337,6 @@ const ReadingDayMcCheyne = () => {
               </div>
             </div>
             
-            {/* Navigation */}
             <div className="flex items-center gap-2 3xl:gap-4 5xl:gap-6">
               <Button 
                 variant="ghost" 
@@ -344,7 +362,7 @@ const ReadingDayMcCheyne = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8 max-w-7xl 3xl:max-w-[90%] 5xl:max-w-[85%]">
-        {false ? (
+        {isFutureDay && !reading ? (
           <Card className="p-12 text-center">
             <CalendarDays className="w-24 h-24 3xl:w-32 3xl:h-32 5xl:w-48 5xl:h-48 text-muted-foreground mx-auto mb-6" />
             <h2 className="text-3xl font-bold mb-4">Dia Bloqueado</h2>
@@ -360,7 +378,6 @@ const ReadingDayMcCheyne = () => {
           </Card>
         ) : (
           <>
-            {/* Progress Overview */}
             <Card className="p-6 3xl:p-8 5xl:p-12 mb-6 shadow-card">
               <div className="flex flex-col md:flex-row items-center gap-6 3xl:gap-10 5xl:gap-16">
                 <CircularProgress value={progress} size={100} />
@@ -384,7 +401,6 @@ const ReadingDayMcCheyne = () => {
               </div>
             </Card>
 
-            {/* Family Reading */}
             <Card className="p-6 3xl:p-8 5xl:p-12 mb-6 shadow-card border-l-4 3xl:border-l-8 5xl:border-l-12 border-blue-500">
               <div className="flex items-center gap-2 3xl:gap-4 5xl:gap-6 mb-4">
                 <Home className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10 text-blue-600" />
@@ -392,12 +408,27 @@ const ReadingDayMcCheyne = () => {
                 <Badge variant="secondary" className="ml-auto 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">2 capítulos</Badge>
               </div>
               <div className="space-y-3 3xl:space-y-4 5xl:space-y-6">
-                <ChapterRow chapter={reading.familyOT} testament="AT" />
-                <ChapterRow chapter={reading.familyNT} testament="NT" />
+                <ChapterRow 
+                    chapter={reading.familyOT} 
+                    testament="AT"
+                    isChecked={checkedChapters.has(reading.familyOT)}
+                    onToggle={handleChapterToggle}
+                    note={chapterNotes[reading.familyOT]}
+                    onNoteChange={handleChapterNoteChange}
+                    profileId={currentProfile?.id}
+                />
+                <ChapterRow 
+                    chapter={reading.familyNT} 
+                    testament="NT"
+                    isChecked={checkedChapters.has(reading.familyNT)}
+                    onToggle={handleChapterToggle}
+                    note={chapterNotes[reading.familyNT]}
+                    onNoteChange={handleChapterNoteChange}
+                    profileId={currentProfile?.id}
+                />
               </div>
             </Card>
 
-            {/* Personal Reading */}
             <Card className="p-6 3xl:p-8 5xl:p-12 mb-6 shadow-card border-l-4 3xl:border-l-8 5xl:border-l-12 border-purple-500">
               <div className="flex items-center gap-2 3xl:gap-4 5xl:gap-6 mb-4">
                 <Users className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10 text-purple-600" />
@@ -405,12 +436,27 @@ const ReadingDayMcCheyne = () => {
                 <Badge variant="secondary" className="ml-auto 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">2 capítulos</Badge>
               </div>
               <div className="space-y-3 3xl:space-y-4 5xl:space-y-6">
-                <ChapterRow chapter={reading.personalOT} testament="AT" />
-                <ChapterRow chapter={reading.personalNT} testament="NT" />
+                <ChapterRow 
+                    chapter={reading.personalOT} 
+                    testament="AT"
+                    isChecked={checkedChapters.has(reading.personalOT)}
+                    onToggle={handleChapterToggle}
+                    note={chapterNotes[reading.personalOT]}
+                    onNoteChange={handleChapterNoteChange}
+                    profileId={currentProfile?.id}
+                />
+                <ChapterRow 
+                    chapter={reading.personalNT} 
+                    testament="NT"
+                    isChecked={checkedChapters.has(reading.personalNT)}
+                    onToggle={handleChapterToggle}
+                    note={chapterNotes[reading.personalNT]}
+                    onNoteChange={handleChapterNoteChange}
+                    profileId={currentProfile?.id}
+                />
               </div>
             </Card>
 
-            {/* Morning Devotional */}
             <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent">
               <div className="mb-6 3xl:mb-8 5xl:mb-12">
                 <Badge variant="outline" className="mb-3 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">🌅 Devocional da Manhã</Badge>
@@ -424,7 +470,6 @@ const ReadingDayMcCheyne = () => {
               </p>
             </Card>
 
-            {/* Evening Devotional */}
             <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent">
               <div className="mb-6 3xl:mb-8 5xl:mb-12">
                 <Badge variant="outline" className="mb-3 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">🌙 Devocional da Noite</Badge>
@@ -438,7 +483,6 @@ const ReadingDayMcCheyne = () => {
               </p>
             </Card>
 
-            {/* Reflection */}
             <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-secondary/5 to-transparent">
               <h2 className="text-2xl 3xl:text-3xl 5xl:text-5xl font-bold mb-4 3xl:mb-6 5xl:mb-8 flex items-center gap-2 3xl:gap-4 5xl:gap-6">
                 <MessageSquare className="w-6 h-6 3xl:w-8 3xl:h-8 5xl:w-12 5xl:h-12 text-secondary" />
@@ -458,7 +502,6 @@ const ReadingDayMcCheyne = () => {
               )}
             </Card>
 
-            {/* Verse Memorization */}
             <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-glory">
               <h2 className="text-2xl 3xl:text-3xl 5xl:text-5xl font-bold mb-4 3xl:mb-6 5xl:mb-8 flex items-center gap-2 3xl:gap-4 5xl:gap-6 text-accent-foreground">
                 <Star className="w-6 h-6 3xl:w-8 3xl:h-8 5xl:w-12 5xl:h-12" />
@@ -482,7 +525,6 @@ const ReadingDayMcCheyne = () => {
               </Button>
             </Card>
 
-            {/* Complete Button */}
             <Card className="p-6 3xl:p-8 5xl:p-12 shadow-elevated border-2 border-primary/20">
               <div className="text-center mb-4 3xl:mb-6 5xl:mb-8">
                 <h3 className="text-xl 3xl:text-2xl 5xl:text-4xl font-bold mb-2 3xl:mb-4 5xl:mb-6">

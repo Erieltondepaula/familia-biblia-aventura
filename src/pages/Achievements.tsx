@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProgress } from "@/hooks/useProgress";
 import { ArrowLeft, Trophy } from "lucide-react";
 
 const Achievements = () => {

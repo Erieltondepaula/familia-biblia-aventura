@@ -12,14 +12,14 @@ import {
   TrendingUp,
   Home,
   MessageSquare,
-  Users
+  Users,
+  HeartHandshake
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useProgress } from "@/contexts/ProgressContext";
-import { useProfile } from "@/contexts/ProfileContext";
-import { getCurrentDayReading, getAllChapters } from "@/lib/mccheyneReadingPlan";
+import { useProgress } from "@/hooks/useProgress"; // A importação correta está aqui
+import { useProfile } from "@/hooks/useProfile";
+import { getCurrentDayReading } from "@/lib/mccheyneReadingPlan";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { toast } from "sonner";
 import MemorizedVerses from "@/components/MemorizedVerses";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -37,11 +37,17 @@ const Dashboard = () => {
   } = useProgress();
 
   const todayReading = getCurrentDayReading();
-  const isCompleted = isChapterCompleted(todayReading.day);
-  const todayChapters = getAllChapters(todayReading);
+  const isCompleted = todayReading ? isChapterCompleted(todayReading.day) : false;
   
-  // Get current date in Brazilian format: dd/mm/yyyy
   const currentDate = getLocalDateString();
+
+  if (!todayReading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Carregando plano de leitura...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,19 +61,19 @@ const Dashboard = () => {
                 Jornada Bíblica
               </h1>
             </Link>
-<div className="flex items-center gap-2">
-  <ThemeToggle />
-  <Link to="/profiles">
-    <Button variant="ghost" className="text-white hover:bg-white/20">
-      Perfis
-    </Button>
-  </Link>
-  <Link to="/settings">
-    <Button variant="ghost" className="text-white hover:bg-white/20">
-      Configurações
-    </Button>
-  </Link>
-</div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Link to="/profiles">
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  Perfis
+                </Button>
+              </Link>
+              <Link to="/settings">
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  Configurações
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -79,7 +85,7 @@ const Dashboard = () => {
           <Card className="lg:col-span-2 p-8 shadow-card">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div>
-                <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "João"}! 👋</h2>
+                <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "Usuário"}! 👋</h2>
                 <div className="flex items-center gap-3 flex-wrap">
                   <Badge className="bg-gradient-glory text-accent-foreground text-base px-4 py-2">
                     {levelName}
@@ -104,7 +110,7 @@ const Dashboard = () => {
                     {xp} / {xpToNextLevel} XP
                   </span>
                 </div>
-                <Progress value={(xp / xpToNextLevel) * 100} className="h-3" />
+                <Progress value={(xpToNextLevel > 0 ? (xp / xpToNextLevel) * 100 : 0)} className="h-3" />
               </div>
 
               {/* Bible Progress */}
@@ -132,7 +138,7 @@ const Dashboard = () => {
                     4 capítulos/dia
                   </span>
                 </div>
-                <Progress value={20} className="h-3" />
+                <Progress value={isCompleted ? 100 : 0} className="h-3" />
               </div>
             </div>
           </Card>
@@ -158,6 +164,19 @@ const Dashboard = () => {
               <p className="font-semibold">Dias de Leitura</p>
               <p className="text-sm text-white/80">De 365 dias</p>
             </Card>
+            
+            <Link to="/contribute">
+                <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow duration-300 cursor-pointer bg-gradient-to-br from-amber-500/5 to-transparent">
+                    <div className="flex items-center justify-between mb-2">
+                        <HeartHandshake className="w-8 h-8 text-amber-500" />
+                        <span className="text-2xl font-bold text-amber-600">Apoie</span>
+                    </div>
+                    <p className="font-semibold">Gostou do Projeto?</p>
+                    <p className="text-sm text-muted-foreground">
+                        Clique aqui e ajude a manter a plataforma no ar.
+                    </p>
+                </Card>
+            </Link>
           </div>
         </div>
 
@@ -181,7 +200,6 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-4 mb-6">
-              {/* Family Reading */}
               <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-l-4 border-blue-500">
                 <div className="flex items-center gap-2 mb-3">
                   <Home className="w-4 h-4 text-blue-600" />
@@ -198,8 +216,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Personal Reading */}
               <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border-l-4 border-purple-500">
                 <div className="flex items-center gap-2 mb-3">
                   <Users className="w-4 h-4 text-purple-600" />
@@ -226,7 +242,6 @@ const Dashboard = () => {
             </Link>
           </Card>
 
-          {/* Quick Info */}
           <div className="space-y-6">
             <Card className="p-6 shadow-card">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
@@ -240,7 +255,7 @@ const Dashboard = () => {
                 </div>
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground mb-1">Próximo Nível</p>
-                  <p className="text-2xl font-bold text-secondary">{xpToNextLevel - xp} XP</p>
+                  <p className="text-2xl font-bold text-secondary">{xpToNextLevel > xp ? xpToNextLevel - xp : 0} XP</p>
                 </div>
                 <div className="p-4 bg-gradient-glory rounded-lg">
                   <p className="text-sm text-accent-foreground/80 mb-1">Seu Nível</p>
@@ -248,84 +263,55 @@ const Dashboard = () => {
                 </div>
               </div>
             </Card>
-
             <MemorizedVerses />
           </div>
         </div>
 
-{/* Quick Actions */}
-<div className="grid md:grid-cols-4 lg:grid-cols-7 gap-4">
-  <Link to="/quiz" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <Target className="w-6 h-6" />
-      <span>Quiz Diário</span>
-    </Button>
-  </Link>
-  <Link to="/statistics" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <TrendingUp className="w-6 h-6" />
-      <span>Estatísticas</span>
-    </Button>
-  </Link>
-  <Link to="/progress" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <Flame className="w-6 h-6" />
-      <span>Progresso</span>
-    </Button>
-  </Link>
-  <Link to="/achievements" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <Trophy className="w-6 h-6" />
-      <span>Conquistas</span>
-    </Button>
-  </Link>
-  <Link to="/verses" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <BookOpen className="w-6 h-6" />
-      <span>Versículos</span>
-    </Button>
-  </Link>
-  <Link to="/sermons" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <Star className="w-6 h-6" />
-      <span>Sermões</span>
-    </Button>
-  </Link>
-  <Link to="/reflections" className="w-full">
-    <Button 
-      variant="outline" 
-      size="lg" 
-      className="w-full h-auto py-6 flex-col gap-2"
-    >
-      <MessageSquare className="w-6 h-6" />
-      <span>Reflexões</span>
-    </Button>
-  </Link>
-</div>
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-4 lg:grid-cols-7 gap-4">
+          <Link to="/quiz" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <Target className="w-6 h-6" />
+              <span>Quiz Diário</span>
+            </Button>
+          </Link>
+          <Link to="/statistics" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <TrendingUp className="w-6 h-6" />
+              <span>Estatísticas</span>
+            </Button>
+          </Link>
+          <Link to="/progress" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <Flame className="w-6 h-6" />
+              <span>Progresso</span>
+            </Button>
+          </Link>
+          <Link to="/achievements" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <Trophy className="w-6 h-6" />
+              <span>Conquistas</span>
+            </Button>
+          </Link>
+          <Link to="/verses" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <BookOpen className="w-6 h-6" />
+              <span>Versículos</span>
+            </Button>
+          </Link>
+          <Link to="/sermons" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <Star className="w-6 h-6" />
+              <span>Sermões</span>
+            </Button>
+          </Link>
+          <Link to="/reflections" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <MessageSquare className="w-6 h-6" />
+              <span>Reflexões</span>
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

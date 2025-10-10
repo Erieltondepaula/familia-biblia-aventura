@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/contexts/ProgressContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

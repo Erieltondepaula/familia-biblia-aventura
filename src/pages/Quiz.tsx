@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Target, CheckCircle2, XCircle } from "lucide-react";
 import { getReadingByDay, getCurrentDayNumber } from "@/lib/mccheyneReadingPlan";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProgress } from "@/hooks/useProgress"; // <-- CORREÇÃO DA IMPORTAÇÃO
 import { awardQuizXP } from "@/lib/progressCalculations";
 import { generateQuiz, QuizQuestion } from "@/lib/quizGenerator";
 import { toast } from "sonner";
@@ -55,7 +55,6 @@ const Quiz = () => {
     }
     setSubmitted(true);
     
-    // Calculate score after submission
     let finalScore = 0;
     questions.forEach((qu, i) => {
       if (answers[i] === qu.correct) finalScore++;

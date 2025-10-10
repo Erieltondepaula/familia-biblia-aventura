@@ -188,6 +188,7 @@ const Index = () => {
             "A tua palavra é lâmpada para os meus pés e luz para o meu caminho" - Salmos 119:105
           </p>
           <p className="mt-4">© 2025 Jornada Bíblica em Família. Feito com ❤️ para a glória de Deus</p>
+          <p className="mt-4">® Todos os direitos reservados à Erielton de Paula Melo</p>
         </div>
       </footer>
     </div>

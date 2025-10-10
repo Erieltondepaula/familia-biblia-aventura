@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useProfile } from "@/contexts/ProfileContext";
+import { useProfile } from "@/hooks/useProfile"; // <-- CORREÇÃO APLICADA AQUI
 import { getAllReflections, Reflection } from "@/lib/reflectionsStorage";
 import { ArrowLeft, MessageSquare, Calendar } from "lucide-react";
 import { getReadingByDay } from "@/lib/readingPlanData";

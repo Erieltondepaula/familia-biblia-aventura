@@ -17,8 +17,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Link } from "react-router-dom";
-import { useProfile, RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
+import { useProfile } from "@/hooks/useProfile";
+import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
 import { ArrowLeft, UserPlus, CheckCircle2, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Profiles = () => {
   const { profiles, currentProfile, setCurrentProfile, addProfile, updateProfile, deleteProfile } = useProfile();
@@ -28,7 +30,7 @@ const Profiles = () => {
     age: 10,
     role: "filho" as RoleType,
     difficulty: "crianca" as Difficulty,
-    bibleVersion: "NTLH" as BibleVersion,
+    bible_version: "NTLH" as BibleVersion,
   });
 
   useEffect(() => {
@@ -36,9 +38,13 @@ const Profiles = () => {
   }, []);
 
   const handleCreate = () => {
-    if (!form.name.trim()) return;
-    addProfile({ ...form, color: undefined });
-    setForm({ name: "", age: 10, role: "filho", difficulty: "crianca", bibleVersion: "NTLH" });
+    if (!form.name.trim() || form.age === null) {
+        toast.error("O nome e a idade do perfil não podem estar em branco.");
+        return;
+    };
+    addProfile(form);
+    setForm({ name: "", age: 10, role: "filho", difficulty: "crianca", bible_version: "NTLH" });
+    toast.success("Novo perfil criado com sucesso!");
   };
 
   return (
@@ -62,7 +68,7 @@ const Profiles = () => {
               <div key={p.id} className={`flex items-center justify-between p-4 rounded-lg border ${currentProfile?.id === p.id ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                 <div>
                   <p className="font-semibold">{p.name} <Badge className="ml-2">{p.role}</Badge></p>
-                  <p className="text-sm text-muted-foreground">{p.age} anos • {p.difficulty} • {p.bibleVersion}</p>
+                  <p className="text-sm text-muted-foreground">{p.age} anos • {p.difficulty} • {p.bible_version}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {currentProfile?.id === p.id ? (
@@ -70,7 +76,7 @@ const Profiles = () => {
                   ) : (
                     <Button variant="outline" onClick={() => setCurrentProfile(p.id)}>Ativar</Button>
                   )}
-                  {p.id !== 'default' && (
+                  {profiles.length > 1 && (
                     <Button variant="destructive" onClick={() => setProfileToDelete(p.id)}>
                       <Trash2 className="w-4 h-4 mr-1"/> Remover
                     </Button>
@@ -90,57 +96,34 @@ const Profiles = () => {
             </div>
             <div>
               <Label>Idade</Label>
-              <Input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: Number(e.target.value) })} />
+              <Input 
+                type="number" 
+                value={form.age === null ? '' : form.age} 
+                onChange={(e) => setForm({ ...form, age: e.target.value === '' ? null : Number(e.target.value) })} 
+              />
             </div>
             <div>
               <Label>Função</Label>
               <RadioGroup value={form.role} onValueChange={(v) => setForm({ ...form, role: v as RoleType })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="pai" id="role-pai" />
-                  <Label htmlFor="role-pai">Pai</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="mae" id="role-mae" />
-                  <Label htmlFor="role-mae">Mãe</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="filho" id="role-filho" />
-                  <Label htmlFor="role-filho">Filho(a)</Label>
-                </div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="pai" id="role-pai" /><Label htmlFor="role-pai">Pai</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="mae" id="role-mae" /><Label htmlFor="role-mae">Mãe</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="filho" id="role-filho" /><Label htmlFor="role-filho">Filho(a)</Label></div>
               </RadioGroup>
             </div>
             <div>
               <Label>Dificuldade</Label>
               <RadioGroup value={form.difficulty} onValueChange={(v) => setForm({ ...form, difficulty: v as Difficulty })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="crianca" id="dif-crianca" />
-                  <Label htmlFor="dif-crianca">Criança</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="adolescente" id="dif-adolescente" />
-                  <Label htmlFor="dif-adolescente">Adolescente</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="adulto" id="dif-adulto" />
-                  <Label htmlFor="dif-adulto">Adulto</Label>
-                </div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="crianca" id="dif-crianca" /><Label htmlFor="dif-crianca">Criança</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="adolescente" id="dif-adolescente" /><Label htmlFor="dif-adolescente">Adolescente</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="adulto" id="dif-adulto" /><Label htmlFor="dif-adulto">Adulto</Label></div>
               </RadioGroup>
             </div>
             <div>
               <Label>Versão da Bíblia</Label>
-              <RadioGroup value={form.bibleVersion} onValueChange={(v) => setForm({ ...form, bibleVersion: v as BibleVersion })} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ACF" id="ver-acf" />
-                  <Label htmlFor="ver-acf">ACF</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="NVI" id="ver-nvi" />
-                  <Label htmlFor="ver-nvi">NVI</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="NTLH" id="ver-ntlh" />
-                  <Label htmlFor="ver-ntlh">NTLH</Label>
-                </div>
+              <RadioGroup value={form.bible_version} onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} className="flex gap-4">
+                <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="ver-acf" /><Label htmlFor="ver-acf">ACF</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="ver-nvi" /><Label htmlFor="ver-nvi">NVI</Label></div>
+                <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="ver-ntlh" /><Label htmlFor="ver-ntlh">NTLH</Label></div>
               </RadioGroup>
             </div>
             <Button onClick={handleCreate}>
@@ -150,11 +133,11 @@ const Profiles = () => {
           </div>
         </Card>
 
-        <div className="lg:col-span-2">
-          <Separator className="my-6" />
-          {currentProfile && (
+        {currentProfile && (
+          <div className="lg:col-span-2">
+            <Separator className="my-6" />
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">Editar Perfil Ativo</h2>
+              <h2 className="text-xl font-bold mb-4">Editar Perfil Ativo: {currentProfile.name}</h2>
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Nome</Label>
@@ -167,41 +150,23 @@ const Profiles = () => {
                 <div>
                   <Label>Função</Label>
                   <RadioGroup value={currentProfile.role} onValueChange={(v) => updateProfile(currentProfile.id, { role: v as RoleType })} className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="pai" id="edit-role-pai" />
-                      <Label htmlFor="edit-role-pai">Pai</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="mae" id="edit-role-mae" />
-                      <Label htmlFor="edit-role-mae">Mãe</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="filho" id="edit-role-filho" />
-                      <Label htmlFor="edit-role-filho">Filho(a)</Label>
-                    </div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="pai" id="edit-role-pai" /><Label htmlFor="edit-role-pai">Pai</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="mae" id="edit-role-mae" /><Label htmlFor="edit-role-mae">Mãe</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="filho" id="edit-role-filho" /><Label htmlFor="edit-role-filho">Filho(a)</Label></div>
                   </RadioGroup>
                 </div>
                 <div>
                   <Label>Versão da Bíblia</Label>
-                  <RadioGroup value={currentProfile.bibleVersion} onValueChange={(v) => updateProfile(currentProfile.id, { bibleVersion: v as BibleVersion })} className="flex gap-4">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="ACF" id="edit-ver-acf" />
-                      <Label htmlFor="edit-ver-acf">ACF</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="NVI" id="edit-ver-nvi" />
-                      <Label htmlFor="edit-ver-nvi">NVI</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="NTLH" id="edit-ver-ntlh" />
-                      <Label htmlFor="edit-ver-ntlh">NTLH</Label>
-                    </div>
+                  <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="edit-ver-acf" /><Label htmlFor="edit-ver-acf">ACF</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="edit-ver-nvi" /><Label htmlFor="edit-ver-nvi">NVI</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="edit-ver-ntlh" /><Label htmlFor="edit-ver-ntlh">NTLH</Label></div>
                   </RadioGroup>
                 </div>
               </div>
             </Card>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       <AlertDialog open={profileToDelete !== null} onOpenChange={() => setProfileToDelete(null)}>
@@ -219,6 +184,7 @@ const Profiles = () => {
                 if (profileToDelete) {
                   deleteProfile(profileToDelete);
                   setProfileToDelete(null);
+                  toast.success("Perfil removido.");
                 }
               }}
               className="bg-destructive hover:bg-destructive/90"
