@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
@@ -138,7 +139,14 @@ const Profiles = () => {
             <Separator className="my-6" />
             <Card className="p-6">
               <h2 className="text-xl font-bold mb-4">Editar Perfil Ativo: {currentProfile.name}</h2>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="md:col-span-2 flex justify-center py-4">
+                  <AvatarUpload
+                    avatarUrl={currentProfile.avatar_url}
+                    name={currentProfile.name}
+                    onUploadComplete={(url) => updateProfile(currentProfile.id, { avatar_url: url })}
+                  />
+                </div>
                 <div>
                   <Label>Nome</Label>
                   <Input value={currentProfile.name} onChange={(e) => updateProfile(currentProfile.id, { name: e.target.value })} />

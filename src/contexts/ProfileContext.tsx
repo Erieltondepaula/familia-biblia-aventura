@@ -14,6 +14,7 @@ export interface Profile {
   role: RoleType;
   difficulty: Difficulty;
   bible_version: BibleVersion;
+  avatar_url?: string | null;
 }
 
 export interface ProfileContextType {

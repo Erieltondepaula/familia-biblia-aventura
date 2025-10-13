@@ -26,6 +26,8 @@ import Statistics from "./pages/Statistics";
 import Sermons from "./pages/Sermons";
 import SermonEditor from "./pages/SermonEditor";
 import Contribute from "./pages/Contribute";
+import Devotional from "./pages/Devotional";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,8 @@ const AppRoutes = () => (
       <Route path="/sermons" element={<Sermons />} />
       <Route path="/sermon-editor" element={<SermonEditor />} />
       <Route path="/sermon-editor/:id" element={<SermonEditor />} />
+      <Route path="/devotional" element={<Devotional />} />
+      <Route path="/admin" element={<Admin />} />
     </Route>
     <Route path="*" element={<NotFound />} />
   </Routes>

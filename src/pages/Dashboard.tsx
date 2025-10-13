@@ -13,7 +13,10 @@ import {
   Home,
   MessageSquare,
   Users,
-  HeartHandshake
+  HeartHandshake,
+  Heart,
+  Shield,
+  LogOut
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "@/hooks/useProgress"; // A importação correta está aqui
@@ -22,9 +25,14 @@ import { getCurrentDayReading } from "@/lib/mccheyneReadingPlan";
 import { getLocalDateString } from "@/lib/dateUtils";
 import MemorizedVerses from "@/components/MemorizedVerses";
 import ThemeToggle from "@/components/ThemeToggle";
+import { SuggestionsDialog } from "@/components/SuggestionsDialog";
+import { useAdmin } from "@/hooks/useAdmin";
+import { useAuth } from "@/hooks/useAuth";
 
 const Dashboard = () => {
   const { currentProfile } = useProfile();
+  const { signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const { 
     xp, 
     level, 
@@ -63,6 +71,15 @@ const Dashboard = () => {
             </Link>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <SuggestionsDialog />
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="ghost" className="text-white hover:bg-white/20">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Link to="/profiles">
                 <Button variant="ghost" className="text-white hover:bg-white/20">
                   Perfis
@@ -73,6 +90,14 @@ const Dashboard = () => {
                   Configurações
                 </Button>
               </Link>
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-white/20"
+                onClick={signOut}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
             </div>
           </div>
         </div>
@@ -268,47 +293,53 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Link to="/devotional" className="w-full">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+              <Heart className="w-6 h-6" />
+              <span className="text-xs md:text-sm">Devocional</span>
+            </Button>
+          </Link>
           <Link to="/quiz" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <Target className="w-6 h-6" />
-              <span>Quiz Diário</span>
+              <span className="text-xs md:text-sm">Quiz Diário</span>
             </Button>
           </Link>
           <Link to="/statistics" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <TrendingUp className="w-6 h-6" />
-              <span>Estatísticas</span>
+              <span className="text-xs md:text-sm">Estatísticas</span>
             </Button>
           </Link>
           <Link to="/progress" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <Flame className="w-6 h-6" />
-              <span>Progresso</span>
+              <span className="text-xs md:text-sm">Progresso</span>
             </Button>
           </Link>
           <Link to="/achievements" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <Trophy className="w-6 h-6" />
-              <span>Conquistas</span>
+              <span className="text-xs md:text-sm">Conquistas</span>
             </Button>
           </Link>
           <Link to="/verses" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <BookOpen className="w-6 h-6" />
-              <span>Versículos</span>
+              <span className="text-xs md:text-sm">Versículos</span>
             </Button>
           </Link>
           <Link to="/sermons" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <Star className="w-6 h-6" />
-              <span>Sermões</span>
+              <span className="text-xs md:text-sm">Sermões</span>
             </Button>
           </Link>
           <Link to="/reflections" className="w-full">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
               <MessageSquare className="w-6 h-6" />
-              <span>Reflexões</span>
+              <span className="text-xs md:text-sm">Reflexões</span>
             </Button>
           </Link>
         </div>

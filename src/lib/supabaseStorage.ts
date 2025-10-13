@@ -218,3 +218,20 @@ export const addXPToProfile = async (profileId: string, xpToAdd: number) => {
     level: Math.min(newLevel, 100) // Max level 100
   });
 };
+
+// ============= FUNÇÕES AUXILIARES DE DEVOCIONAIS =============
+
+export const getDevotionalProgress = async (profileId: string, day: number): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('devotional_progress')
+    .select('id')
+    .eq('profile_id', profileId)
+    .eq('day', day)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao verificar devocional:', error);
+    return false;
+  }
+  return !!data;
+};
