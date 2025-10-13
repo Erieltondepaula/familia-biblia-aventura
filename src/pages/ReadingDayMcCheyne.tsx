@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import CircularProgress from "@/components/CircularProgress";
 import { RichTextEditor } from "@/components/RichTextEditor";
@@ -12,8 +11,6 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Lightbulb,
-  MessageSquare,
   Star,
   Sparkles,
   CalendarDays,
@@ -34,7 +31,7 @@ import {
   calculateReadingProgress
 } from "@/lib/mccheyneReadingPlan";
 import { parseChapterReference } from "@/lib/bibleData";
-import { saveReflection, getReflection, saveChapterNote, getChapterNote } from "@/lib/reflectionsStorage";
+import { saveChapterNote, getChapterNote } from "@/lib/reflectionsStorage";
 import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorage";
 import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
@@ -180,7 +177,6 @@ const ReadingDayMcCheyne = () => {
   const reading = getReadingByDay(dayNumber);
   
   const [checkedChapters, setCheckedChapters] = useState<Set<string>>(new Set());
-  const [notes, setNotes] = useState("");
   const [memorizedVerse, setMemorizedVerse] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [newLevel, setNewLevel] = useState(0);
@@ -192,9 +188,6 @@ const ReadingDayMcCheyne = () => {
   useEffect(() => {
     const loadData = async () => {
       if (currentProfile && reading) {
-        const savedReflection = getReflection(currentProfile.id, dayNumber);
-        setNotes(savedReflection);
-        
         const alreadyMemorized = await isVerseMemorized(currentProfile.id, dayNumber);
         setMemorizedVerse(alreadyMemorized);
 
@@ -213,15 +206,6 @@ const ReadingDayMcCheyne = () => {
     };
     loadData();
   }, [currentProfile, dayNumber, reading, isCompleted]);
-
-  useEffect(() => {
-    if (currentProfile && reading) {
-      const timer = setTimeout(() => {
-        saveReflection(currentProfile.id, dayNumber, notes);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [notes, currentProfile, dayNumber, reading]);
 
   if (!reading) {
     return (
@@ -286,12 +270,8 @@ const ReadingDayMcCheyne = () => {
     const currentLevel = level;
     markChapterAsRead(dayNumber, allChapters);
     
-    let totalXP = allChapters.length * 84;
-    if (notes.trim().length > 0) {
-      addXP(50);
-      totalXP += 50;
-    }
-
+    const totalXP = allChapters.length * 84;
+    
     const levelAfter = calculateLevel(xp + totalXP);
     if (levelAfter > currentLevel) {
       setNewLevel(levelAfter);
@@ -470,52 +450,7 @@ const ReadingDayMcCheyne = () => {
                 />
               </div>
             </Card>
-
-            <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent">
-              <div className="mb-6 3xl:mb-8 5xl:mb-12">
-                <Badge variant="outline" className="mb-3 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">🌅 Devocional da Manhã</Badge>
-                <h2 className="text-xl 3xl:text-2xl 5xl:text-4xl font-bold flex items-center gap-2 3xl:gap-4 5xl:gap-6 text-amber-700 dark:text-amber-400">
-                  <Lightbulb className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10" />
-                  {reading.morningVerse}
-                </h2>
-              </div>
-              <p className="text-base 3xl:text-xl 5xl:text-2xl leading-relaxed text-foreground/90 whitespace-pre-line">
-                {reading.morningDevotional}
-              </p>
-            </Card>
-
-            <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent">
-              <div className="mb-6 3xl:mb-8 5xl:mb-12">
-                <Badge variant="outline" className="mb-3 3xl:text-lg 5xl:text-xl 5xl:px-4 5xl:py-2">🌙 Devocional da Noite</Badge>
-                <h2 className="text-xl 3xl:text-2xl 5xl:text-4xl font-bold flex items-center gap-2 3xl:gap-4 5xl:gap-6 text-indigo-700 dark:text-indigo-400">
-                  <Star className="w-5 h-5 3xl:w-7 3xl:h-7 5xl:w-10 5xl:h-10" />
-                  {reading.eveningVerse}
-                </h2>
-              </div>
-              <p className="text-base 3xl:text-xl 5xl:text-2xl leading-relaxed text-foreground/90 whitespace-pre-line">
-                {reading.eveningDevotional}
-              </p>
-            </Card>
-
-            <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-to-br from-secondary/5 to-transparent">
-              <h2 className="text-2xl 3xl:text-3xl 5xl:text-5xl font-bold mb-4 3xl:mb-6 5xl:mb-8 flex items-center gap-2 3xl:gap-4 5xl:gap-6">
-                <MessageSquare className="w-6 h-6 3xl:w-8 3xl:h-8 5xl:w-12 5xl:h-12 text-secondary" />
-                Reflexão
-              </h2>
-              <p className="text-lg 3xl:text-xl 5xl:text-2xl leading-relaxed text-foreground/90 mb-4 3xl:mb-6 5xl:mb-8">
-                {reading.reflection}
-              </p>
-              <Textarea
-                placeholder="Exemplo: 'Hoje percebi que preciso confiar mais em Deus nas minhas decisões do trabalho. Vou orar todas as manhãs antes de começar o dia...'"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="min-h-[120px] 3xl:min-h-[160px] 5xl:min-h-[220px] text-base 3xl:text-lg 5xl:text-xl"
-              />
-              {notes.length > 0 && (
-                <p className="text-sm 3xl:text-base 5xl:text-lg text-success mt-2 3xl:mt-3 5xl:mt-4">✓ Reflexão salva automaticamente (+50 XP ao concluir)</p>
-              )}
-            </Card>
-
+            
             <Card className="p-8 3xl:p-10 5xl:p-16 mb-6 shadow-card bg-gradient-glory">
               <h2 className="text-2xl 3xl:text-3xl 5xl:text-5xl font-bold mb-4 3xl:mb-6 5xl:mb-8 flex items-center gap-2 3xl:gap-4 5xl:gap-6 text-accent-foreground">
                 <Star className="w-6 h-6 3xl:w-8 3xl:h-8 5xl:w-12 5xl:h-12" />

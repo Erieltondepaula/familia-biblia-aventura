@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { BibleChapter } from '@/lib/bibleData';
-import { 
-  HighlightColor, 
-  HighlightStyle, 
-  VerseHighlight, // <-- 1. IMPORT THE CORRECT TYPE
-  saveHighlight, 
-  getHighlight, 
-  removeHighlight 
+import {
+  HighlightColor,
+  HighlightStyle,
+  VerseHighlight,
+  saveHighlight,
+  getHighlight,
+  removeHighlight
 } from '@/lib/bibleHighlightStorage';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Bold, 
-  Underline, 
-  Highlighter, 
+import {
+  Bold,
+  Underline,
+  Highlighter,
   Eraser,
   StickyNote
 } from 'lucide-react';
@@ -31,13 +30,11 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<HighlightColor>('yellow');
   const [note, setNote] = useState('');
-  // 2. USE THE 'VerseHighlight' TYPE INSTEAD OF 'any'
   const [verseHighlights, setVerseHighlights] = useState<Record<number, Partial<VerseHighlight>>>({});
 
   useEffect(() => {
     if (!currentProfile) return;
-    
-    // 3. USE THE 'VerseHighlight' TYPE HERE AS WELL
+
     const highlights: Record<number, Partial<VerseHighlight>> = {};
     chapter.verses.forEach(verse => {
       const highlight = getHighlight(
@@ -66,7 +63,7 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
 
   const applyHighlight = (color: HighlightColor) => {
     if (!selectedVerse || !currentProfile) return;
-    
+
     const newHighlight: VerseHighlight = {
       ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
@@ -88,7 +85,7 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
 
   const applyStyle = (style: HighlightStyle) => {
     if (!selectedVerse || !currentProfile) return;
-    
+
     const newHighlight: VerseHighlight = {
       ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
@@ -110,22 +107,22 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
 
   const clearHighlight = () => {
     if (!selectedVerse || !currentProfile) return;
-    
+
     removeHighlight(currentProfile.id, chapter.book, chapter.chapter, selectedVerse);
-    
+
     setVerseHighlights(prev => {
       const updated = { ...prev };
       delete updated[selectedVerse];
       return updated;
     });
-    
+
     setNote('');
     toast.success('Marcação removida!');
   };
 
   const saveNote = () => {
     if (!selectedVerse || !currentProfile) return;
-    
+
     const newHighlight: VerseHighlight = {
       ...(verseHighlights[selectedVerse] || {}),
       profileId: currentProfile.id,
@@ -147,22 +144,22 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
   const getVerseClassName = (verseNumber: number) => {
     const highlight = verseHighlights[verseNumber];
     if (!highlight) return 'cursor-pointer hover:bg-muted/30 transition-colors p-2 rounded';
-    
+
     let className = 'cursor-pointer p-2 rounded transition-colors ';
-    
+
     if (highlight.color === 'yellow') className += 'bg-yellow-200/60 dark:bg-yellow-900/40 ';
     if (highlight.color === 'green') className += 'bg-green-200/60 dark:bg-green-900/40 ';
     if (highlight.color === 'red') className += 'bg-red-200/60 dark:bg-red-900/40 ';
     if (highlight.color === 'blue') className += 'bg-blue-200/60 dark:bg-blue-900/40 ';
     if (highlight.color === 'purple') className += 'bg-purple-200/60 dark:bg-purple-900/40 ';
-    
+
     if (highlight.style === 'bold') className += 'font-bold ';
     if (highlight.style === 'underline') className += 'underline decoration-2 ';
-    
+
     if (selectedVerse === verseNumber) {
       className += 'ring-2 ring-primary ';
     }
-    
+
     return className;
   };
 
@@ -175,7 +172,7 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
               {chapter.book} {chapter.chapter}
             </h1>
           </div>
-          
+
           <div className="space-y-3">
             {chapter.verses.map((verse) => (
               <div
@@ -201,7 +198,7 @@ const BibleReader = ({ chapter }: BibleReaderProps) => {
           <h3 className="text-lg font-semibold mb-4">
             Ferramentas de Marcação
           </h3>
-          
+
           {selectedVerse ? (
             <div className="space-y-4">
               <div>

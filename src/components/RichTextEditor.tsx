@@ -102,7 +102,6 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, minHei
 
         {/* Paleta de Marca-Texto */}
         <div className="flex items-center gap-1">
-          {/* CORREÇÃO APLICADA AQUI: removido o 'title' do ícone */}
           <Highlighter className="w-4 h-4 text-muted-foreground mr-1" />
           {HIGHLIGHT_COLORS.map((colorOption) => (
             <button
@@ -122,7 +121,6 @@ export const RichTextEditor = ({ value, onChange, placeholder, className, minHei
 
         {/* Paleta de Cor de Fonte */}
         <div className="flex items-center gap-1">
-            {/* CORREÇÃO APLICADA AQUI: removido o 'title' do ícone */}
             <Palette className="w-4 h-4 text-muted-foreground mr-1" />
             {FONT_COLORS.map((colorOption) => (
             <button

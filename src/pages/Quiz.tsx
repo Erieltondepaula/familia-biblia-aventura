@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Target, CheckCircle2, XCircle } from "lucide-react";
 import { getReadingByDay, getCurrentDayNumber } from "@/lib/mccheyneReadingPlan";
-import { useProgress } from "@/hooks/useProgress"; // <-- CORREÇÃO DA IMPORTAÇÃO
+import { useProgress } from "@/contexts/ProgressContext"; // <-- CORREÇÃO DA IMPORTAÇÃO
 import { awardQuizXP } from "@/lib/progressCalculations";
 import { generateQuiz, QuizQuestion } from "@/lib/quizGenerator";
 import { toast } from "sonner";
@@ -54,12 +54,12 @@ const Quiz = () => {
       return;
     }
     setSubmitted(true);
-    
+
     let finalScore = 0;
     questions.forEach((qu, i) => {
       if (answers[i] === qu.correct) finalScore++;
     });
-    
+
     const xp = awardQuizXP(finalScore, questions.length);
     if (xp > 0) {
       addXP(xp);
@@ -101,18 +101,18 @@ const Quiz = () => {
                     <Badge className="mt-1">{i + 1}</Badge>
                     <p className="font-semibold text-lg flex-1">{qu.question}</p>
                   </div>
-                  
+
                   <div className="grid gap-3">
                     {qu.options.map((opt, optIndex) => {
                       const isSelected = answers[i] === optIndex;
                       const isCorrect = qu.correct === optIndex;
                       const showResult = submitted;
-                      
+
                       let variant: "outline" | "default" | "success" | "destructive" = "outline";
                       if (isSelected && !showResult) variant = "default";
                       if (showResult && isCorrect) variant = "success";
                       if (showResult && isSelected && !isCorrect) variant = "destructive";
-                      
+
                       return (
                         <Button 
                           key={optIndex}
@@ -130,7 +130,7 @@ const Quiz = () => {
                       );
                     })}
                   </div>
-                  
+
                   {submitted && (
                     <div className={`p-4 rounded-lg ${answers[i] === qu.correct ? 'bg-success/10' : 'bg-muted'}`}>
                       <p className="text-sm font-medium">
@@ -160,7 +160,7 @@ const Quiz = () => {
                 </div>
               </Card>
             )}
-            
+
             <Button 
               className="w-full" 
               size="lg" 
@@ -169,7 +169,7 @@ const Quiz = () => {
             >
               {submitted ? 'Quiz Concluído' : 'Enviar Respostas'}
             </Button>
-            
+
             {submitted && (
               <Link to="/dashboard">
                 <Button variant="outline" className="w-full" size="lg">

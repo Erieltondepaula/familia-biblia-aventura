@@ -5,7 +5,8 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { AuthProvider } from "./contexts/AuthContext";
-import { useAuth } from "./hooks/useAuth"; // <-- CORREÇÃO FINAL AQUI
+import { useAuth } from "./hooks/useAuth";
+import Layout from "./components/Layout"; // Adicionando o Layout
 
 // Páginas
 import Index from "./pages/Index";
@@ -26,6 +27,8 @@ import Statistics from "./pages/Statistics";
 import Sermons from "./pages/Sermons";
 import SermonEditor from "./pages/SermonEditor";
 import Contribute from "./pages/Contribute";
+import Devotional from "./pages/Devotional";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -36,47 +39,53 @@ const ProtectedRoute = () => {
   return <Outlet />;
 };
 
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Index />} />
-    <Route path="/login" element={<Login />} />
-    <Route path="/how-it-works" element={<HowItWorks />} />
-    <Route path="/contribute" element={<Contribute />} />
-    <Route element={<ProtectedRoute />}>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/reading/:day" element={<ReadingDayMcCheyne />} />
-      <Route path="/reflections" element={<Reflections />} />
-      <Route path="/profiles" element={<Profiles />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/quiz" element={<Quiz />} />
-      <Route path="/progress" element={<ProgressDetails />} />
-      <Route path="/achievements" element={<Achievements />} />
-      <Route path="/verses" element={<Verses />} />
-      <Route path="/bible/:book/:chapter" element={<BibleChapter />} />
-      <Route path="/statistics" element={<Statistics />} />
-      <Route path="/sermons" element={<Sermons />} />
-      <Route path="/sermon-editor" element={<SermonEditor />} />
-      <Route path="/sermon-editor/:id" element={<SermonEditor />} />
-    </Route>
-    <Route path="*" element={<NotFound />} />
-  </Routes>
-);
+const App = () => {
+  const AppRoutes = () => (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/contribute" element={<Contribute />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reading/:day" element={<ReadingDayMcCheyne />} />
+          <Route path="/reflections" element={<Reflections />} />
+          <Route path="/profiles" element={<Profiles />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/progress" element={<ProgressDetails />} />
+          <Route path="/achievements" element={<Achievements />} />
+          <Route path="/verses" element={<Verses />} />
+          <Route path="/bible/:book/:chapter" element={<BibleChapter />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/sermons" element={<Sermons />} />
+          <Route path="/sermon-editor" element={<SermonEditor />} />
+          <Route path="/sermon-editor/:id" element={<SermonEditor />} />
+          <Route path="/devotional" element={<Devotional />} />
+          <Route path="/admin" element={<Admin />} />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
+  );
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <ProfileProvider>
-          <ProgressProvider>
-            <TooltipProvider>
-              <Sonner />
-              <AppRoutes />
-            </TooltipProvider>
-          </ProgressProvider>
-        </ProfileProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AuthProvider>
+          <ProfileProvider>
+            <ProgressProvider>
+              <TooltipProvider>
+                <Sonner />
+                <AppRoutes />
+              </TooltipProvider>
+            </ProgressProvider>
+          </ProfileProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

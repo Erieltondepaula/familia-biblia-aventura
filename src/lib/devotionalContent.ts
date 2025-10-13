@@ -192,3 +192,47 @@ Não te contentes com respostas superficiais ou evasivas. Permite que o Espírit
 export const getRandomMemorizationVerse = (dayNumber: number): string => {
   return bibleVerses[dayNumber % bibleVerses.length];
 };
+
+// Simplified devotional content for the Devotional page
+interface SimplifiedDevotionalContent {
+  verse: {
+    text: string;
+    reference: string;
+  };
+  reflection: string;
+  application: string;
+}
+
+export const getDevotionalContent = (dayNumber: number): SimplifiedDevotionalContent => {
+  const verse = bibleVerses[dayNumber % bibleVerses.length];
+  const [reference, ...textParts] = verse.split(' - ');
+  const text = textParts.join(' - ');
+
+  const reflections = [
+    `A Palavra de Deus é viva e eficaz. Neste dia, somos convidados a meditar profundamente no que o Senhor nos revela através das Escrituras. Cada versículo carrega em si a sabedoria eterna de Deus e Seu amor incondicional por nós.
+
+Como este texto se aplica à sua vida hoje? Que verdade sobre o caráter de Deus está sendo revelada? Permita que o Espírito Santo ilumine seu entendimento e transforme seu coração.`,
+    
+    `Deus não nos deu Sua Palavra para ser apenas conhecimento intelectual, mas para ser alimento para nossa alma e guia para nossos passos. As Escrituras são a voz de Deus falando diretamente ao nosso coração.
+
+Neste momento de reflexão, considere: Como você tem respondido à Palavra de Deus? Está sendo obediente ao que Ele tem falado? Lembre-se: quem ouve a Palavra mas não a pratica é semelhante a alguém que olha seu rosto no espelho e logo esquece como é.`,
+    
+    `A vida cristã é uma jornada de crescimento contínuo. Cada dia com a Palavra de Deus é uma oportunidade de conhecê-Lo mais profundamente e de ser transformado à imagem de Cristo.
+
+Reflita: Que área da sua vida precisa ser moldada pela verdade que você leu hoje? Onde você precisa da graça e do poder de Deus para vencer? Não tenha medo de ser honesto com Deus - Ele já conhece seu coração e está pronto para ajudá-lo.`
+  ];
+
+  const applications = [
+    `Aplicação prática: Escolha um aspecto desta passagem para aplicar hoje. Pode ser um ato de obediência, uma mudança de atitude, ou uma verdade para compartilhar com alguém. Escreva em um papel e coloque em um lugar visível para lembrá-lo durante o dia. Ore pedindo ao Espírito Santo que lhe dê força para viver esta verdade.`,
+    
+    `Aplicação prática: Identifique uma situação específica que você enfrentará hoje onde esta verdade bíblica pode ser aplicada. Visualize-se respondendo de forma que honre a Deus. Antes de dormir, reflita se você foi fiel à Palavra e, se falhou, confesse e receba o perdão de Deus.`,
+    
+    `Aplicação prática: Compartilhe o que você aprendeu hoje com pelo menos uma pessoa - pode ser sua família, um amigo ou um irmão em Cristo. Ao ensinar outros, você fortalece sua própria compreensão. Além disso, ore especificamente sobre como este texto se aplica aos desafios que você está enfrentando.`
+  ];
+
+  return {
+    verse: { text, reference },
+    reflection: reflections[dayNumber % reflections.length],
+    application: applications[dayNumber % applications.length]
+  };
+};

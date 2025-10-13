@@ -13,12 +13,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    if (isSigningUp) {
+    if (isPasswordReset) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) toast.error(error.message);
+      else toast.info('Verifique seu e-mail para redefinir a senha.');
+      setIsPasswordReset(false);
+    } else if (isSigningUp) {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) toast.error(error.message);
       else toast.info('Verifique seu e-mail para confirmar a conta.');
@@ -37,7 +45,7 @@ const Login = () => {
     <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
-      
+
       {/* Animated background shapes */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
@@ -51,10 +59,14 @@ const Login = () => {
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            Bem-vindo ao Jornada Bíblica
+            {isPasswordReset ? 'Redefinir Senha' : 'Bem-vindo ao Jornada Bíblica'}
           </CardTitle>
           <CardDescription className="text-base">
-            {isSigningUp ? 'Crie uma nova conta para começar sua jornada espiritual' : 'Entre para continuar sua jornada de fé'}
+            {isPasswordReset
+              ? 'Insira seu e-mail para receber o link de redefinição'
+              : isSigningUp
+              ? 'Crie uma nova conta para começar sua jornada espiritual'
+              : 'Entre para continuar sua jornada de fé'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -72,30 +84,43 @@ const Login = () => {
                 className="h-11"
               />
             </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Senha</label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                required
-                className="h-11"
-              />
-            </div>
+            {!isPasswordReset && (
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">Senha</label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                  className="h-11"
+                />
+              </div>
+            )}
             <Button type="submit" disabled={loading} className="w-full h-11 text-base font-semibold">
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                   Aguarde...
                 </>
+              ) : isPasswordReset ? (
+                'Enviar Link'
+              ) : isSigningUp ? (
+                'Criar Conta'
               ) : (
-                isSigningUp ? 'Criar Conta' : 'Entrar'
+                'Entrar'
               )}
             </Button>
           </form>
+          {!isPasswordReset && (
+            <div className="text-sm text-center mt-4">
+              <Button variant="link" onClick={() => setIsPasswordReset(true)}>
+                Esqueceu a senha?
+              </Button>
+            </div>
+          )}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border" />
@@ -104,8 +129,15 @@ const Login = () => {
               <span className="px-2 bg-background text-muted-foreground">ou</span>
             </div>
           </div>
-          <Button variant="outline" onClick={() => setIsSigningUp(!isSigningUp)} className="w-full h-11">
-            {isSigningUp ? 'Já tem uma conta? Fazer login' : 'Não tem conta? Criar agora'}
+          <Button variant="outline" onClick={() => {
+            setIsSigningUp(!isSigningUp);
+            setIsPasswordReset(false);
+          }} className="w-full h-11">
+            {isPasswordReset
+              ? 'Voltar para o Login'
+              : isSigningUp
+              ? 'Já tem uma conta? Fazer login'
+              : 'Não tem conta? Criar agora'}
           </Button>
         </CardContent>
       </Card>

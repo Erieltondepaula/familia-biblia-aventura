@@ -1,12 +1,10 @@
-// Copie todo este código e cole no arquivo src/pages/Sermons.tsx
-
-import { useState, useEffect, useCallback } from 'react'; // Adicionado 'useCallback'
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
-import { 
-  deleteSermon, 
+import {
+  deleteSermon,
   getSermonsByProfile,
-  Sermon 
+  Sermon
 } from '@/lib/sermonsStorage';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,11 +20,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  ArrowLeft, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  ArrowLeft,
+  Plus,
+  Edit,
+  Trash2,
   BookOpen,
   Calendar,
   User,
@@ -43,11 +41,10 @@ const Sermons = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteSermonId, setDeleteSermonId] = useState<string | null>(null);
 
-  // CORREÇÃO APLICADA AQUI: A função 'loadSermons' agora usa 'useCallback'
   const loadSermons = useCallback(() => {
     if (currentProfile) {
       const loadedSermons = getSermonsByProfile(currentProfile.id);
-      setSermons(loadedSermons.sort((a, b) => 
+      setSermons(loadedSermons.sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       ));
     }
@@ -56,7 +53,7 @@ const Sermons = () => {
   useEffect(() => {
     document.title = 'Sermões - Bíblia 365';
     loadSermons();
-  }, [currentProfile, loadSermons]); // CORREÇÃO APLICADA AQUI: 'loadSermons' adicionado à lista
+  }, [currentProfile, loadSermons]);
 
   const handleEdit = (sermonId: string) => {
     navigate(`/sermon-editor/${sermonId}`);
@@ -125,7 +122,7 @@ const Sermons = () => {
             {searchQuery ? 'Nenhum sermão encontrado' : 'Nenhum sermão ainda'}
           </h3>
           <p className="text-muted-foreground mb-6">
-            {searchQuery 
+            {searchQuery
               ? 'Tente buscar com outros termos'
               : 'Comece adicionando suas anotações de sermões'
             }

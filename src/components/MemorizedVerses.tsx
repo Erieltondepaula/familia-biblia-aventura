@@ -26,7 +26,7 @@ const MemorizedVerses = () => {
   }, [key, currentProfile]);
 
   const memorizedVerses = verses.filter(v => v.memorized);
-  
+
   if (memorizedVerses.length === 0) {
     return null; // Não renderiza nada se não houver versos memorizados
   }
