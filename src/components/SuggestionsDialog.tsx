@@ -35,6 +35,7 @@ export const SuggestionsDialog = () => {
       const { error } = await supabase
         .from('suggestions')
         .insert({
+          user_id: user.id,
           user_email: user.email || 'Usuário sem email',
           title,
           module,

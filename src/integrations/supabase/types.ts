@@ -310,25 +310,31 @@ export type Database = {
       suggestions: {
         Row: {
           created_at: string | null
+          description: string
           id: string
+          module: string
           status: string | null
-          suggestion: string
+          title: string
           user_email: string
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          description: string
           id?: string
+          module: string
           status?: string | null
-          suggestion: string
+          title: string
           user_email: string
           user_id: string
         }
         Update: {
           created_at?: string | null
+          description?: string
           id?: string
+          module?: string
           status?: string | null
-          suggestion?: string
+          title?: string
           user_email?: string
           user_id?: string
         }
