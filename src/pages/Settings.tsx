@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
 import { useProgress } from "@/hooks/useProgress";
-import { ArrowLeft, RotateCcw, Calendar } from "lucide-react";
+import { ArrowLeft, RotateCcw, Calendar, LogOut } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,11 +14,12 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getPlanStartDate, setPlanStartDate, getCurrentDayNumber } from "@/lib/readingPlanData";
 import { dateFromInputString } from "@/lib/dateUtils";
-// IMPORTAÇÃO CORRIGIDA
 import { exportReadingPlanToPDF, exportReadingPlanToExcel } from "@/lib/exportService";
 
 const Settings = () => {
   const { currentProfile, updateProfile } = useProfile();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const { resetProgress } = useProgress();
   const [startDate, setStartDate] = useState("");
 
@@ -34,6 +36,16 @@ const Settings = () => {
     if (!currentProfile) return;
     resetProgress();
     toast.success("Plano reiniciado!", { description: "Seu XP e leituras foram zerados para este perfil." });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Você saiu do sistema!");
+      navigate('/login');
+    } catch (error) {
+      toast.error("Erro ao sair");
+    }
   };
 
   const handleStartDateChange = (newDate: string) => {
@@ -192,6 +204,25 @@ const Settings = () => {
               Exportar para Excel
             </Button>
           </div>
+        </Card>
+
+        <Card className="lg:col-span-2 p-6 space-y-4 border-2 border-destructive/20">
+          <h2 className="text-xl font-bold text-destructive flex items-center gap-2">
+            <LogOut className="w-5 h-5" />
+            Sair da Conta
+          </h2>
+          <p className="text-muted-foreground">
+            Encerrar sua sessão atual no sistema.
+          </p>
+          <Button 
+            variant="destructive" 
+            onClick={handleLogout} 
+            className="w-full"
+            size="lg"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Sair do Sistema
+          </Button>
         </Card>
       </main>
     </div>
