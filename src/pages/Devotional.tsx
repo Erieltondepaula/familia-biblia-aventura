@@ -208,7 +208,7 @@ const Devotional = () => {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={6}
-                className="resize-none"
+                className="resize-none border-2 focus-visible:ring-2 focus-visible:ring-primary"
               />
               <Button 
                 onClick={handleComplete} 

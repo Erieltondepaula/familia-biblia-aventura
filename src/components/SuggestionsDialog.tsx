@@ -35,7 +35,6 @@ export const SuggestionsDialog = () => {
       const { error } = await supabase
         .from('suggestions')
         .insert({
-          user_id: user.id,
           user_email: user.email || 'Usuário sem email',
           title,
           module,
@@ -63,7 +62,7 @@ export const SuggestionsDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
+        <Button variant="default" size="icon" className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg">
           <Lightbulb className="w-5 h-5" />
         </Button>
       </DialogTrigger>
