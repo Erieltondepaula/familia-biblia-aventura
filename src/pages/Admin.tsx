@@ -133,11 +133,11 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-gradient-hero text-white shadow-elevated">
+      <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20"><ArrowLeft className="w-6 h-6" /></Button>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 btn-interactive"><ArrowLeft className="w-6 h-6" /></Button>
             </Link>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="w-6 h-6" />Painel de Administração</h1>
@@ -150,15 +150,15 @@ const Admin = () => {
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="grid gap-6">
           {/* Estatísticas Rápidas */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Total de Sugestões</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{suggestions.length}</div></CardContent></Card>
-            <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{suggestions.filter(s => s.status === 'pending').length}</div></CardContent></Card>
-            <Card><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Aprovadas</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{suggestions.filter(s => s.status === 'approved').length}</div></CardContent></Card>
+          <div className="grid md:grid-cols-3 gap-6 animate-slide-up">
+            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Total de Sugestões</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{suggestions.length}</div></CardContent></Card>
+            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{suggestions.filter(s => s.status === 'pending').length}</div></CardContent></Card>
+            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Aprovadas</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{suggestions.filter(s => s.status === 'approved').length}</div></CardContent></Card>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 items-start">
+          <div className="grid lg:grid-cols-2 gap-6 items-start animate-fade-in">
             {/* Usuários Cadastrados */}
-            <Card className="lg:col-span-1">
+            <Card className="lg:col-span-1 hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Usuários Cadastrados</CardTitle>
                 <CardDescription>Visualize e gerencie os usuários do sistema</CardDescription>
@@ -175,10 +175,10 @@ const Admin = () => {
                       </TableHeader>
                       <TableBody>
                         {users.map(user => (
-                          <TableRow key={user.id}>
+                          <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
                             <TableCell className="font-medium">{user.email}<br/><small className="text-muted-foreground">Último login: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Nunca'}</small></TableCell>
                             <TableCell className="text-right">
-                              <Button variant="ghost" size="icon" onClick={() => setUserToDelete(user)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                              <Button variant="ghost" size="icon" className="hover-scale" onClick={() => setUserToDelete(user)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -190,7 +190,7 @@ const Admin = () => {
             </Card>
 
             {/* Sugestões de Melhoria */}
-            <Card className="lg:col-span-1">
+            <Card className="lg:col-span-1 hover-lift">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /> Sugestões de Melhoria</CardTitle>
                 <CardDescription>Gerencie as sugestões enviadas pelos usuários</CardDescription>
@@ -201,20 +201,20 @@ const Admin = () => {
                 ) : (
                   <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
                     {suggestions.map(suggestion => (
-                      <Card key={suggestion.id} className="border-2">
+                      <Card key={suggestion.id} className="border-2 hover-lift animate-scale-in">
                         <CardContent className="pt-6">
                           <div className="mb-3">
                             <div className="flex justify-between items-start">
                               <span className="font-bold text-base">{suggestion.title}</span>
-                              <Badge variant={suggestion.status === 'approved' ? 'default' : suggestion.status === 'rejected' ? 'destructive' : 'secondary'}>{suggestion.status}</Badge>
+                              <Badge variant={suggestion.status === 'approved' ? 'default' : suggestion.status === 'rejected' ? 'destructive' : 'secondary'} className="hover-scale">{suggestion.status}</Badge>
                             </div>
                             <p className="text-sm text-muted-foreground">Módulo: {suggestion.module}</p>
                             <p className="text-xs text-muted-foreground">{suggestion.user_email} em {new Date(suggestion.created_at).toLocaleString('pt-BR')}</p>
                           </div>
                           <p className="text-sm whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{suggestion.description}</p>
                           <div className="flex gap-2 mt-4">
-                            <Button size="sm" variant="outline" onClick={() => setSuggestionToEdit(suggestion)}><Edit className="w-4 h-4 mr-2" /> Editar</Button>
-                            <Button size="sm" variant="destructive" onClick={() => setSuggestionToDelete(suggestion)}><Trash2 className="w-4 h-4 mr-2" /> Remover</Button>
+                            <Button size="sm" variant="outline" className="btn-interactive hover-lift" onClick={() => setSuggestionToEdit(suggestion)}><Edit className="w-4 h-4 mr-2" /> Editar</Button>
+                            <Button size="sm" variant="destructive" className="btn-interactive hover-lift" onClick={() => setSuggestionToDelete(suggestion)}><Trash2 className="w-4 h-4 mr-2" /> Remover</Button>
                           </div>
                         </CardContent>
                       </Card>

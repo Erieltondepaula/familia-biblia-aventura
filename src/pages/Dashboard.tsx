@@ -61,7 +61,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-gradient-hero text-white shadow-elevated">
+      <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <Link to="/">
@@ -74,32 +74,34 @@ const Dashboard = () => {
               <ThemeToggle />
               {isAdmin && (
                 <Link to="/admin">
-                  <Button variant="ghost" className="text-white hover:bg-white/20">
+                  <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
                     <Shield className="w-4 h-4 mr-2" />
                     Admin
                   </Button>
                 </Link>
               )}
               <Link to="/profiles">
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
                   Perfis
                 </Button>
               </Link>
               <Link to="/settings">
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
                   Configurações
                 </Button>
               </Link>
-              <SuggestionsDialog />
+              <div className="hover-scale">
+                <SuggestionsDialog />
+              </div>
               <Button
                 variant="ghost"
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 btn-interactive"
                 onClick={signOut}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
               </Button>
-              <div className="ml-4">
+              <div className="ml-4 hover-scale">
                 <Avatar>
                   <AvatarImage src={currentProfile?.avatar_url || undefined} alt={currentProfile?.name} />
                   <AvatarFallback>{currentProfile?.name?.charAt(0)}</AvatarFallback>
@@ -112,17 +114,17 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 py-12">
         {/* User Stats Section */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid lg:grid-cols-3 gap-8 mb-12 animate-slide-up">
           {/* Main Progress Card */}
-          <Card className="lg:col-span-2 p-8 shadow-card">
+          <Card className="lg:col-span-2 p-8 shadow-card hover-lift">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
               <div>
                 <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "Usuário"}! 👋</h2>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <Badge className="bg-gradient-glory text-accent-foreground text-base px-4 py-2">
+                  <Badge className="bg-gradient-glory text-accent-foreground text-base px-4 py-2 hover-scale">
                     {levelName}
                   </Badge>
-                  <Badge variant="outline" className="text-base px-4 py-2 border-2">
+                  <Badge variant="outline" className="text-base px-4 py-2 border-2 hover-scale">
                     Nível {level}
                   </Badge>
                 </div>
@@ -176,8 +178,8 @@ const Dashboard = () => {
           </Card>
 
           {/* Stats Cards */}
-          <div className="space-y-8">
-            <Card className="p-6 shadow-card bg-gradient-faith text-white">
+          <div className="space-y-8 animate-scale-in">
+            <Card className="p-6 shadow-card bg-gradient-faith text-white hover-lift">
               <div className="flex items-center justify-between">
                 <Flame className="w-8 h-8" />
                 <span className="text-3xl font-bold">{currentStreak}</span>
@@ -188,7 +190,7 @@ const Dashboard = () => {
               </p>
             </Card>
 
-            <Card className="p-6 shadow-card bg-gradient-growth text-white">
+            <Card className="p-6 shadow-card bg-gradient-growth text-white hover-lift">
               <div className="flex items-center justify-between">
                 <Calendar className="w-8 h-8" />
                 <span className="text-3xl font-bold">{totalDaysRead}</span>
@@ -198,7 +200,7 @@ const Dashboard = () => {
             </Card>
 
             <Link to="/contribute">
-                <Card className="p-6 shadow-card hover:shadow-elevated transition-shadow duration-300 cursor-pointer bg-gradient-to-br from-amber-500/5 to-transparent">
+                <Card className="p-6 shadow-card hover:shadow-elevated transition-all duration-300 cursor-pointer bg-gradient-to-br from-amber-500/5 to-transparent hover-lift">
                     <div className="flex items-center justify-between mb-2">
                         <HeartHandshake className="w-8 h-8 text-amber-500" />
                         <span className="text-2xl font-bold text-amber-600">Apoie</span>
@@ -267,29 +269,29 @@ const Dashboard = () => {
             </div>
 
             <Link to={`/reading/${todayReading.day}`}>
-              <Button className="w-full" size="lg" variant={isCompleted ? "success" : "default"}>
+              <Button className="w-full btn-interactive hover-lift" size="lg" variant={isCompleted ? "success" : "default"}>
                 <BookOpen className="w-5 h-5 mr-2" />
                 {isCompleted ? "Ver Leitura Novamente" : "Começar Leitura"}
               </Button>
             </Link>
           </Card>
 
-          <div className="space-y-8">
-            <Card className="p-6 shadow-card">
+          <div className="space-y-8 animate-scale-in">
+            <Card className="p-6 shadow-card hover-lift">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Trophy className="w-6 h-6 text-accent" />
                 Progresso de Hoje
               </h3>
               <div className="space-y-6">
-                <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="p-4 bg-muted/50 rounded-lg transition-all hover:bg-muted/70">
                   <p className="text-sm text-muted-foreground mb-1">XP Total</p>
                   <p className="text-2xl font-bold text-primary">{xp} XP</p>
                 </div>
-                <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="p-4 bg-muted/50 rounded-lg transition-all hover:bg-muted/70">
                   <p className="text-sm text-muted-foreground mb-1">Próximo Nível</p>
                   <p className="text-2xl font-bold text-secondary">{xpToNextLevel > xp ? xpToNextLevel - xp : 0} XP</p>
                 </div>
-                <div className="p-4 bg-gradient-glory rounded-lg">
+                <div className="p-4 bg-gradient-glory rounded-lg transition-all hover:shadow-lg">
                   <p className="text-sm text-accent-foreground/80 mb-1">Seu Nível</p>
                   <p className="text-xl font-bold text-accent-foreground">{levelName}</p>
                 </div>
@@ -300,51 +302,51 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 animate-fade-in">
           <Link to="/devotional" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Heart className="w-6 h-6" />
               <span className="text-xs md:text-sm">Devocional</span>
             </Button>
           </Link>
           <Link to="/quiz" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Target className="w-6 h-6" />
               <span className="text-xs md:text-sm">Quiz Diário</span>
             </Button>
           </Link>
           <Link to="/statistics" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <TrendingUp className="w-6 h-6" />
               <span className="text-xs md:text-sm">Estatísticas</span>
             </Button>
           </Link>
           <Link to="/progress" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Flame className="w-6 h-6" />
               <span className="text-xs md:text-sm">Progresso</span>
             </Button>
           </Link>
           <Link to="/achievements" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Trophy className="w-6 h-6" />
               <span className="text-xs md:text-sm">Conquistas</span>
             </Button>
           </Link>
           <Link to="/verses" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <BookOpen className="w-6 h-6" />
               <span className="text-xs md:text-sm">Versículos</span>
             </Button>
           </Link>
           <Link to="/sermons" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Star className="w-6 h-6" />
               <span className="text-xs md:text-sm">Sermões</span>
             </Button>
           </Link>
           <Link to="/reflections" className="w-full">
-            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2">
+            <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <MessageSquare className="w-6 h-6" />
               <span className="text-xs md:text-sm">Reflexões</span>
             </Button>

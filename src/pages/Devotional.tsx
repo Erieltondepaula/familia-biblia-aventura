@@ -98,11 +98,11 @@ const Devotional = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-gradient-hero text-white shadow-elevated">
+      <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
             <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 btn-interactive">
                 <ArrowLeft className="w-6 h-6" />
               </Button>
             </Link>
@@ -118,10 +118,10 @@ const Devotional = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up">
           {/* Status */}
           {isCompleted && (
-            <Card className="border-2 border-success bg-success/5">
+            <Card className="border-2 border-success bg-success/5 animate-scale-in hover-lift">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-success" />
@@ -137,7 +137,7 @@ const Devotional = () => {
           )}
 
           {/* Versículo Base */}
-          <Card className="shadow-card">
+          <Card className="shadow-card hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
@@ -146,16 +146,16 @@ const Devotional = () => {
               <CardDescription>Fundamento para a reflexão de hoje</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border-l-4 border-primary">
+              <div className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border-l-4 border-primary transition-all hover:shadow-lg">
                 <p className="text-lg font-semibold mb-2 italic">"{devotionalContent.verseOfDay}"</p>
               </div>
             </CardContent>
           </Card>
           
           {/* Devocional da Manhã */}
-          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent">
+          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent hover-lift">
             <div className="mb-6">
-              <Badge variant="outline" className="mb-3">🌅 Devocional da Manhã</Badge>
+              <Badge variant="outline" className="mb-3 hover-scale">🌅 Devocional da Manhã</Badge>
               <h2 className="text-xl font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
                 Baseado em {devotionalContent.morningVerse}
               </h2>
@@ -166,9 +166,9 @@ const Devotional = () => {
           </Card>
 
           {/* Devocional da Noite */}
-          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent">
+          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent hover-lift">
             <div className="mb-6">
-              <Badge variant="outline" className="mb-3">🌙 Devocional da Noite</Badge>
+              <Badge variant="outline" className="mb-3 hover-scale">🌙 Devocional da Noite</Badge>
               <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
                 Baseado em {devotionalContent.eveningVerse}
               </h2>
@@ -180,7 +180,7 @@ const Devotional = () => {
 
 
           {/* Reflexão */}
-          <Card className="shadow-card">
+          <Card className="shadow-card hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-secondary" />
@@ -195,7 +195,7 @@ const Devotional = () => {
           </Card>
 
           {/* Anotações Pessoais */}
-          <Card className="shadow-card">
+          <Card className="shadow-card hover-lift">
             <CardHeader>
               <CardTitle>Minhas Anotações</CardTitle>
               <CardDescription>
@@ -208,11 +208,11 @@ const Devotional = () => {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={6}
-                className="resize-none border-2 focus-visible:ring-2 focus-visible:ring-primary"
+                className="resize-none transition-all focus:scale-[1.01] focus:shadow-lg"
               />
               <Button 
                 onClick={handleComplete} 
-                className="w-full" 
+                className="w-full btn-interactive hover-lift" 
                 size="lg"
                 variant={isCompleted ? "secondary" : "default"}
               >
