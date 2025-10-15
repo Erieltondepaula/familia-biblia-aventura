@@ -68,7 +68,10 @@ const Profiles = () => {
             {profiles.map(p => (
               <div key={p.id} className={`flex items-center justify-between p-4 rounded-lg border ${currentProfile?.id === p.id ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                 <div>
-                  <p className="font-semibold">{p.name} <Badge className="ml-2">{p.role}</Badge></p>
+                  <div className="font-semibold flex items-center gap-2">
+                    <span>{p.name}</span>
+                    <Badge>{p.role}</Badge>
+                  </div>
                   <p className="text-sm text-muted-foreground">{p.age} anos • {p.difficulty} • {p.bible_version}</p>
                 </div>
                 <div className="flex items-center gap-2">

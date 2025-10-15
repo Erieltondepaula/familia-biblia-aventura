@@ -27,7 +27,13 @@ const Login = () => {
       else toast.info('Verifique seu e-mail para redefinir a senha.');
       setIsPasswordReset(false);
     } else if (isSigningUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
       if (error) toast.error(error.message);
       else toast.info('Verifique seu e-mail para confirmar a conta.');
     } else {
