@@ -1,65 +1,59 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.74.0';
+// @deno-types="npm:@supabase/supabase-js@2.43.4"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !serviceKey) {
+      throw new Error('As variáveis de ambiente SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não foram configuradas.');
+    }
     
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
+    const supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Verificar se o usuário é admin
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Não autorizado' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Usuário não autenticado. Cabeçalho de autorização ausente.');
+    }
+    const { data: { user } } = await supabaseAdmin.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Token de usuário inválido.' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Verificar se o usuário tem role de admin
-    const { data: roles, error: rolesError } = await supabaseAdmin
+    const { data: adminRole, error: roleError } = await supabaseAdmin
       .from('user_roles')
-      .select('role')
+      .select('id')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .single();
-
-    if (rolesError || !roles) {
-      return new Response(
-        JSON.stringify({ error: 'Acesso negado' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      .maybeSingle();
+    if (roleError) throw roleError;
+    if (!adminRole) {
+      return new Response(JSON.stringify({ error: 'Acesso negado. Requer privilégios de administrador.' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    // Buscar todos os usuários
     const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+    if (listError) throw listError;
 
-    if (listError) {
-      throw listError;
-    }
+    return new Response(JSON.stringify({ users }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
-    return new Response(
-      JSON.stringify({ users }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro inesperado.';
+    console.error('Erro na função get-all-users:', errorMessage);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
