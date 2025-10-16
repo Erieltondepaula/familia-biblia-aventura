@@ -126,20 +126,35 @@ const Settings = () => {
           </div>
           <div>
             <Label>Versão da Bíblia</Label>
-            <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
-              <div className="flex items-center space-x-2">
+            <RadioGroup 
+              value={currentProfile.bible_version} 
+              onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} 
+              className="grid grid-cols-2 gap-3 mt-2"
+            >
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                 <RadioGroupItem value="ACF" id="ver-acf" />
-                <Label htmlFor="ver-acf">ACF</Label>
+                <Label htmlFor="ver-acf" className="cursor-pointer flex-1">ACF</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                 <RadioGroupItem value="NVI" id="ver-nvi" />
-                <Label htmlFor="ver-nvi">NVI</Label>
+                <Label htmlFor="ver-nvi" className="cursor-pointer flex-1">NVI</Label>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                 <RadioGroupItem value="NTLH" id="ver-ntlh" />
-                <Label htmlFor="ver-ntlh">NTLH</Label>
+                <Label htmlFor="ver-ntlh" className="cursor-pointer flex-1">NTLH</Label>
+              </div>
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                <RadioGroupItem value="BKJ1611" id="ver-bkj" />
+                <Label htmlFor="ver-bkj" className="cursor-pointer flex-1">BKJ 1611</Label>
+              </div>
+              <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                <RadioGroupItem value="NAA" id="ver-naa" />
+                <Label htmlFor="ver-naa" className="cursor-pointer flex-1">NAA</Label>
               </div>
             </RadioGroup>
+            <p className="text-xs text-muted-foreground mt-2">
+              Escolha a versão bíblica que será usada para suas leituras
+            </p>
           </div>
         </Card>
 

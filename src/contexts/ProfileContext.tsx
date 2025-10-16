@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 // As definições de tipos e o contexto agora são exportadas daqui
 export type RoleType = "pai" | "mae" | "filho";
 export type Difficulty = "crianca" | "adolescente" | "adulto";
-export type BibleVersion = "ACF" | "NVI" | "NTLH" | "BKJ";
+export type BibleVersion = 'ACF' | 'NVI' | 'NTLH' | 'BKJ1611' | 'NAA';
 
 export interface Profile {
   id: string;

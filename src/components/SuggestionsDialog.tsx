@@ -67,13 +67,20 @@ export const SuggestionsDialog = () => {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button variant="default" size="icon" className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all">
-                <Lightbulb className="w-5 h-5" />
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 pulse-subtle"
+              >
+                <Lightbulb className="w-5 h-5 animate-pulse" />
               </Button>
             </DialogTrigger>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Enviar Sugestão de Melhoria</p>
+          <TooltipContent side="bottom" className="bg-amber-500 text-white font-semibold">
+            <p className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              Enviar Sugestão de Melhoria
+            </p>
           </TooltipContent>
         </Tooltip>
       <DialogContent className="sm:max-w-[500px]">
