@@ -48,27 +48,19 @@ try {
     Write-Info "Selected migration: $MigrationFile"
 
     # If SUPABASE_URL & SERVICE_ROLE_KEY are provided, use psql with that connection.
-    if ($env:SUPABASE_URL -and $env:SUPABASE_SERVICE_ROLE_KEY) {
-        Write-Info "Using SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from environment to apply migration."
-        # Build a connection string. SUPABASE_URL is like https://<ref>.supabase.co
-        $uri = [uri]$env:SUPABASE_URL
-        $host = $uri.Host
-        $port = 5432
-        $user = 'postgres'
-        $password = $env:SUPABASE_SERVICE_ROLE_KEY
-        $dbname = 'postgres'
+    # Se a variável SUPABASE_DB_URL (connection string) estiver definida, use-a diretamente
+    if ($env:SUPABASE_DB_URL) {
+        Write-Info "Usando SUPABASE_DB_URL do ambiente para aplicar a migration."
+        if (-not (Get-Command psql -ErrorAction SilentlyContinue)) { Write-Err "psql não encontrado no PATH. Instale o cliente PostgreSQL (psql) para usar este modo."; exit 5 }
 
-        if (-not (Get-Command psql -ErrorAction SilentlyContinue)) { Write-Err "psql not found on PATH. Install PostgreSQL client tools (psql) to use this mode."; exit 5 }
-
-        $conn = "postgresql://$user:`$password@$host:$port/$dbname"
-        Write-Info "Applying migration via psql..."
-        & psql $conn -f $MigrationFile
+        Write-Info "Aplicando $MigrationFile usando psql..."
+        & psql $env:SUPABASE_DB_URL -f $MigrationFile
         exit $LASTEXITCODE
     }
 
     # Fallback: try to use supabase CLI for a local instance
     if (Get-Command supabase -ErrorAction SilentlyContinue) {
-        Write-Info "Attempting to apply migration via local supabase (supabase is installed)."
+    Write-Info "Tentando aplicar a migration via supabase local (supabase CLI detectado)."
         # supabase db remote set/psql could be used, but simplest path is to open a psql shell using supabase secrets.
         # Ask user whether they want to try to use 'supabase db remote commit' or prefer manual steps.
         $useSupabase = Read-Host "Run the migration using the local supabase CLI? This requires a running 'supabase start' and psql on PATH. (Y/n)"
@@ -76,10 +68,8 @@ try {
 
         if (-not (Get-Command psql -ErrorAction SilentlyContinue)) { Write-Err "psql not found on PATH. Install PostgreSQL client tools (psql) to use this mode."; exit 6 }
 
-        Write-Info "Reading local DB connection string from supabase..."
-        $connInfo = & supabase db remote commit 2>&1
-        Write-Info "If the above command did not print a connection string, open a separate terminal where 'supabase start' is running and obtain the DB connection string from its logs or use the Supabase web SQL editor."
-        Write-Info "You can also open the SQL editor at your project's Supabase dashboard and run the migration SQL there."
+        Write-Info "Se 'supabase start' estiver rodando localmente, abra o terminal onde ele roda e copie a connection string do banco (procurar por 'Connection string')."
+        Write-Info "Alternativamente, abra o painel do seu projeto no Supabase e use o Editor SQL para colar e executar o arquivo SQL manualmente."
         exit 0
     }
 

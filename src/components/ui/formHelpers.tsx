@@ -8,17 +8,18 @@ export type FormFieldContextValue<
   name: TName;
 };
 
-export const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue);
+// Use undefined as default so we can check presence
+export const FormFieldContext = React.createContext<FormFieldContextValue | undefined>(undefined);
 
 export type FormItemContextValue = { id: string };
-export const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
+export const FormItemContext = React.createContext<FormItemContextValue | undefined>(undefined);
 
 export const useFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >() => {
-  const fieldContext = React.useContext(FormFieldContext as React.Context<FormFieldContextValue>);
-  const itemContext = React.useContext(FormItemContext as React.Context<FormItemContextValue>);
+  const fieldContext = React.useContext(FormFieldContext) as FormFieldContextValue | undefined;
+  const itemContext = React.useContext(FormItemContext) as FormItemContextValue | undefined;
   const methods = useFormContext<TFieldValues>();
 
   if (!fieldContext) throw new Error("useFormField deve ser usado dentro de <FormField>");

@@ -1,32 +1,44 @@
-# Supabase helper scripts
+# Scripts auxiliares para Supabase (PowerShell)
 
-This folder contains PowerShell helper scripts to assist with local Supabase development. They are intentionally conservative: they check prerequisites and guide you instead of attempting privileged installs.
+Esta pasta contém scripts PowerShell para facilitar o desenvolvimento local com Supabase. Os scripts são conservadores: checam pré-requisitos e dão instruções em vez de tentar instalar ferramentas com permissões elevadas.
 
-Files:
+Arquivos incluídos:
 
-- `start-local-supabase.ps1` — checks for Docker and the Supabase CLI, then runs `supabase start` from the repository root. Do not run this script unless you have Docker and the Supabase CLI installed.
-- `apply-migration.ps1` — assists in applying a migration SQL file from `supabase/migrations/`. Supports applying via environment variables (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) or guidance for local supabase instances.
-- `reset-local-supabase.ps1` — attempts `supabase stop` and optionally deletes local supabase data (destructive). Use with care.
+- `start-local-supabase.ps1` — verifica Docker e a CLI do Supabase e executa `supabase start` na raiz do repositório. Execute somente se tiver Docker e a CLI instalados.
+- `apply-migration.ps1` — aplica um arquivo SQL da pasta `supabase/migrations/`.
+	- Modos suportados:
+		1. Usando a variável de ambiente `SUPABASE_DB_URL` (string de conexão Postgres) — o script usa `psql`.
+		2. Usando a CLI `supabase` local — exibe instruções (requer `supabase start` rodando).
+		3. Manualmente via Editor SQL no painel do Supabase.
+- `reset-local-supabase.ps1` — tenta `supabase stop` e, opcionalmente, remove dados locais (ação destrutiva). Use com cuidado.
 
-Windows PowerShell usage examples:
-
-Open an elevated PowerShell or normal PowerShell depending on your Docker setup, then from the repo root:
+Exemplos (PowerShell) — execute a partir da raiz do repositório:
 
 ```powershell
-# Start local Supabase (requires Docker + supabase CLI on PATH)
+# Iniciar Supabase local (requer Docker + supabase CLI no PATH)
 powershell -ExecutionPolicy Bypass -File .\scripts\supabase\start-local-supabase.ps1
 
-# Apply a specific migration file
+# Aplicar uma migration específica (modo SUPABASE_DB_URL)
+setx SUPABASE_DB_URL "postgres://postgres:<senha>@<host>:5432/postgres"
 powershell -ExecutionPolicy Bypass -File .\scripts\supabase\apply-migration.ps1 -MigrationFile .\supabase\migrations\20251016120000_fix_bkj1611_values.sql
 
-# Stop and optionally remove local data
+# Parar e opcionalmente remover dados locais
 powershell -ExecutionPolicy Bypass -File .\scripts\supabase\reset-local-supabase.ps1
 ```
 
-Notes:
+Observações:
 
-- These scripts do not perform global npm installs or install Docker for you. Install Docker Desktop and the Supabase CLI manually if you need them.
-- If you prefer using the Supabase web dashboard to run SQL, you can open the migration SQL file and paste it into the SQL editor there (this is often the simplest route for production projects).
-- The `apply-migration.ps1` script supports using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` environment variables with `psql` if you have the PostgreSQL client installed.
+- Os scripts não instalam Docker ou a CLI do Supabase. Instale Docker Desktop e a Supabase CLI manualmente se necessário.
+- Para produção, a forma mais simples de aplicar migrations é usar o Editor SQL no painel do Supabase.
+- `apply-migration.ps1` suporta a variável `SUPABASE_DB_URL` (recomendado para CI) ou instruções para uso local via supabase CLI.
 
-If you'd like, I can add a GitHub Actions workflow to automatically apply migrations when merging to a protected branch (requires storing the service role key in Secrets).
+Workflow de CI (GitHub Actions):
+
+- Este repositório contém o workflow `.github/workflows/apply-supabase-migrations.yml` que aplica os arquivos em `supabase/migrations/`.
+- Para usá-lo, adicione o Secret `SUPABASE_DB_URL` (Settings → Secrets) com a connection string do Postgres do seu projeto.
+
+Avisos importantes:
+
+- CUIDADO: armazenar credenciais em Secrets é sensível — use um usuário/role com permissões mínimas necessárias.
+- O workflow executa os arquivos `.sql` em ordem alfabética. Garanta que os arquivos estejam corretamente versionados.
+
