@@ -17,14 +17,15 @@ export const useFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >() => {
-  const fieldContext = React.useContext(FormFieldContext as unknown as React.Context<FormFieldContextValue>);
-  const itemContext = React.useContext(FormItemContext as unknown as React.Context<FormItemContextValue>);
-  const { getFieldState, formState } = useFormContext<TFieldValues>();
+  const fieldContext = React.useContext(FormFieldContext as React.Context<FormFieldContextValue>);
+  const itemContext = React.useContext(FormItemContext as React.Context<FormItemContextValue>);
+  const methods = useFormContext<TFieldValues>();
 
-  if (!fieldContext) throw new Error("useFormField should be used within <FormField>");
+  if (!fieldContext) throw new Error("useFormField deve ser usado dentro de <FormField>");
+  if (!itemContext) throw new Error("useFormField deve ser usado dentro de <FormItem>");
 
   const fieldName = (fieldContext as unknown as { name: string }).name as string;
-  const fieldState = getFieldState(fieldName, formState as unknown as Record<string, unknown>);
+  const fieldState = methods.getFieldState(fieldName as unknown as FieldPath<TFieldValues>, methods.formState);
   const { id } = itemContext;
 
   return {
