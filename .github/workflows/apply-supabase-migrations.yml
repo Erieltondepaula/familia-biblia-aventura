@@ -1,0 +1,44 @@
+name: Apply Supabase Migrations
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+jobs:
+  apply-migrations:
+    name: Aplicar migrations do Supabase
+    runs-on: ubuntu-latest
+    if: secrets.SUPABASE_DB_URL != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preparar psql (instalar cliente PostgreSQL)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Listar migrations
+        id: list
+        run: |
+          ls -1 supabase/migrations/*.sql | sort > migrations_list.txt
+          cat migrations_list.txt
+          echo "MIGRATIONS<<EOF" >> $GITHUB_OUTPUT
+          cat migrations_list.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Aplicar migrations
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_DB_URL}" ]; then
+            echo "SUPABASE_DB_URL não está definido. Configure o segredo no repositório."
+            exit 1
+          fi
+          while IFS= read -r file; do
+            echo "Aplicando $file"
+            psql "$SUPABASE_DB_URL" -f "$file"
+          done < migrations_list.txt

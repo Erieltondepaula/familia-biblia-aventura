@@ -58,7 +58,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const isBibleCode = (v: string): v is Profile["bible_version"] => Object.keys(bibleVersions).includes(v);
 
     const normalizeBibleVersion = (value?: string) => {
-      if (!value) return value;
+      if (!value) return undefined;
       const v = String(value).trim();
       // valor já é um código válido?
       if (isBibleCode(v)) return v;
@@ -75,7 +75,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         b.name.replace(/\s+/g, '').toLowerCase() === v.replace(/\s+/g, '').toLowerCase() ||
         b.fullName.replace(/\s+/g, '').toLowerCase() === v.replace(/\s+/g, '').toLowerCase()
       );
-      return relaxed ? relaxed.code : value;
+      return relaxed ? relaxed.code : undefined;
     };
 
     let normalizedBibleVersion = normalizeBibleVersion(String(data.bible_version)) as Profile["bible_version"];
@@ -99,14 +99,14 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateProfile = async (id: string, updates: Partial<Omit<Profile, "id" | "user_id">>) => {
-    // Normalizar bible_version se presente
+    // Helpers
     const isBibleCode = (v: string): v is Profile["bible_version"] => Object.keys(bibleVersions).includes(v);
-    const normalizeBibleVersion = (value?: string) => {
-      if (!value) return value;
+    const tryNormalize = (value?: string): Profile["bible_version"] | undefined => {
+      if (!value) return undefined;
       const v = String(value).trim();
       if (isBibleCode(v)) return v;
-      const removedSpaces = v.replace(/\s+/g, '');
-      if (isBibleCode(removedSpaces)) return removedSpaces;
+      const compact = v.replace(/\s+/g, '');
+      if (isBibleCode(compact)) return compact as Profile["bible_version"];
       const byName = Object.values(bibleVersions).find(b =>
         b.name.toLowerCase() === v.toLowerCase() || b.fullName.toLowerCase() === v.toLowerCase()
       );
@@ -115,41 +115,80 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         b.name.replace(/\s+/g, '').toLowerCase() === v.replace(/\s+/g, '').toLowerCase() ||
         b.fullName.replace(/\s+/g, '').toLowerCase() === v.replace(/\s+/g, '').toLowerCase()
       );
-      return relaxed ? relaxed.code : value;
+      return relaxed ? relaxed.code : undefined;
     };
 
-    let updatesToSend = { ...updates } as typeof updates;
-    if (updates.bible_version) {
-      updatesToSend = { ...updatesToSend, bible_version: normalizeBibleVersion(String(updates.bible_version)) as Profile["bible_version"] };
-    }
+    // Prepare payload and clean undefined values
+    const payload: Record<string, unknown> = { ...updates };
+    Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
-    // Debug: log the payload being sent to Supabase
-    console.debug('Profile update payload:', updatesToSend);
-
-    // If normalization didn't produce a valid code, fallback to NVI to avoid DB errors
-    if (updatesToSend.bible_version && !isBibleCode(String(updatesToSend.bible_version))) {
-      console.warn('Fallback on update: invalid bible_version, using NVI. Original:', updatesToSend.bible_version);
-      toast(`Versão da Bíblia inválida: '${updatesToSend.bible_version}'. Usando NVI como padrão.`);
-      updatesToSend = { ...updatesToSend, bible_version: 'NVI' } as typeof updatesToSend;
-    }
-
-    const { error } = await supabase.from('profiles').update(updatesToSend).eq('id', id);
-    if (error) {
-      console.error("Erro ao atualizar perfil:", error);
-      const msg = (error.message as string) || 'Erro ao atualizar perfil';
-      // Mensagem específica para violação do CHECK
-      if (msg.includes('profiles_bible_version_check') || msg.includes('violates check constraint')) {
-        toast.error('Versão da Bíblia inválida. Por favor, selecione uma versão suportada.');
+    // If bible_version is present, normalize and perform isolated update first
+    if (Object.prototype.hasOwnProperty.call(payload, 'bible_version')) {
+      const raw = payload.bible_version as unknown as string | undefined;
+      console.debug('[DEBUG updateProfile] raw bible_version:', raw);
+      const normalized = tryNormalize(raw) || 'NVI';
+      console.debug('[DEBUG updateProfile] normalized bible_version:', normalized);
+      if (!isBibleCode(normalized)) {
+        // safety: ensure final is a valid code
+        payload.bible_version = 'NVI';
       } else {
-        toast.error(`Erro ao atualizar perfil: ${msg}`);
+        payload.bible_version = normalized;
+      }
+
+      console.debug('[DEBUG updateProfile] payload before isolated update:', JSON.stringify(payload));
+
+      // Attempt isolated update for bible_version
+  const { error: bibleErr } = await supabase.from('profiles').update({ bible_version: String(payload.bible_version) }).eq('id', id);
+      if (bibleErr) {
+        console.error('Erro ao atualizar bible_version isoladamente:', bibleErr, { bible_version: payload.bible_version });
+        const msg = (bibleErr.message as string) || '';
+        if (msg.includes('profiles_bible_version_check') || msg.includes('violates check constraint')) {
+          // Retry with fallback NVI
+          const { error: retryErr } = await supabase.from('profiles').update({ bible_version: 'NVI' }).eq('id', id);
+          if (retryErr) {
+            toast.error('Erro ao atualizar versão da Bíblia. Contate o suporte.');
+            return;
+          }
+          // Remove bible_version from payload so it won't be re-sent
+          delete payload.bible_version;
+          // Update local state with fallback
+          setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates, bible_version: 'NVI' } as Profile : p)));
+          if (currentProfile?.id === id) setCurrentProfileState(prev => prev ? { ...prev, ...updates, bible_version: 'NVI' } as Profile : null);
+          toast.success('Versão inválida substituída por NVI e perfil atualizado.');
+        } else {
+          toast.error(`Erro ao atualizar perfil: ${bibleErr.message}`);
+        }
+        return;
+      }
+      // successful bible_version update -> remove from payload
+      delete payload.bible_version;
+    }
+
+    // If other fields remain, send them in a single update
+    if (Object.keys(payload).length > 0) {
+      const { error } = await supabase.from('profiles').update(payload).eq('id', id);
+      if (error) {
+        console.error('Erro ao atualizar perfil:', error, { payload });
+        const msg = (error.message as string) || '';
+        if (msg.includes('profiles_bible_version_check') || msg.includes('violates check constraint')) {
+          // As a last resort, attempt to set bible_version to NVI and retry remaining fields
+          const { error: retryErr } = await supabase.from('profiles').update({ bible_version: 'NVI' }).eq('id', id);
+          if (!retryErr) {
+            // Update local cache to reflect fallback
+            setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates, bible_version: 'NVI' } as Profile : p)));
+            if (currentProfile?.id === id) setCurrentProfileState(prev => prev ? { ...prev, ...updates, bible_version: 'NVI' } as Profile : null);
+            toast.success('Versão inválida substituída por NVI e perfil atualizado.');
+            return;
+          }
+        }
+        toast.error(`Erro ao atualizar perfil: ${msg || 'Erro desconhecido'}`);
+        return;
       }
     }
-    else {
-      setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updatesToSend } as Profile : p)));
-      if (currentProfile?.id === id) {
-        setCurrentProfileState(prev => prev ? { ...prev, ...updatesToSend } as Profile : null);
-      }
-    }
+
+    // Apply updates to local state (payload may be empty if we only updated bible_version)
+    setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates } as Profile : p)));
+    if (currentProfile?.id === id) setCurrentProfileState(prev => prev ? { ...prev, ...updates } as Profile : null);
   };
 
   const deleteProfile = async (id: string) => {

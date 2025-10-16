@@ -19,13 +19,22 @@ import {
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
-import { RoleType, Difficulty, BibleVersion } from "@/contexts/profileContextDef";
+import { RoleType, Difficulty, BibleVersion, Profile } from "@/contexts/profileContextDef";
 import { ArrowLeft, UserPlus, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const Profiles = () => {
   const { profiles, currentProfile, setCurrentProfile, addProfile, updateProfile, deleteProfile } = useProfile();
   const [profileToDelete, setProfileToDelete] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    age: 10 as number | null,
+    role: "filho" as RoleType,
+    difficulty: "crianca" as Difficulty,
+    bible_version: "NTLH" as BibleVersion,
+    avatar_url: '' as string | null,
+  });
   const [form, setForm] = useState({
     name: "",
     age: 10,
@@ -37,6 +46,24 @@ const Profiles = () => {
   useEffect(() => {
     document.title = "Perfis | Jornada Bíblica";
   }, []);
+
+  // Sync editForm when active profile changes (or when entering edit mode)
+  useEffect(() => {
+    if (currentProfile) {
+      setEditForm({
+        name: currentProfile.name || "",
+        age: currentProfile.age ?? null,
+        role: currentProfile.role,
+        difficulty: currentProfile.difficulty,
+        bible_version: currentProfile.bible_version,
+        avatar_url: currentProfile.avatar_url || null,
+      });
+    } else {
+      setEditForm({ name: "", age: 10, role: "filho", difficulty: "crianca", bible_version: "NTLH", avatar_url: null });
+    }
+    // If profile changes, exit edit mode
+    setIsEditing(false);
+  }, [currentProfile]);
 
   const handleCreate = () => {
     if (!form.name.trim() || form.age === null) {
@@ -162,26 +189,93 @@ const Profiles = () => {
           <div className="lg:col-span-2">
             <Separator className="my-6" />
             <Card className="p-6">
-              <h2 className="text-xl font-bold mb-4">Editar Perfil Ativo: {currentProfile.name}</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Editar Perfil Ativo: {currentProfile.name}</h2>
+                <div className="flex items-center gap-2">
+                  {!isEditing ? (
+                    <Button onClick={() => setIsEditing(true)}>Editar</Button>
+                  ) : (
+                    <>
+                      <Button
+                        onClick={async () => {
+                          if (!currentProfile) return;
+                          // build diff of changed fields
+                          const updates: Partial<Omit<Profile, 'id' | 'user_id'>> = {};
+                          if (editForm.name !== currentProfile.name) updates.name = editForm.name;
+                          if ((editForm.age ?? null) !== (currentProfile.age ?? null)) updates.age = editForm.age;
+                          if (editForm.role !== currentProfile.role) updates.role = editForm.role;
+                          if (editForm.difficulty !== currentProfile.difficulty) updates.difficulty = editForm.difficulty;
+                          if (editForm.bible_version !== currentProfile.bible_version) updates.bible_version = editForm.bible_version;
+                          if ((editForm.avatar_url || null) !== (currentProfile.avatar_url || null)) updates.avatar_url = editForm.avatar_url;
+                          if (Object.keys(updates).length === 0) {
+                            toast('Nenhuma alteração para salvar.');
+                            setIsEditing(false);
+                            return;
+                          }
+                          await updateProfile(currentProfile.id, updates);
+                          toast.success('Perfil salvo.');
+                          setIsEditing(false);
+                        }}
+                      >Salvar</Button>
+                      <Button variant="outline" onClick={() => {
+                        // revert edits
+                        if (currentProfile) {
+                          setEditForm({
+                            name: currentProfile.name || "",
+                            age: currentProfile.age ?? null,
+                            role: currentProfile.role,
+                            difficulty: currentProfile.difficulty,
+                            bible_version: currentProfile.bible_version,
+                            avatar_url: currentProfile.avatar_url || null,
+                          });
+                        }
+                        setIsEditing(false);
+                      }}>Cancelar</Button>
+                    </>
+                  )}
+                  <Button variant="destructive" onClick={() => setProfileToDelete(currentProfile.id)}>
+                    <Trash2 className="w-4 h-4 mr-1"/> Remover
+                  </Button>
+                </div>
+              </div>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 flex justify-center py-4">
                   <AvatarUpload
-                    avatarUrl={currentProfile.avatar_url}
+                    avatarUrl={isEditing ? (editForm.avatar_url || currentProfile.avatar_url) : currentProfile.avatar_url}
                     name={currentProfile.name}
-                    onUploadComplete={(url) => updateProfile(currentProfile.id, { avatar_url: url })}
+                    onUploadComplete={(url) => {
+                      if (isEditing) {
+                        setEditForm(prev => ({ ...prev, avatar_url: url }));
+                      } else {
+                        updateProfile(currentProfile.id, { avatar_url: url });
+                      }
+                    }}
                   />
                 </div>
                 <div>
                   <Label>Nome</Label>
-                  <Input value={currentProfile.name} onChange={(e) => updateProfile(currentProfile.id, { name: e.target.value })} />
+                  <Input
+                    disabled={!isEditing}
+                    value={isEditing ? editForm.name : currentProfile.name}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                  />
                 </div>
                 <div>
                   <Label>Idade</Label>
-                  <Input type="number" value={currentProfile.age} onChange={(e) => updateProfile(currentProfile.id, { age: Number(e.target.value) })} />
+                  <Input
+                    disabled={!isEditing}
+                    type="number"
+                    value={isEditing ? (editForm.age ?? '') : (currentProfile.age ?? '')}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, age: e.target.value === '' ? null : Number(e.target.value) }))}
+                  />
                 </div>
                 <div>
                   <Label>Função</Label>
-                  <RadioGroup value={currentProfile.role} onValueChange={(v) => updateProfile(currentProfile.id, { role: v as RoleType })} className="flex gap-4">
+                  <RadioGroup
+                    value={isEditing ? editForm.role : currentProfile.role}
+                    onValueChange={(v) => setEditForm(prev => ({ ...prev, role: v as RoleType }))}
+                    className="flex gap-4"
+                  >
                     <div className="flex items-center space-x-2"><RadioGroupItem value="pai" id="edit-role-pai" /><Label htmlFor="edit-role-pai">Pai</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="mae" id="edit-role-mae" /><Label htmlFor="edit-role-mae">Mãe</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="filho" id="edit-role-filho" /><Label htmlFor="edit-role-filho">Filho(a)</Label></div>
@@ -189,9 +283,9 @@ const Profiles = () => {
                 </div>
                 <div className="md:col-span-2">
                   <Label>Versão da Bíblia</Label>
-                  <RadioGroup 
-                    value={currentProfile.bible_version} 
-                    onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} 
+                  <RadioGroup
+                    value={isEditing ? editForm.bible_version : currentProfile.bible_version}
+                    onValueChange={(v) => setEditForm(prev => ({ ...prev, bible_version: v as BibleVersion }))}
                     className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2"
                   >
                     <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
