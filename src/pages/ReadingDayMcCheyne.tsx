@@ -134,7 +134,7 @@ const ChapterRow = ({ chapter, testament, isChecked, onToggle, note, onNoteChang
           size="sm"
           variant="ghost"
           className="h-8 w-8 3xl:h-12 3xl:w-12 5xl:h-16 5xl:w-16 p-0"
-          title="Anotações"
+          title="Reflexão"
           onClick={handleEdit}
           disabled={isEditing}
         >
@@ -157,7 +157,7 @@ const ChapterRow = ({ chapter, testament, isChecked, onToggle, note, onNoteChang
               </Button>
               <Button size="sm" onClick={handleSave}>
                 <Save className="w-4 h-4 mr-1" />
-                Salvar Anotação
+                Salvar Reflexão
               </Button>
             </div>
           </div>

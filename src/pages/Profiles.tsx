@@ -125,10 +125,12 @@ const Profiles = () => {
             <div>
               <Label>Versão da Bíblia</Label>
               <RadioGroup value={form.bible_version} onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} className="flex gap-4">
-                <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="ver-acf" /><Label htmlFor="ver-acf">ACF</Label></div>
-                <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="ver-nvi" /><Label htmlFor="ver-nvi">NVI</Label></div>
-                <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="ver-ntlh" /><Label htmlFor="ver-ntlh">NTLH</Label></div>
-              </RadioGroup>
+  <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="ver-acf" /><Label htmlFor="ver-acf">ACF</Label></div>
+  <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="ver-nvi" /><Label htmlFor="ver-nvi">NVI</Label></div>
+  <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="ver-ntlh" /><Label htmlFor="ver-ntlh">NTLH</Label></div>
+  {/* Linha adicionada abaixo */}
+  <div className="flex items-center space-x-2"><RadioGroupItem value="BKJ" id="ver-bkj" /><Label htmlFor="ver-bkj">BKJ</Label></div>
+</RadioGroup>
             </div>
             <Button onClick={handleCreate}>
               <UserPlus className="w-4 h-4 mr-2"/>
@@ -169,10 +171,12 @@ const Profiles = () => {
                 <div>
                   <Label>Versão da Bíblia</Label>
                   <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="edit-ver-acf" /><Label htmlFor="edit-ver-acf">ACF</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="edit-ver-nvi" /><Label htmlFor="edit-ver-nvi">NVI</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="edit-ver-ntlh" /><Label htmlFor="edit-ver-ntlh">NTLH</Label></div>
-                  </RadioGroup>
+    <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="edit-ver-acf" /><Label htmlFor="edit-ver-acf">ACF</Label></div>
+    <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="edit-ver-nvi" /><Label htmlFor="edit-ver-nvi">NVI</Label></div>
+    <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="edit-ver-ntlh" /><Label htmlFor="edit-ver-ntlh">NTLH</Label></div>
+    {/* Linha adicionada abaixo */}
+    <div className="flex items-center space-x-2"><RadioGroupItem value="BKJ" id="edit-ver-bkj" /><Label htmlFor="edit-ver-bkj">BKJ</Label></div>
+</RadioGroup>
                 </div>
               </div>
             </Card>

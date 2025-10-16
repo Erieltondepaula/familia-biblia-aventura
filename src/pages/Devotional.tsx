@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Heart, CheckCircle, Sparkles, MessageSquare } from 'lucide-react';
+import { ArrowLeft, BookOpen, Heart, CheckCircle, MessageSquare } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useProgress } from '@/hooks/useProgress';
 import { getCurrentDayReading } from '@/lib/mccheyneReadingPlan';
-import { getDevotionalContent } from '@/lib/devotionalContent';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { RichTextEditor } from '@/components/RichTextEditor'; // Importação adicionada
 
 const Devotional = () => {
   const { currentProfile } = useProfile();
@@ -23,12 +23,17 @@ const Devotional = () => {
 
   useEffect(() => {
     document.title = 'Devocional | Jornada Bíblica';
-    loadDevotionalProgress();
+    if (currentProfile && todayReading) {
+      loadDevotionalProgress();
+    } else if (!todayReading) {
+      setLoading(false);
+    }
   }, [currentProfile, todayReading]);
 
   const loadDevotionalProgress = async () => {
     if (!currentProfile || !todayReading) return;
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('devotional_progress')
@@ -44,9 +49,13 @@ const Devotional = () => {
       if (data) {
         setIsCompleted(true);
         setNotes(data.notes || '');
+      } else {
+        setIsCompleted(false);
+        setNotes('');
       }
     } catch (error) {
       console.error('Erro ao carregar devocional:', error);
+      toast.error('Não foi possível carregar o progresso do devocional.');
     } finally {
       setLoading(false);
     }
@@ -69,11 +78,13 @@ const Devotional = () => {
 
       if (error) throw error;
 
-      if (!isCompleted && notes.trim().length > 0) {
-        await addXP(50); // Bônus por completar devocional com anotação
-        toast.success('Devocional concluído! +50 XP', {
-          description: 'Continue crescendo em sua jornada de fé!'
-        });
+      if (!isCompleted) {
+        let xpGained = 25;
+        if (notes.trim().length > 0) {
+          xpGained += 50;
+        }
+        await addXP(xpGained);
+        toast.success(`Devocional concluído! +${xpGained} XP`);
       } else {
         toast.success('Anotações atualizadas!');
       }
@@ -85,16 +96,36 @@ const Devotional = () => {
     }
   };
 
-  if (loading || !todayReading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        Carregando devocional...
+        <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
+            <Skeleton className="h-16 w-1/2" />
+            <Skeleton className="h-24 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-64 w-full" />
+            </div>
+            <Skeleton className="h-48 w-full" />
       </div>
     );
   }
 
-  // Obter conteúdo dos devocionais e reflexão
-  const devotionalContent = todayReading;
+  if (!todayReading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-center p-4">
+        <div>
+            <h2 className="text-2xl font-bold mb-4">Plano de Leitura não Encontrado</h2>
+            <p className="text-muted-foreground mb-6">Não foi possível carregar o conteúdo do devocional de hoje.</p>
+            <Link to="/dashboard">
+                <Button>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Voltar ao Dashboard
+                </Button>
+            </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,107 +148,89 @@ const Devotional = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-6 animate-slide-up">
-          {/* Status */}
           {isCompleted && (
-            <Card className="border-2 border-success bg-success/5 animate-scale-in hover-lift">
+            <Card className="border-2 border-success bg-success/5">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-6 h-6 text-success" />
                   <div>
                     <p className="font-semibold">Devocional Concluído!</p>
-                    <p className="text-sm text-muted-foreground">
-                      Você já completou o devocional de hoje.
-                    </p>
+                    <p className="text-sm text-muted-foreground">Você já completou o devocional de hoje.</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Versículo Base */}
-          <Card className="shadow-card hover-lift">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                Versículo do Dia
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary" />Versículo do Dia</CardTitle>
               <CardDescription>Fundamento para a reflexão de hoje</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border-l-4 border-primary transition-all hover:shadow-lg">
-                <p className="text-lg font-semibold mb-2 italic">"{devotionalContent.verseOfDay}"</p>
+              <div className="p-6 bg-muted/50 rounded-lg border-l-4 border-primary">
+                <p className="text-lg font-semibold mb-2 italic">"{todayReading.verseOfDay}"</p>
               </div>
             </CardContent>
           </Card>
           
-          {/* Devocional da Manhã */}
-          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-amber-500/5 to-transparent hover-lift">
-            <div className="mb-6">
-              <Badge variant="outline" className="mb-3 hover-scale">🌅 Devocional da Manhã</Badge>
-              <h2 className="text-xl font-bold flex items-center gap-2 text-amber-700 dark:text-amber-400">
-                Baseado em {devotionalContent.morningVerse}
-              </h2>
-            </div>
-            <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-line">
-              {devotionalContent.morningDevotional}
-            </p>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-6 md:p-8 flex flex-col">
+              <div className="mb-4">
+                <Badge variant="outline" className="mb-3">🌅 Devocional da Manhã</Badge>
+                <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                  Baseado em {todayReading.morningVerse}
+                </h2>
+              </div>
+              <div className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1" dangerouslySetInnerHTML={{ __html: todayReading.morningDevotional }}>
+              </div>
+            </Card>
 
-          {/* Devocional da Noite */}
-          <Card className="p-8 mb-6 shadow-card bg-gradient-to-br from-indigo-500/5 to-transparent hover-lift">
-            <div className="mb-6">
-              <Badge variant="outline" className="mb-3 hover-scale">🌙 Devocional da Noite</Badge>
-              <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                Baseado em {devotionalContent.eveningVerse}
-              </h2>
-            </div>
-            <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-line">
-              {devotionalContent.eveningDevotional}
-            </p>
-          </Card>
+            <Card className="p-6 md:p-8 flex flex-col">
+              <div className="mb-4">
+                <Badge variant="outline" className="mb-3">🌙 Devocional da Noite</Badge>
+                <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-400">
+                  Baseado em {todayReading.eveningVerse}
+                </h2>
+              </div>
+              <div className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1" dangerouslySetInnerHTML={{ __html: todayReading.eveningDevotional }}>
+              </div>
+            </Card>
+          </div>
 
-
-          {/* Reflexão */}
-          <Card className="shadow-card hover-lift">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-secondary" />
-                Perguntas para Reflexão
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-secondary" />Perguntas para Reflexão</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-base leading-relaxed whitespace-pre-line">
-                {devotionalContent.reflection}
-              </p>
+              <div className="text-base leading-relaxed whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: todayReading.reflection }}>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Anotações Pessoais */}
-          <Card className="shadow-card hover-lift">
+          <Card>
             <CardHeader>
               <CardTitle>Minhas Anotações</CardTitle>
-              <CardDescription>
-                Registre suas reflexões e como você aplicará isso em sua vida
-              </CardDescription>
+              <CardDescription>Registre suas reflexões e como você aplicará isso em sua vida.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Textarea
-                placeholder="Como este devocional falou com você? Que ação prática você tomará hoje?"
+              {/* === SUBSTITUIÇÃO APLICADA AQUI === */}
+              <RichTextEditor
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={6}
-                className="resize-none transition-all focus:scale-[1.01] focus:shadow-lg"
+                onChange={setNotes}
+                placeholder="Como este devocional falou com você? Que ação prática você tomará hoje?"
+                minHeight="150px"
               />
               <Button 
                 onClick={handleComplete} 
-                className="w-full btn-interactive hover-lift" 
+                className="w-full btn-interactive" 
                 size="lg"
                 variant={isCompleted ? "secondary" : "default"}
               >
                 <CheckCircle className="w-5 h-5 mr-2" />
-                {isCompleted ? 'Atualizar Anotações' : 'Finalizar Devocional (+50 XP)'}
+                {isCompleted ? 'Atualizar Anotações' : 'Finalizar Devocional (+XP)'}
               </Button>
             </CardContent>
           </Card>

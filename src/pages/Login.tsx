@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Passo 1: Importamos a imagem de fundo
+import heroBackground from '@/assets/hero-family.jpg';
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -48,38 +51,37 @@ const Login = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden animate-fade-in">
-      {/* Background gradient - Tema cristão */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-100 via-amber-50 to-purple-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900" />
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
+      {/* Passo 2: A imagem é aplicada como fundo */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      />
+      
+      {/* Passo 3: Adicionamos uma camada escura para garantir a legibilidade do texto */}
+      <div className="absolute inset-0 w-full h-full bg-black/60" />
 
-      {/* Animated background shapes */}
-      <div className="absolute inset-0 overflow-hidden opacity-30">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-sky-400/10 rounded-full blur-3xl pulse-subtle" />
-      </div>
-
-      {/* Login card */}
-      <Card className="relative w-full max-w-md mx-4 shadow-elevated border-2 border-border/50 backdrop-blur-sm bg-background/95 animate-scale-in hover-lift">
+      {/* O card de login fica por cima de tudo */}
+      <Card className="relative w-full max-w-md mx-4 shadow-elevated border-2 border-white/10 bg-background/80 backdrop-blur-sm dark:bg-card/70 animate-scale-in transition-all duration-300 hover:shadow-2xl">
         <CardHeader className="text-center space-y-2 pb-6">
-          <div className="mx-auto w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center mb-4 shadow-card hover-scale">
+          <div className="mx-auto w-16 h-16 bg-gradient-hero rounded-2xl flex items-center justify-center mb-4 shadow-lg transition-transform hover:scale-110">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-3xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            {isPasswordReset ? 'Redefinir Senha' : 'Bem-vindo ao Jornada Bíblica'}
+          <CardTitle className="text-3xl font-bold text-foreground">
+            {isPasswordReset ? 'Redefinir Senha' : 'Jornada Bíblica'}
           </CardTitle>
-          <CardDescription className="text-base">
+          <CardDescription className="text-base text-muted-foreground">
             {isPasswordReset
-              ? 'Insira seu e-mail para receber o link de redefinição'
+              ? 'Insira seu e-mail para receber o link de redefinição.'
               : isSigningUp
-              ? 'Crie uma nova conta para começar sua jornada espiritual'
-              : 'Entre para continuar sua jornada de fé'}
+              ? 'Crie sua conta para começar a jornada.'
+              : 'Entre para continuar sua jornada de fé.'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
+              <label htmlFor="email" className="text-sm font-medium text-left block">Email</label>
               <Input
                 id="email"
                 type="email"
@@ -88,12 +90,12 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
                 required
-                className="h-11 transition-all focus:scale-[1.02]"
+                className="h-11 text-base"
               />
             </div>
             {!isPasswordReset && (
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">Senha</label>
+                <label htmlFor="password" className="text-sm font-medium text-left block">Senha</label>
                 <Input
                   id="password"
                   type="password"
@@ -102,7 +104,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   required
-                  className="h-11 transition-all focus:scale-[1.02]"
+                  className="h-11 text-base"
                 />
               </div>
             )}
@@ -121,14 +123,19 @@ const Login = () => {
               )}
             </Button>
           </form>
-          {!isPasswordReset && (
-            <div className="text-sm text-center mt-4">
-              <Button variant="link" className="hover-scale" onClick={() => setIsPasswordReset(true)}>
-                Esqueceu a senha?
-              </Button>
-            </div>
-          )}
-          <div className="relative my-6">
+          <div className="text-sm text-center mt-4">
+            <Button variant="link" className="text-muted-foreground" onClick={() => {
+                if (isPasswordReset) {
+                    setIsPasswordReset(false);
+                } else {
+                    setIsPasswordReset(true);
+                    setIsSigningUp(false);
+                }
+            }}>
+              {isPasswordReset ? 'Voltar para o Login' : 'Esqueceu a senha?'}
+            </Button>
+          </div>
+          <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border" />
             </div>
@@ -140,11 +147,9 @@ const Login = () => {
             setIsSigningUp(!isSigningUp);
             setIsPasswordReset(false);
           }} className="w-full h-11 btn-interactive hover-lift">
-            {isPasswordReset
-              ? 'Voltar para o Login'
-              : isSigningUp
+            {isSigningUp
               ? 'Já tem uma conta? Fazer login'
-              : 'Não tem conta? Criar agora'}
+              : 'Não tem uma conta? Criar agora'}
           </Button>
         </CardContent>
       </Card>

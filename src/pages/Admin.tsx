@@ -64,16 +64,20 @@ const Admin = () => {
       if (suggestionsError) throw suggestionsError;
       setSuggestions(suggestionsData || []);
 
-      const { data: usersData, error: functionsError } = await supabase.functions.invoke('get-all-users');
+      // CORREÇÃO AQUI (Erro 1): Especificamos o tipo de retorno da função
+      const { data: usersData, error: functionsError } = await supabase.functions.invoke<{ users: User[] }>('get-all-users');
+      
       if (functionsError) throw functionsError;
 
+      // Agora o `u` aqui é automaticamente reconhecido como do tipo `User`, sem precisar do `any`
       if (usersData && usersData.users) {
-        setUsers(usersData.users.map((u: any) => ({ id: u.id, email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at })));
+        setUsers(usersData.users);
       }
 
-    } catch (error: any) {
+    } catch (error) { // CORREÇÃO AQUI (Erro 2): Removemos o `:any` e tratamos o erro de forma segura
       console.error('Erro ao carregar dados do admin:', error);
-      toast.error(`Erro ao carregar dados: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar dados do admin.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -115,8 +119,9 @@ const Admin = () => {
       toast.success('Usuário removido!');
       setUsers(users.filter(u => u.id !== userToDelete.id));
       setUserToDelete(null);
-    } catch (error: any) {
-      toast.error(`Falha ao remover usuário: ${error.message}`);
+    } catch (error) { // CORREÇÃO AQUI (Erro 3): Removemos o `:any` e tratamos o erro de forma segura
+      const errorMessage = error instanceof Error ? `Falha ao remover usuário: ${error.message}` : 'Falha ao remover usuário.';
+      toast.error(errorMessage);
     }
   };
 
@@ -131,8 +136,9 @@ const Admin = () => {
     );
   }
 
+  // O restante do código (a parte visual) continua o mesmo
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted/20">
       <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
@@ -141,89 +147,92 @@ const Admin = () => {
             </Link>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="w-6 h-6" />Painel de Administração</h1>
-              <p className="text-sm text-white/80">Gerencie sugestões e usuários</p>
+              <p className="text-sm text-white/80">Gerencie sugestões e usuários do sistema.</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid gap-6">
-          {/* Estatísticas Rápidas */}
-          <div className="grid md:grid-cols-3 gap-6 animate-slide-up">
-            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Total de Sugestões</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{suggestions.length}</div></CardContent></Card>
-            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{suggestions.filter(s => s.status === 'pending').length}</div></CardContent></Card>
-            <Card className="hover-lift"><CardHeader className="pb-3"><CardTitle className="text-sm font-medium text-muted-foreground">Aprovadas</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{suggestions.filter(s => s.status === 'approved').length}</div></CardContent></Card>
-          </div>
+      <main className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+        {/* Estatísticas Rápidas */}
+        <section>
+            <h2 className="text-xl font-bold mb-4">Visão Geral</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
+                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Usuários Totais</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{users.length}</div></CardContent></Card>
+                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Total de Sugestões</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{suggestions.length}</div></CardContent></Card>
+                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Sugestões Pendentes</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{suggestions.filter(s => s.status === 'pending').length}</div></CardContent></Card>
+                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Sugestões Aprovadas</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{suggestions.filter(s => s.status === 'approved').length}</div></CardContent></Card>
+            </div>
+        </section>
 
-          <div className="grid lg:grid-cols-2 gap-6 items-start animate-fade-in">
-            {/* Usuários Cadastrados */}
-            <Card className="lg:col-span-1 hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Usuários Cadastrados</CardTitle>
-                <CardDescription>Visualize e gerencie os usuários do sistema</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? <Skeleton className="h-48 w-full" /> : (
-                  <div className="max-h-[600px] overflow-y-auto pr-2">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Email</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
+        <div className="grid lg:grid-cols-5 gap-8 items-start">
+          {/* Usuários Cadastrados */}
+          <Card className="lg:col-span-3 hover-lift">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" /> Usuários Cadastrados</CardTitle>
+              <CardDescription>Visualize e gerencie os usuários do sistema.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? <Skeleton className="h-48 w-full" /> : (
+                <div className="max-h-[600px] overflow-y-auto pr-2">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Último Login</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {users.map(user => (
+                        <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
+                          <TableCell className="font-medium">{user.email}</TableCell>
+                          <TableCell>
+                            {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('pt-BR') : 'Nunca'}
+                          </TableCell>
+                          <TableCell className="text-right space-x-1">
+                            <Button variant="ghost" size="icon" className="hover-scale"><Edit className="w-4 h-4 text-blue-500" /></Button>
+                            <Button variant="ghost" size="icon" className="hover-scale" onClick={() => setUserToDelete(user)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {users.map(user => (
-                          <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
-                            <TableCell className="font-medium">{user.email}<br/><small className="text-muted-foreground">Último login: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Nunca'}</small></TableCell>
-                            <TableCell className="text-right">
-                              <Button variant="ghost" size="icon" className="hover-scale" onClick={() => setUserToDelete(user)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-            {/* Sugestões de Melhoria */}
-            <Card className="lg:col-span-1 hover-lift">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /> Sugestões de Melhoria</CardTitle>
-                <CardDescription>Gerencie as sugestões enviadas pelos usuários</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div> : suggestions.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground"><MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" /><p>Nenhuma sugestão registrada</p></div>
-                ) : (
-                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                    {suggestions.map(suggestion => (
-                      <Card key={suggestion.id} className="border-2 hover-lift animate-scale-in">
-                        <CardContent className="pt-6">
-                          <div className="mb-3">
-                            <div className="flex justify-between items-start">
-                              <span className="font-bold text-base">{suggestion.title}</span>
-                              <Badge variant={suggestion.status === 'approved' ? 'default' : suggestion.status === 'rejected' ? 'destructive' : 'secondary'} className="hover-scale">{suggestion.status}</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">Módulo: {suggestion.module}</p>
-                            <p className="text-xs text-muted-foreground">{suggestion.user_email} em {new Date(suggestion.created_at).toLocaleString('pt-BR')}</p>
-                          </div>
-                          <p className="text-sm whitespace-pre-wrap p-2 bg-muted/50 rounded-md">{suggestion.description}</p>
-                          <div className="flex gap-2 mt-4">
-                            <Button size="sm" variant="outline" className="btn-interactive hover-lift" onClick={() => setSuggestionToEdit(suggestion)}><Edit className="w-4 h-4 mr-2" /> Editar</Button>
-                            <Button size="sm" variant="destructive" className="btn-interactive hover-lift" onClick={() => setSuggestionToDelete(suggestion)}><Trash2 className="w-4 h-4 mr-2" /> Remover</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          {/* Sugestões de Melhoria */}
+          <Card className="lg:col-span-2 hover-lift">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5" /> Sugestões de Melhoria</CardTitle>
+              <CardDescription>Gerencie as sugestões enviadas.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? <div className="space-y-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}</div> : suggestions.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground"><MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" /><p>Nenhuma sugestão registrada</p></div>
+              ) : (
+                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                  {suggestions.map(suggestion => (
+                    <Card key={suggestion.id} className="border-l-4 hover-lift animate-scale-in" style={{ borderColor: suggestion.status === 'approved' ? 'hsl(var(--success))' : suggestion.status === 'rejected' ? 'hsl(var(--destructive))' : 'hsl(var(--border))' }}>
+                      <CardContent className="pt-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-bold text-base">{suggestion.title}</span>
+                          <Badge variant={suggestion.status === 'approved' ? 'default' : suggestion.status === 'rejected' ? 'destructive' : 'secondary'} className="hover-scale">{suggestion.status}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">{suggestion.user_email} em {new Date(suggestion.created_at).toLocaleString('pt-BR')}</p>
+                        <p className="text-sm p-2 bg-muted/50 rounded-md">{suggestion.description}</p>
+                        <div className="flex gap-2 mt-4">
+                          <Button size="sm" variant="outline" className="btn-interactive hover-lift" onClick={() => setSuggestionToEdit(suggestion)}><Edit className="w-4 h-4 mr-2" /> Editar</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
 

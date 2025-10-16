@@ -178,7 +178,8 @@ const Dashboard = () => {
           </Card>
 
           {/* Stats Cards */}
-          <div className="space-y-8 animate-scale-in">
+          {/* === CORREÇÃO APLICADA AQUI === */}
+          <div className="flex flex-col gap-8 animate-scale-in">
             <Card className="p-6 shadow-card bg-gradient-faith text-white hover-lift">
               <div className="flex items-center justify-between">
                 <Flame className="w-8 h-8" />
@@ -199,7 +200,7 @@ const Dashboard = () => {
               <p className="text-sm text-white/80">De 365 dias</p>
             </Card>
 
-            <Link to="/contribute">
+            <Link to="/contribute" className="block"> {/* Adicionado 'block' para o link ocupar a largura toda */}
                 <Card className="p-6 shadow-card hover:shadow-elevated transition-all duration-300 cursor-pointer bg-gradient-to-br from-amber-500/5 to-transparent hover-lift">
                     <div className="flex items-center justify-between mb-2">
                         <HeartHandshake className="w-8 h-8 text-amber-500" />
@@ -215,7 +216,7 @@ const Dashboard = () => {
         </div>
 
         {/* Today's Reading */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12 items-start"> {/* Adicionado items-start para corrigir o alinhamento */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-12 items-start">
           <Card className={`lg:col-span-2 p-8 shadow-card border-2 ${isCompleted ? 'border-success/50 bg-success/5' : 'border-primary/20'}`}>
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -275,8 +276,8 @@ const Dashboard = () => {
               </Button>
             </Link>
           </Card>
-
-          <div className="space-y-8 animate-scale-in">
+          
+          <div className="flex flex-col gap-8 animate-scale-in">
             <Card className="p-6 shadow-card hover-lift">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <Trophy className="w-6 h-6 text-accent" />
@@ -299,6 +300,7 @@ const Dashboard = () => {
             </Card>
             <MemorizedVerses />
           </div>
+
         </div>
 
         {/* Quick Actions */}
