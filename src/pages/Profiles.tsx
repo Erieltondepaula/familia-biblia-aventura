@@ -124,13 +124,32 @@ const Profiles = () => {
             </div>
             <div>
               <Label>Versão da Bíblia</Label>
-              <RadioGroup value={form.bible_version} onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} className="flex gap-4">
-  <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="ver-acf" /><Label htmlFor="ver-acf">ACF</Label></div>
-  <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="ver-nvi" /><Label htmlFor="ver-nvi">NVI</Label></div>
-  <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="ver-ntlh" /><Label htmlFor="ver-ntlh">NTLH</Label></div>
-  {/* Linha adicionada abaixo */}
-  <div className="flex items-center space-x-2"><RadioGroupItem value="BKJ" id="ver-bkj" /><Label htmlFor="ver-bkj">BKJ</Label></div>
-</RadioGroup>
+              <RadioGroup 
+                value={form.bible_version} 
+                onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} 
+                className="grid grid-cols-2 gap-3 mt-2"
+              >
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="ACF" id="ver-acf" />
+                  <Label htmlFor="ver-acf" className="cursor-pointer flex-1">ACF</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="NVI" id="ver-nvi" />
+                  <Label htmlFor="ver-nvi" className="cursor-pointer flex-1">NVI</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="NTLH" id="ver-ntlh" />
+                  <Label htmlFor="ver-ntlh" className="cursor-pointer flex-1">NTLH</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="BKJ1611" id="ver-bkj" />
+                  <Label htmlFor="ver-bkj" className="cursor-pointer flex-1">BKJ 1611</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer col-span-2">
+                  <RadioGroupItem value="NAA" id="ver-naa" />
+                  <Label htmlFor="ver-naa" className="cursor-pointer flex-1">NAA</Label>
+                </div>
+              </RadioGroup>
             </div>
             <Button onClick={handleCreate}>
               <UserPlus className="w-4 h-4 mr-2"/>
@@ -168,15 +187,34 @@ const Profiles = () => {
                     <div className="flex items-center space-x-2"><RadioGroupItem value="filho" id="edit-role-filho" /><Label htmlFor="edit-role-filho">Filho(a)</Label></div>
                   </RadioGroup>
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <Label>Versão da Bíblia</Label>
-                  <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
-    <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="edit-ver-acf" /><Label htmlFor="edit-ver-acf">ACF</Label></div>
-    <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="edit-ver-nvi" /><Label htmlFor="edit-ver-nvi">NVI</Label></div>
-    <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="edit-ver-ntlh" /><Label htmlFor="edit-ver-ntlh">NTLH</Label></div>
-    {/* Linha adicionada abaixo */}
-    <div className="flex items-center space-x-2"><RadioGroupItem value="BKJ" id="edit-ver-bkj" /><Label htmlFor="edit-ver-bkj">BKJ</Label></div>
-</RadioGroup>
+                  <RadioGroup 
+                    value={currentProfile.bible_version} 
+                    onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} 
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2"
+                  >
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="ACF" id="edit-ver-acf" />
+                      <Label htmlFor="edit-ver-acf" className="cursor-pointer flex-1">ACF</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="NVI" id="edit-ver-nvi" />
+                      <Label htmlFor="edit-ver-nvi" className="cursor-pointer flex-1">NVI</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="NTLH" id="edit-ver-ntlh" />
+                      <Label htmlFor="edit-ver-ntlh" className="cursor-pointer flex-1">NTLH</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="BKJ1611" id="edit-ver-bkj" />
+                      <Label htmlFor="edit-ver-bkj" className="cursor-pointer flex-1">BKJ 1611</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer md:col-span-2">
+                      <RadioGroupItem value="NAA" id="edit-ver-naa" />
+                      <Label htmlFor="edit-ver-naa" className="cursor-pointer flex-1">NAA</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </div>
             </Card>
