@@ -2,9 +2,10 @@ import React, { createContext, useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
+// As definições de tipos e o contexto agora são exportadas daqui
 export type RoleType = "pai" | "mae" | "filho";
 export type Difficulty = "crianca" | "adolescente" | "adulto";
-export type BibleVersion = "ACF" | "NVI" | "NTLH";
+export type BibleVersion = 'ACF' | 'NVI' | 'NTLH' | 'BKJ1611' | 'NAA';
 
 export interface Profile {
   id: string;
@@ -22,13 +23,14 @@ export interface ProfileContextType {
   currentProfile: Profile | null;
   loading: boolean;
   setCurrentProfile: (id: string) => void;
-  addProfile: (data: Omit<Profile, "id" | "user_id">) => Promise<void>;
+  addProfile: (data: Omit<Profile, "id" | "user_id" | "avatar_url">) => Promise<void>;
   updateProfile: (id: string, updates: Partial<Omit<Profile, "id" | "user_id">>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
 }
 
 export const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
+// O componente Provider continua aqui
 export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -38,6 +40,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchProfiles = useCallback(async () => {
     if (!user) {
       setProfiles([]);
+      setCurrentProfileState(null);
       setLoading(false);
       return;
     }
@@ -57,14 +60,14 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [fetchProfiles]);
 
   useEffect(() => {
-    if (profiles.length > 0) {
+    if (profiles.length > 0 && !currentProfile) {
       const savedProfileId = localStorage.getItem('currentProfileId');
       const profileToSet = profiles.find(p => p.id === savedProfileId) || profiles[0];
       setCurrentProfileState(profileToSet);
-    } else {
+    } else if (profiles.length === 0) {
       setCurrentProfileState(null);
     }
-  }, [profiles]);
+  }, [profiles, currentProfile]);
 
   const setCurrentProfile = (id: string) => {
     const profile = profiles.find(p => p.id === id);
@@ -74,12 +77,12 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  const addProfile = async (data: Omit<Profile, "id" | "user_id">) => {
+  const addProfile = async (data: Omit<Profile, "id" | "user_id" | "avatar_url">) => {
     if (!user) return;
     const { data: newProfile, error } = await supabase.from('profiles').insert({ ...data, user_id: user.id }).select().single();
     if (error) console.error("Erro ao adicionar perfil:", error);
     else if (newProfile) {
-      setProfiles(prev => [...prev, newProfile as Profile]);
+      await fetchProfiles(); // Recarrega a lista para garantir consistência
       setCurrentProfile(newProfile.id);
     }
   };
@@ -89,20 +92,27 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (error) console.error("Erro ao atualizar perfil:", error);
     else {
       setProfiles(prev => prev.map(p => (p.id === id ? { ...p, ...updates } as Profile : p)));
+      if (currentProfile?.id === id) {
+        setCurrentProfileState(prev => prev ? { ...prev, ...updates } as Profile : null);
+      }
     }
   };
 
   const deleteProfile = async (id: string) => {
     const { error } = await supabase.from('profiles').delete().eq('id', id);
-    if (error) console.error("Erro ao deletar perfil:", error);
-    else {
+    if (error) {
+      console.error("Erro ao deletar perfil:", error);
+    } else {
       const newProfiles = profiles.filter(p => p.id !== id);
       setProfiles(newProfiles);
       if (currentProfile?.id === id) {
         const nextProfile = newProfiles[0] || null;
         setCurrentProfileState(nextProfile);
-        if (nextProfile) localStorage.setItem('currentProfileId', nextProfile.id);
-        else localStorage.removeItem('currentProfileId');
+        if (nextProfile) {
+          localStorage.setItem('currentProfileId', nextProfile.id);
+        } else {
+          localStorage.removeItem('currentProfileId');
+        }
       }
     }
   };

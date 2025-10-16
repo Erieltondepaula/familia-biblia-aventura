@@ -6,7 +6,7 @@ import { ProgressProvider } from "@/contexts/ProgressContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useAuth } from "./hooks/useAuth";
-import Layout from "./components/Layout"; // Adicionando o Layout
+import Layout from "./components/Layout";
 
 // Páginas
 import Index from "./pages/Index";
@@ -72,7 +72,12 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AuthProvider>
           <ProfileProvider>
             <ProgressProvider>

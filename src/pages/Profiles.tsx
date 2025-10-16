@@ -68,7 +68,10 @@ const Profiles = () => {
             {profiles.map(p => (
               <div key={p.id} className={`flex items-center justify-between p-4 rounded-lg border ${currentProfile?.id === p.id ? 'border-success/50 bg-success/5' : 'border-border'}`}>
                 <div>
-                  <p className="font-semibold">{p.name} <Badge className="ml-2">{p.role}</Badge></p>
+                  <div className="font-semibold flex items-center gap-2">
+                    <span>{p.name}</span>
+                    <Badge>{p.role}</Badge>
+                  </div>
                   <p className="text-sm text-muted-foreground">{p.age} anos • {p.difficulty} • {p.bible_version}</p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -121,10 +124,31 @@ const Profiles = () => {
             </div>
             <div>
               <Label>Versão da Bíblia</Label>
-              <RadioGroup value={form.bible_version} onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} className="flex gap-4">
-                <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="ver-acf" /><Label htmlFor="ver-acf">ACF</Label></div>
-                <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="ver-nvi" /><Label htmlFor="ver-nvi">NVI</Label></div>
-                <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="ver-ntlh" /><Label htmlFor="ver-ntlh">NTLH</Label></div>
+              <RadioGroup 
+                value={form.bible_version} 
+                onValueChange={(v) => setForm({ ...form, bible_version: v as BibleVersion })} 
+                className="grid grid-cols-2 gap-3 mt-2"
+              >
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="ACF" id="ver-acf" />
+                  <Label htmlFor="ver-acf" className="cursor-pointer flex-1">ACF</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="NVI" id="ver-nvi" />
+                  <Label htmlFor="ver-nvi" className="cursor-pointer flex-1">NVI</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="NTLH" id="ver-ntlh" />
+                  <Label htmlFor="ver-ntlh" className="cursor-pointer flex-1">NTLH</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="BKJ1611" id="ver-bkj" />
+                  <Label htmlFor="ver-bkj" className="cursor-pointer flex-1">BKJ 1611</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer col-span-2">
+                  <RadioGroupItem value="NAA" id="ver-naa" />
+                  <Label htmlFor="ver-naa" className="cursor-pointer flex-1">NAA</Label>
+                </div>
               </RadioGroup>
             </div>
             <Button onClick={handleCreate}>
@@ -163,12 +187,33 @@ const Profiles = () => {
                     <div className="flex items-center space-x-2"><RadioGroupItem value="filho" id="edit-role-filho" /><Label htmlFor="edit-role-filho">Filho(a)</Label></div>
                   </RadioGroup>
                 </div>
-                <div>
+                <div className="md:col-span-2">
                   <Label>Versão da Bíblia</Label>
-                  <RadioGroup value={currentProfile.bible_version} onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} className="flex gap-4">
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="ACF" id="edit-ver-acf" /><Label htmlFor="edit-ver-acf">ACF</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="NVI" id="edit-ver-nvi" /><Label htmlFor="edit-ver-nvi">NVI</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="NTLH" id="edit-ver-ntlh" /><Label htmlFor="edit-ver-ntlh">NTLH</Label></div>
+                  <RadioGroup 
+                    value={currentProfile.bible_version} 
+                    onValueChange={(v) => updateProfile(currentProfile.id, { bible_version: v as BibleVersion })} 
+                    className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2"
+                  >
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="ACF" id="edit-ver-acf" />
+                      <Label htmlFor="edit-ver-acf" className="cursor-pointer flex-1">ACF</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="NVI" id="edit-ver-nvi" />
+                      <Label htmlFor="edit-ver-nvi" className="cursor-pointer flex-1">NVI</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="NTLH" id="edit-ver-ntlh" />
+                      <Label htmlFor="edit-ver-ntlh" className="cursor-pointer flex-1">NTLH</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="BKJ1611" id="edit-ver-bkj" />
+                      <Label htmlFor="edit-ver-bkj" className="cursor-pointer flex-1">BKJ 1611</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer md:col-span-2">
+                      <RadioGroupItem value="NAA" id="edit-ver-naa" />
+                      <Label htmlFor="edit-ver-naa" className="cursor-pointer flex-1">NAA</Label>
+                    </div>
                   </RadioGroup>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Lightbulb, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,12 +62,27 @@ export const SuggestionsDialog = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="relative">
-          <Lightbulb className="w-5 h-5" />
-        </Button>
-      </DialogTrigger>
+    <TooltipProvider>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="relative bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 pulse-subtle"
+              >
+                <Lightbulb className="w-5 h-5 animate-pulse" />
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="bg-amber-500 text-white font-semibold">
+            <p className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              Enviar Sugestão de Melhoria
+            </p>
+          </TooltipContent>
+        </Tooltip>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -126,5 +142,6 @@ export const SuggestionsDialog = () => {
         </div>
       </DialogContent>
     </Dialog>
+  </TooltipProvider>
   );
 };
