@@ -8,6 +8,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Open the default browser automatically when running `npm run dev` in development
+    open: mode === 'development',
   },
   plugins: [
     react(),

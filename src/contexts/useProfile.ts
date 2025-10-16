@@ -1,6 +1,7 @@
 // Caminho: src/hooks/useProfile.ts
 import { useContext } from 'react';
-import { ProfileContext, ProfileContextType } from '@/contexts/ProfileContext';
+import { ProfileContext } from '@/contexts/profileContextDef';
+import type { ProfileContextType } from '@/contexts/profileContextDef';
 
 export const useProfile = (): ProfileContextType => {
   const context = useContext(ProfileContext);

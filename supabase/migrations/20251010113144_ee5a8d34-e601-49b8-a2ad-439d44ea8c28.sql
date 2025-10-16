@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   age INTEGER NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('pai', 'mae', 'filho')),
   difficulty TEXT NOT NULL CHECK (difficulty IN ('crianca', 'adolescente', 'adulto')),
-  bible_version TEXT NOT NULL CHECK (bible_version IN ('ACF', 'NVI', 'NTLH')),
+  -- LINHA CORRIGIDA ABAIXO --
+  bible_version TEXT NOT NULL CHECK (bible_version IN ('ACF', 'NVI', 'NTLH', 'BKJ1611', 'NAA')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -80,24 +81,24 @@ CREATE POLICY "Usuários podem deletar seus próprios perfis"
 CREATE POLICY "Usuários podem ver progresso de seus perfis"
   ON public.reading_progress FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = reading_progress.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = reading_progress.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem inserir progresso de seus perfis"
   ON public.reading_progress FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = reading_progress.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = reading_progress.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem atualizar progresso de seus perfis"
   ON public.reading_progress FOR UPDATE
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = reading_progress.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = reading_progress.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
@@ -105,32 +106,32 @@ CREATE POLICY "Usuários podem atualizar progresso de seus perfis"
 CREATE POLICY "Usuários podem ver anotações de seus perfis"
   ON public.chapter_notes FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = chapter_notes.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = chapter_notes.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem inserir anotações de seus perfis"
   ON public.chapter_notes FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = chapter_notes.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = chapter_notes.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem atualizar anotações de seus perfis"
   ON public.chapter_notes FOR UPDATE
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = chapter_notes.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = chapter_notes.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem deletar anotações de seus perfis"
   ON public.chapter_notes FOR DELETE
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = chapter_notes.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = chapter_notes.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
@@ -138,16 +139,16 @@ CREATE POLICY "Usuários podem deletar anotações de seus perfis"
 CREATE POLICY "Usuários podem ver versículos memorizados de seus perfis"
   ON public.memorized_verses FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = memorized_verses.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = memorized_verses.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem inserir versículos memorizados de seus perfis"
   ON public.memorized_verses FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = memorized_verses.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = memorized_verses.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
@@ -155,24 +156,24 @@ CREATE POLICY "Usuários podem inserir versículos memorizados de seus perfis"
 CREATE POLICY "Usuários podem ver estatísticas de seus perfis"
   ON public.profile_stats FOR SELECT
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = profile_stats.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = profile_stats.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem inserir estatísticas de seus perfis"
   ON public.profile_stats FOR INSERT
   WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = profile_stats.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = profile_stats.profile_id
     AND profiles.user_id = auth.uid()
   ));
 
 CREATE POLICY "Usuários podem atualizar estatísticas de seus perfis"
   ON public.profile_stats FOR UPDATE
   USING (EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = profile_stats.profile_id 
+    SELECT 1 FROM public.profiles
+    WHERE profiles.id = profile_stats.profile_id
     AND profiles.user_id = auth.uid()
   ));
 

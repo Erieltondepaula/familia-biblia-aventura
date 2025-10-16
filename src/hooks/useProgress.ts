@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { ProgressContext } from '@/contexts/ProgressContext';
-import type { ProgressContextType } from '@/contexts/ProgressContext';
+import ProgressContext from '@/contexts/progressContextDef';
+import type { ProgressContextType } from '@/contexts/progressContextDef';
 
 export const useProgress = () => {
   const context = useContext(ProgressContext);

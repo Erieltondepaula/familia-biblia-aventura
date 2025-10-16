@@ -20,7 +20,7 @@ import {
   CalendarDays
 } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useProgress } from "@/contexts/ProgressContext";
+import { useProgress } from "@/contexts/useProgress";
 import { useProfile } from "@/hooks/useProfile";
 import { getReadingByDay, readingPlan, getCurrentDayNumber } from "@/lib/readingPlanData";
 import { saveReflection, getReflection } from "@/lib/reflectionsStorage";

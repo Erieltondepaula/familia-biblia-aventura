@@ -16,9 +16,17 @@ export const useAdmin = () => {
       }
 
       try {
+        // Allow explicit email override for the main admin account
+        const ADMIN_EMAIL_OVERRIDE = 'erieltondepaulamelo@gmail.com';
+        if (user.email && user.email.toLowerCase() === ADMIN_EMAIL_OVERRIDE.toLowerCase()) {
+          setIsAdmin(true);
+          setLoading(false);
+          return;
+        }
+
         const { data, error } = await supabase
           .rpc('has_role', { _user_id: user.id, _role: 'admin' });
-        
+
         if (error) {
           console.error('Erro ao verificar admin:', error);
           setIsAdmin(false);

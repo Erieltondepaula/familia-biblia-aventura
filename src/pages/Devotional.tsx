@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,16 +21,7 @@ const Devotional = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    document.title = 'Devocional | Jornada Bíblica';
-    if (currentProfile && todayReading) {
-      loadDevotionalProgress();
-    } else if (!todayReading) {
-      setLoading(false);
-    }
-  }, [currentProfile, todayReading]);
-
-  const loadDevotionalProgress = async () => {
+  const loadDevotionalProgress = useCallback(async () => {
     if (!currentProfile || !todayReading) return;
 
     setLoading(true);
@@ -59,7 +50,16 @@ const Devotional = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentProfile, todayReading]);
+
+  useEffect(() => {
+    document.title = 'Devocional | Jornada Bíblica';
+    if (currentProfile && todayReading) {
+      loadDevotionalProgress();
+    } else if (!todayReading) {
+      setLoading(false);
+    }
+  }, [loadDevotionalProgress, currentProfile, todayReading]);
 
   const handleComplete = async () => {
     if (!currentProfile || !todayReading) return;

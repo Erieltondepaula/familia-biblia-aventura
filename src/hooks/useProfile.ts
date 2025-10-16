@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { ProfileContext } from '@/contexts/ProfileContext';
-import type { ProfileContextType } from '@/contexts/ProfileContext';
+import { ProfileContext } from '@/contexts/profileContextDef';
+import type { ProfileContextType } from '@/contexts/profileContextDef';
 
 export const useProfile = (): ProfileContextType => {
   const context = useContext(ProfileContext);

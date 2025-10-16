@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode, useCallback } from 'react';
+import React, { useContext, useState, useEffect, useMemo, ReactNode, useCallback } from 'react';
+import ProgressContextDef, { ProgressContextType, CompletedReading } from './progressContextDef';
 import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
 import { useProfile } from '@/hooks/useProfile';
 import { 
@@ -9,29 +10,7 @@ import {
   addXPToProfile 
 } from '@/lib/supabaseStorage';
 
-interface CompletedReading {
-  day: number;
-  chapters: string[];
-  completedAt: string;
-}
 
-export interface ProgressContextType {
-  xp: number;
-  level: number;
-  levelName: string;
-  completedReadings: CompletedReading[];
-  currentStreak: number;
-  totalDaysRead: number;
-  bibleProgress: number;
-  xpToNextLevel: number;
-  totalChaptersRead: () => number;
-  markChapterAsRead: (day: number, chapters: string[]) => void;
-  addXP: (amount: number) => void;
-  isChapterCompleted: (day: number) => boolean;
-  resetProgress: () => void;
-}
-
-export const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
 export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { currentProfile } = useProfile();
@@ -177,7 +156,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   if (loading) {
     return (
-      <ProgressContext.Provider
+      <ProgressContextDef.Provider
         value={{
           xp: 0,
           level: 0,
@@ -195,12 +174,12 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
         }}
       >
         {children}
-      </ProgressContext.Provider>
+      </ProgressContextDef.Provider>
     );
   }
 
   return (
-    <ProgressContext.Provider
+    <ProgressContextDef.Provider
       value={{
         xp,
         level,
@@ -218,13 +197,8 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
       }}
     >
       {children}
-    </ProgressContext.Provider>
+    </ProgressContextDef.Provider>
   );
 };
 
-// ✅ Hook useProgress integrado
-export const useProgress = (): ProgressContextType => {
-  const context = useContext(ProgressContext);
-  if (!context) throw new Error("useProgress must be used within a ProgressProvider");
-  return context;
-};
+// Hook moved to src/contexts/useProgress.ts to satisfy react-refresh rule (file now only exports components)

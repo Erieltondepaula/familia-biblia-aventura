@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/hooks/useAuth";
-import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
+import { RoleType, Difficulty, BibleVersion } from "@/contexts/profileContextDef";
 import { useProgress } from "@/hooks/useProgress";
 import { ArrowLeft, RotateCcw, Calendar, LogOut } from "lucide-react";
 import { Label } from "@/components/ui/label";

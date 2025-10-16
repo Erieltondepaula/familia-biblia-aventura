@@ -6,7 +6,8 @@ CREATE TABLE public.profiles (
   age integer NOT NULL,
   role text NOT NULL,
   difficulty text NOT NULL,
-  bible_version text NOT NULL,
+  -- LINHA CORRIGIDA ABAIXO --
+  bible_version text NOT NULL CHECK (bible_version IN ('ACF', 'NVI', 'NTLH', 'BKJ1611', 'NAA')),
   created_at timestamptz DEFAULT now()
 );
 

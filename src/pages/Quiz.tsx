@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Target, CheckCircle2, XCircle } from "lucide-react";
 import { getReadingByDay, getCurrentDayNumber } from "@/lib/mccheyneReadingPlan";
-import { useProgress } from "@/contexts/ProgressContext"; // <-- CORREÇÃO DA IMPORTAÇÃO
+import { useProgress } from "@/contexts/useProgress";
 import { awardQuizXP } from "@/lib/progressCalculations";
 import { generateQuiz, QuizQuestion } from "@/lib/quizGenerator";
 import { toast } from "sonner";

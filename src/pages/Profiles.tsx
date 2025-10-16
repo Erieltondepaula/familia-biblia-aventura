@@ -19,7 +19,7 @@ import {
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { Link } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
-import { RoleType, Difficulty, BibleVersion } from "@/contexts/ProfileContext";
+import { RoleType, Difficulty, BibleVersion } from "@/contexts/profileContextDef";
 import { ArrowLeft, UserPlus, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -252,3 +252,4 @@ const Profiles = () => {
 };
 
 export default Profiles;
+
