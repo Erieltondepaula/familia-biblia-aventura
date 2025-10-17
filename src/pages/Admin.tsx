@@ -65,14 +65,12 @@ const Admin = () => {
       setSuggestions(suggestionsData || []);
 
       // CORREÇÃO AQUI (Erro 1): Especificamos o tipo de retorno da função
-      const { data: usersData, error: functionsError } = await supabase.functions.invoke<{ users: User[] }>('get-all-users');
+      const { data: usersData, error: functionsError } = await supabase.functions.invoke('get-all-users');
       
       if (functionsError) throw functionsError;
 
-      // Agora o `u` aqui é automaticamente reconhecido como do tipo `User`, sem precisar do `any`
-      if (usersData && usersData.users) {
-        setUsers(usersData.users);
-      }
+      const usersList = (usersData as { users?: User[] } | null)?.users ?? [];
+      setUsers(usersList);
 
     } catch (error) { // CORREÇÃO AQUI (Erro 2): Removemos o `:any` e tratamos o erro de forma segura
       console.error('Erro ao carregar dados do admin:', error);
