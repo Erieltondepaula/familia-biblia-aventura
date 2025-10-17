@@ -1,6 +1,6 @@
 // Cole isto em: supabase/functions/get-all-users/index.ts
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.74.0'
 
 // Cabeçalhos CORS colocados diretamente aqui para garantir que funcionem
 const corsHeaders = {

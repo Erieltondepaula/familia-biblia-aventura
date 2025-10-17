@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, MessageSquare, Edit, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Users, MessageSquare, Save, Edit, Eye, EyeOff } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AdminUserRow } from '@/components/AdminUserRow';
 
+// Tipos de dados
 interface Suggestion {
   id: string;
-  user_email: string;
+  user_id: string;
   title: string;
   module: string;
   description: string;
-  status: string;
+  status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }
 
@@ -39,9 +39,12 @@ const Admin = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [suggestionToDelete, setSuggestionToDelete] = useState<Suggestion | null>(null);
   const [suggestionToEdit, setSuggestionToEdit] = useState<Suggestion | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
 
   useEffect(() => {
     document.title = 'Administração | Jornada Bíblica';
@@ -56,25 +59,19 @@ const Admin = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const { data: suggestionsData, error: suggestionsError } = await supabase
-        .from('suggestions')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const [suggestionsResult, usersResult] = await Promise.all([
+        supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
+        supabase.functions.invoke('get-all-users')
+      ]);
 
-      if (suggestionsError) throw suggestionsError;
-      setSuggestions(suggestionsData || []);
+      if (suggestionsResult.error) throw suggestionsResult.error;
+      setSuggestions((suggestionsResult.data as Suggestion[]) || []);
 
-      // CORREÇÃO AQUI (Erro 1): Especificamos o tipo de retorno da função
-      const { data: usersData, error: functionsError } = await supabase.functions.invoke<{ users: User[] }>('get-all-users');
-      
-      if (functionsError) throw functionsError;
+      if (usersResult.error) throw usersResult.error;
+      const usersList = (usersResult.data as { users?: User[] } | null)?.users ?? [];
+      setUsers(usersList);
 
-      // Agora o `u` aqui é automaticamente reconhecido como do tipo `User`, sem precisar do `any`
-      if (usersData && usersData.users) {
-        setUsers(usersData.users);
-      }
-
-    } catch (error) { // CORREÇÃO AQUI (Erro 2): Removemos o `:any` e tratamos o erro de forma segura
+    } catch (error) {
       console.error('Erro ao carregar dados do admin:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar dados do admin.';
       toast.error(errorMessage);
@@ -82,10 +79,29 @@ const Admin = () => {
       setLoading(false);
     }
   };
+  
+  const handleUpdateSuggestionStatus = async (suggestion: Suggestion, status: Suggestion['status']) => {
+    const originalStatus = suggestion.status;
+    setSuggestions(suggestions.map(s => s.id === suggestion.id ? { ...s, status } : s));
+
+    const { error } = await supabase.from('suggestions').update({ status }).eq('id', suggestion.id);
+
+    if (error) {
+        toast.error(`Falha ao ${status === 'approved' ? 'aprovar' : 'rejeitar'} sugestão.`);
+        setSuggestions(suggestions.map(s => s.id === suggestion.id ? { ...s, status: originalStatus } : s));
+    } else {
+        toast.success(`Sugestão ${status === 'approved' ? 'aprovada' : 'rejeitada'}!`);
+    }
+  };
 
   const handleUpdateSuggestion = async () => {
     if (!suggestionToEdit) return;
-    const { error } = await supabase.from('suggestions').update({ title: suggestionToEdit.title, module: suggestionToEdit.module, description: suggestionToEdit.description, status: suggestionToEdit.status }).eq('id', suggestionToEdit.id);
+    const { error } = await supabase.from('suggestions').update({ 
+      title: suggestionToEdit.title, 
+      module: suggestionToEdit.module, 
+      description: suggestionToEdit.description, 
+      status: suggestionToEdit.status 
+    }).eq('id', suggestionToEdit.id);
     if (error) {
       toast.error('Falha ao atualizar sugestão.');
     } else {
@@ -95,40 +111,62 @@ const Admin = () => {
     }
   };
 
-  const handleDeleteSuggestion = async () => {
-    if (!suggestionToDelete) return;
-    const { error } = await supabase.from('suggestions').delete().eq('id', suggestionToDelete.id);
-    if (error) {
-      toast.error('Falha ao remover sugestão.');
-    } else {
-      toast.success('Sugestão removida!');
-      setSuggestions(suggestions.filter(s => s.id !== suggestionToDelete.id));
-      setSuggestionToDelete(null);
-    }
-  };
-
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     try {
       const { error } = await supabase.functions.invoke('delete-user', {
         body: { userId: userToDelete.id },
       });
-
       if (error) throw error;
-
       toast.success('Usuário removido!');
       setUsers(users.filter(u => u.id !== userToDelete.id));
       setUserToDelete(null);
-    } catch (error) { // CORREÇÃO AQUI (Erro 3): Removemos o `:any` e tratamos o erro de forma segura
+    } catch (error) {
       const errorMessage = error instanceof Error ? `Falha ao remover usuário: ${error.message}` : 'Falha ao remover usuário.';
       toast.error(errorMessage);
     }
   };
+  
+  const handleUpdateUser = async () => {
+    if (!userToEdit) return;
+
+    if (newPassword) {
+        if (newPassword.length < 6) {
+            toast.error("A nova senha deve ter no mínimo 6 caracteres.");
+            return;
+        }
+        try {
+            const { error } = await supabase.functions.invoke('update-user-password', {
+                body: { userId: userToEdit.id, password: newPassword },
+            });
+            if (error) throw error;
+            toast.success(`Senha do usuário ${userToEdit.email} atualizada!`);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? `Falha ao atualizar senha: ${error.message}` : 'Falha ao atualizar senha.';
+            toast.error(errorMessage);
+            return; 
+        }
+    }
+    
+    toast.info("Funcionalidade de edição de outros dados do usuário a ser implementada.");
+
+    setUserToEdit(null);
+    setNewPassword('');
+  };
+
+
+  const handleBlockUser = (user: User) => {
+      toast.info(`Funcionalidade para bloquear ${user.email} a ser implementada.`);
+  };
+
+  const handleUnblockUser = (user: User) => {
+      toast.info(`Funcionalidade para desbloquear ${user.email} a ser implementada.`);
+  };
 
   if (adminLoading || !isAdmin) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
+      <div className="flex items-center justify-center min-h-screen bg-slate-900">
+        <div className="text-center space-y-4 text-white">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
           <p>Verificando permissões...</p>
         </div>
@@ -136,221 +174,163 @@ const Admin = () => {
     );
   }
 
-  // O restante do código (a parte visual) continua o mesmo
   return (
-    <div className="min-h-screen bg-muted/20">
-      <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
-        <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-slate-900 text-white">
+      <header className="bg-gradient-to-r from-blue-600 to-green-500 shadow-lg">
+        <div className="container mx-auto px-8 py-4">
           <div className="flex items-center gap-4">
             <Link to="/dashboard">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 btn-interactive"><ArrowLeft className="w-6 h-6" /></Button>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20"><ArrowLeft className="w-6 h-6" /></Button>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="w-6 h-6" />Painel de Administração</h1>
+              <h1 className="text-2xl font-bold">Painel de Administração</h1>
               <p className="text-sm text-white/80">Gerencie sugestões e usuários do sistema.</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
-        {/* Estatísticas Rápidas */}
-        <section>
-            <h2 className="text-xl font-bold mb-4">Visão Geral</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 animate-slide-up">
-                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Usuários Totais</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{users.length}</div></CardContent></Card>
-                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Total de Sugestões</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold">{suggestions.length}</div></CardContent></Card>
-                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Sugestões Pendentes</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-amber-600">{suggestions.filter(s => s.status === 'pending').length}</div></CardContent></Card>
-                <Card className="hover-lift"><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">Sugestões Aprovadas</CardTitle></CardHeader><CardContent><div className="text-3xl font-bold text-green-600">{suggestions.filter(s => s.status === 'approved').length}</div></CardContent></Card>
-            </div>
-        </section>
-
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
-          {/* Usuários Cadastrados - Lado Esquerdo */}
-          <Card className="hover-lift animate-fade-in">
-            <CardHeader className="bg-gradient-faith text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5" /> 
-                Usuários Cadastrados
-              </CardTitle>
-              <CardDescription className="text-white/80">
-                Visualize e gerencie os usuários do sistema.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 w-full" />)}
-                </div>
-              ) : users.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhum usuário cadastrado</p>
-                </div>
-              ) : (
-                <div className="max-h-[600px] overflow-y-auto pr-2 space-y-2">
-                  <Table>
-                    <TableHeader className="sticky top-0 bg-background z-10">
-                      <TableRow>
-                        <TableHead className="font-bold">Email</TableHead>
-                        <TableHead className="font-bold">Status</TableHead>
-                        <TableHead className="font-bold">Último Login</TableHead>
-                        <TableHead className="text-right font-bold">Ações</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.map(user => (
-                        <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
-                          <TableCell className="font-medium">
-                            {user.email}
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={user.last_sign_in_at ? 'default' : 'secondary'}
-                              className="hover-scale"
-                            >
-                              {user.last_sign_in_at ? '🟢 Ativo' : '⚪ Inativo'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {user.last_sign_in_at 
-                              ? new Date(user.last_sign_in_at).toLocaleString('pt-BR', {
-                                  day: '2-digit',
-                                  month: '2-digit', 
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })
-                              : 'Nunca'}
-                          </TableCell>
-                          <TableCell className="text-right space-x-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="hover-scale hover:bg-blue-500/10"
-                              title="Editar usuário"
-                            >
-                              <Edit className="w-4 h-4 text-blue-500" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="hover-scale hover:bg-destructive/10" 
-                              onClick={() => setUserToDelete(user)}
-                              title="Remover usuário"
-                            >
-                              <Trash2 className="w-4 h-4 text-destructive" />
-                            </Button>
-                          </TableCell>
+      <main className="p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+          
+          <div className="lg:col-span-3 space-y-8">
+             <div className="bg-slate-800 rounded-xl shadow-md">
+              <div className="bg-blue-600 p-4 rounded-t-xl text-white font-semibold flex items-center justify-between">
+                <span>Usuários Cadastrados</span>
+                <span className="text-sm text-blue-100">Visualize e gerencie os usuários do sistema</span>
+              </div>
+              <div className="p-6">
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-12 w-full bg-slate-700" />)}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-slate-700 hover:bg-slate-700/50">
+                          <TableHead className="text-gray-400 text-sm uppercase">Email</TableHead>
+                          <TableHead className="text-gray-400 text-sm uppercase">Status</TableHead>
+                          <TableHead className="text-gray-400 text-sm uppercase">Último Login</TableHead>
+                          <TableHead className="text-right font-bold w-[150px] text-gray-400 text-sm uppercase">Ações</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      </TableHeader>
+                      <TableBody>
+                        {users.length === 0 ? (
+                           <TableRow><TableCell colSpan={4} className="h-24 text-center text-gray-400 border-slate-700">Nenhum usuário cadastrado.</TableCell></TableRow>
+                        ) : (
+                          users.map(user => (
+                            <AdminUserRow 
+                              key={user.id} 
+                              user={user}
+                              onEdit={() => setUserToEdit(user)}
+                              onDelete={() => setUserToDelete(user)}
+                              onBlock={handleBlockUser}
+                              onUnblock={handleUnblockUser}
+                            />
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-          {/* Sugestões de Melhoria - Lado Direito */}
-          <Card className="hover-lift animate-fade-in">
-            <CardHeader className="bg-gradient-growth text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5" /> 
-                Sugestões de Melhoria
-              </CardTitle>
-              <CardDescription className="text-white/80">
-                Gerencie as sugestões enviadas pelos usuários.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full" />)}
+          <div className="lg:col-span-2 space-y-8">
+            <div>
+                <h2 className="text-xl font-bold mb-4 text-white">Visão Geral</h2>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-800 p-4 rounded-lg text-center">
+                        <p className="text-gray-400 text-sm">Usuários Totais</p>
+                        <div className="text-2xl font-bold text-white mt-1">{loading ? <Skeleton className="h-8 w-1/2 mx-auto bg-slate-700" /> : users.length}</div>
+                    </div>
+                    <div className="bg-slate-800 p-4 rounded-lg text-center">
+                        <p className="text-gray-400 text-sm">Total de Sugestões</p>
+                        <div className="text-2xl font-bold text-white mt-1">{loading ? <Skeleton className="h-8 w-1/2 mx-auto bg-slate-700" /> : suggestions.length}</div>
+                    </div>
+                     <div className="bg-slate-800 p-4 rounded-lg text-center">
+                        <p className="text-gray-400 text-sm">Sugestões Pendentes</p>
+                        <div className="text-2xl font-bold text-amber-400 mt-1">{loading ? <Skeleton className="h-8 w-1/2 mx-auto bg-slate-700" /> : suggestions.filter(s => s.status === 'pending').length}</div>
+                    </div>
+                    <div className="bg-slate-800 p-4 rounded-lg text-center">
+                        <p className="text-gray-400 text-sm">Sugestões Aprovadas</p>
+                        <div className="text-2xl font-bold text-green-400 mt-1">{loading ? <Skeleton className="h-8 w-1/2 mx-auto bg-slate-700" /> : suggestions.filter(s => s.status === 'approved').length}</div>
+                    </div>
                 </div>
-              ) : suggestions.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nenhuma sugestão registrada</p>
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                  {suggestions.map(suggestion => (
-                    <Card 
-                      key={suggestion.id} 
-                      className="border-l-4 hover-lift animate-scale-in transition-all duration-300" 
-                      style={{ 
-                        borderColor: suggestion.status === 'approved' 
-                          ? 'hsl(var(--success))' 
-                          : suggestion.status === 'rejected' 
-                          ? 'hsl(var(--destructive))' 
-                          : 'hsl(var(--border))' 
-                      }}
-                    >
-                      <CardContent className="pt-4">
-                        <div className="flex justify-between items-start mb-2 gap-2">
-                          <span className="font-bold text-base flex-1">{suggestion.title}</span>
-                          <Badge 
-                            variant={
-                              suggestion.status === 'approved' 
-                                ? 'default' 
-                                : suggestion.status === 'rejected' 
-                                ? 'destructive' 
-                                : 'secondary'
-                            } 
-                            className="hover-scale"
-                          >
-                            {suggestion.status === 'approved' 
-                              ? '✓ Aprovada' 
-                              : suggestion.status === 'rejected' 
-                              ? '✗ Rejeitada' 
-                              : '⏳ Pendente'}
-                          </Badge>
+            </div>
+
+            <div className="bg-slate-800 rounded-xl shadow-md">
+              <div className="bg-green-600 p-4 rounded-t-xl text-white font-semibold flex items-center justify-between">
+                <span>Sugestões de Melhoria</span>
+                <span className="text-sm text-green-100">Gerencie as sugestões enviadas</span>
+              </div>
+              <div className="p-6">
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full bg-slate-700" />)}
+                  </div>
+                ) : suggestions.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhuma sugestão registrada</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {suggestions.map(suggestion => (
+                      <div key={suggestion.id} className="bg-slate-900 p-4 rounded-lg shadow-sm space-y-3 border border-slate-700">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400 text-xs">
+                            {suggestion.module} | {new Date(suggestion.created_at).toLocaleDateString()}
+                          </span>
+                          <span className={`text-xs px-2 py-1 rounded-full text-white ${
+                            suggestion.status === 'approved' ? 'bg-green-700' :
+                            suggestion.status === 'pending' ? 'bg-amber-600' : 'bg-red-700'
+                          }`}>
+                            {suggestion.status === 'approved' ? 'Aprovada' :
+                             suggestion.status === 'pending' ? 'Pendente' : 'Rejeitada'}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Badge variant="outline" className="text-xs">
-                            {suggestion.module}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground">
-                            {suggestion.user_email} • {new Date(suggestion.created_at).toLocaleDateString('pt-BR')}
-                          </p>
-                        </div>
-                        <p className="text-sm p-3 bg-muted/50 rounded-md border border-border/50">
-                          {suggestion.description}
+
+                        <p className="text-gray-200 text-sm">
+                          <strong>Título:</strong> {suggestion.title}<br />
+                          <strong>Descrição:</strong> {suggestion.description}
                         </p>
-                        <div className="flex gap-2 mt-4">
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="btn-interactive hover-lift flex-1" 
-                            onClick={() => setSuggestionToEdit(suggestion)}
-                          >
-                            <Edit className="w-4 h-4 mr-2" /> 
-                            Editar
+
+                        <div className="flex justify-end gap-3 pt-2">
+                          <Button size="sm" onClick={() => setSuggestionToEdit(suggestion)} variant="outline" className="text-xs bg-blue-600 border-blue-500 hover:bg-blue-700 text-white flex items-center gap-1">
+                            <Edit className="w-3 h-3" /> Editar
+                          </Button>
+                          <Button size="sm" onClick={() => handleUpdateSuggestionStatus(suggestion, 'approved')} className="text-xs bg-green-600 hover:bg-green-700">
+                            Aprovar
+                          </Button>
+                          <Button size="sm" onClick={() => handleUpdateSuggestionStatus(suggestion, 'rejected')} className="text-xs bg-red-600 hover:bg-red-700">
+                            Rejeitar
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* Modal de Edição de Sugestão */}
       <Dialog open={!!suggestionToEdit} onOpenChange={() => setSuggestionToEdit(null)}>
-        <DialogContent>
+        <DialogContent className="bg-slate-800 border-slate-700 text-white">
           <DialogHeader><DialogTitle>Editar Sugestão</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <div><label className="text-sm font-medium">Título</label><Input value={suggestionToEdit?.title || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, title: e.target.value} : null)} /></div>
-            <div><label className="text-sm font-medium">Módulo</label><Input value={suggestionToEdit?.module || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, module: e.target.value} : null)} /></div>
-            <div><label className="text-sm font-medium">Descrição</label><Textarea value={suggestionToEdit?.description || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, description: e.target.value} : null)} rows={5} /></div>
+            <div><label className="text-sm font-medium">Título</label><Input className="bg-slate-700 border-slate-600" value={suggestionToEdit?.title || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, title: e.target.value} : null)} /></div>
+            <div><label className="text-sm font-medium">Módulo</label><Input className="bg-slate-700 border-slate-600" value={suggestionToEdit?.module || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, module: e.target.value} : null)} /></div>
+            <div><label className="text-sm font-medium">Descrição</label><Textarea className="bg-slate-700 border-slate-600" value={suggestionToEdit?.description || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, description: e.target.value} : null)} rows={5} /></div>
             <div>
               <label className="text-sm font-medium">Status</label>
-              <Select onValueChange={(value) => setSuggestionToEdit(s => s ? {...s, status: value} : null)} value={suggestionToEdit?.status}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
+              <Select onValueChange={(value) => setSuggestionToEdit(s => s ? {...s, status: value as Suggestion['status']} : null)} value={suggestionToEdit?.status}>
+                <SelectTrigger className="bg-slate-700 border-slate-600"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   <SelectItem value="pending">Pendente</SelectItem>
                   <SelectItem value="approved">Aprovada</SelectItem>
                   <SelectItem value="rejected">Rejeitada</SelectItem>
@@ -364,22 +344,52 @@ const Admin = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={!!userToEdit} onOpenChange={(isOpen) => { if (!isOpen) { setUserToEdit(null); setNewPassword(''); setShowPassword(false); } }}>
+        <DialogContent className="bg-slate-800 border-slate-700 text-white">
+          <DialogHeader><DialogTitle>Editar Usuário</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                className="bg-slate-700 border-slate-600"
+                value={userToEdit?.email || ''}
+                disabled
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Nova Senha</label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  className="bg-slate-700 border-slate-600 pr-10"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute inset-y-0 right-0 h-full px-3 text-slate-400 hover:text-white"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+              </div>
+               <p className="text-xs text-slate-400 mt-1">Deixe em branco para não alterar a senha.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
+            <Button onClick={handleUpdateUser}><Save className="w-4 h-4 mr-2" /> Salvar Alterações</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* Diálogo de Confirmação - Remover Sugestão */}
-      <AlertDialog open={!!suggestionToDelete} onOpenChange={() => setSuggestionToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle><AlertDialogDescription>Tem certeza que deseja remover esta sugestão? Esta ação não pode ser desfeita.</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSuggestion} className="bg-destructive">Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Diálogo de Confirmação - Remover Usuário */}
       <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Confirmar Exclusão de Usuário</AlertDialogTitle><AlertDialogDescription>Tem certeza que deseja remover o usuário <span className="font-bold">{userToDelete?.email}</span>? Todos os seus dados serão perdidos. Esta ação é irreversível.</AlertDialogDescription></AlertDialogHeader>
+        <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
+          <AlertDialogHeader><AlertDialogTitle>Confirmar Exclusão de Usuário</AlertDialogTitle><AlertDialogDescription className="text-slate-400">Tem certeza que deseja remover o usuário <span className="font-bold text-white">{userToDelete?.email}</span>? Todos os seus dados serão perdidos. Esta ação é irreversível.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive">Confirmar Exclusão</AlertDialogAction>
@@ -391,3 +401,4 @@ const Admin = () => {
 };
 
 export default Admin;
+

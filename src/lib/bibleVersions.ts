@@ -53,7 +53,7 @@ export const bibleVersions: Record<BibleVersionCode, BibleVersionInfo> = {
   }
 };
 
-// Book abbreviation mapping for URLs
+// Book abbreviation mapping for URLs (ACF, NVI, NTLH, NAA)
 export const bookUrlMap: Record<string, string> = {
   'Gênesis': 'gn',
   'Êxodo': 'ex',
@@ -123,6 +123,76 @@ export const bookUrlMap: Record<string, string> = {
   'Apocalipse': 'ap'
 };
 
+// Book name mapping for BKJ 1611 (uses full names in lowercase with hyphens)
+export const bookUrlMapBKJ: Record<string, string> = {
+  'Gênesis': 'genesis',
+  'Êxodo': 'exodo',
+  'Levítico': 'levitico',
+  'Números': 'numeros',
+  'Deuteronômio': 'deuteronomio',
+  'Josué': 'josue',
+  'Juízes': 'juizes',
+  'Rute': 'rute',
+  '1 Samuel': '1-samuel',
+  '2 Samuel': '2-samuel',
+  '1 Reis': '1-reis',
+  '2 Reis': '2-reis',
+  '1 Crônicas': '1-cronicas',
+  '2 Crônicas': '2-cronicas',
+  'Esdras': 'esdras',
+  'Neemias': 'neemias',
+  'Ester': 'ester',
+  'Jó': 'jo',
+  'Salmos': 'salmos',
+  'Provérbios': 'proverbios',
+  'Eclesiastes': 'eclesiastes',
+  'Cantares': 'cantares',
+  'Isaías': 'isaias',
+  'Jeremias': 'jeremias',
+  'Lamentações': 'lamentacoes',
+  'Ezequiel': 'ezequiel',
+  'Daniel': 'daniel',
+  'Oseias': 'oseias',
+  'Joel': 'joel',
+  'Amós': 'amos',
+  'Obadias': 'obadias',
+  'Jonas': 'jonas',
+  'Miqueias': 'miqueias',
+  'Naum': 'naum',
+  'Habacuque': 'habacuque',
+  'Sofonias': 'sofonias',
+  'Ageu': 'ageu',
+  'Zacarias': 'zacarias',
+  'Malaquias': 'malaquias',
+  'Mateus': 'mateus',
+  'Marcos': 'marcos',
+  'Lucas': 'lucas',
+  'João': 'joao',
+  'Atos': 'atos',
+  'Romanos': 'romanos',
+  '1 Coríntios': '1-corintios',
+  '2 Coríntios': '2-corintios',
+  'Gálatas': 'galatas',
+  'Efésios': 'efesios',
+  'Filipenses': 'filipenses',
+  'Colossenses': 'colossenses',
+  '1 Tessalonicenses': '1-tessalonicenses',
+  '2 Tessalonicenses': '2-tessalonicenses',
+  '1 Timóteo': '1-timoteo',
+  '2 Timóteo': '2-timoteo',
+  'Tito': 'tito',
+  'Filemon': 'filemom',
+  'Hebreus': 'hebreus',
+  'Tiago': 'tiago',
+  '1 Pedro': '1-pedro',
+  '2 Pedro': '2-pedro',
+  '1 João': '1-joao',
+  '2 João': '2-joao',
+  '3 João': '3-joao',
+  'Judas': 'judas',
+  'Apocalipse': 'apocalipse'
+};
+
 /**
  * Generate Bible reading URL for a specific version
  */
@@ -136,6 +206,16 @@ export const generateBibleUrl = (
     throw new Error(`Bible version ${version} not available`);
   }
 
+  // BKJ 1611 uses different URL pattern: full book name with hyphens
+  if (version === 'BKJ1611') {
+    const bookName = bookUrlMapBKJ[book];
+    if (!bookName) {
+      throw new Error(`Book ${book} not found in BKJ mapping`);
+    }
+    return `${versionInfo.baseUrl}/${bookName}-${chapter}`;
+  }
+
+  // Other versions use abbreviated book names
   const bookAbbr = bookUrlMap[book];
   if (!bookAbbr) {
     throw new Error(`Book ${book} not found in mapping`);

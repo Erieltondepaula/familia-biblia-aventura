@@ -37,7 +37,6 @@ export const SuggestionsDialog = () => {
         .from('suggestions')
         .insert({
           user_id: user.id,
-          user_email: user.email || 'Usuário sem email',
           title,
           module,
           description,
