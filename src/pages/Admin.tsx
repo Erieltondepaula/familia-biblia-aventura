@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, MessageSquare, Save, Edit, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Users, MessageSquare, Save, Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +40,7 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
 
   const [suggestionToEdit, setSuggestionToEdit] = useState<Suggestion | null>(null);
+  const [suggestionToDelete, setSuggestionToDelete] = useState<Suggestion | null>(null);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState('');
@@ -111,6 +112,18 @@ const Admin = () => {
     }
   };
 
+  const handleDeleteSuggestion = async () => {
+    if (!suggestionToDelete) return;
+    const { error } = await supabase.from('suggestions').delete().eq('id', suggestionToDelete.id);
+    if (error) {
+      toast.error('Falha ao remover sugestão.');
+    } else {
+      toast.success('Sugestão removida!');
+      setSuggestions(suggestions.filter(s => s.id !== suggestionToDelete.id));
+      setSuggestionToDelete(null);
+    }
+  };
+
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
     try {
@@ -148,7 +161,9 @@ const Admin = () => {
         }
     }
     
-    toast.info("Funcionalidade de edição de outros dados do usuário a ser implementada.");
+    if(!newPassword) {
+      toast.info("Nenhuma alteração de senha foi feita.");
+    }
 
     setUserToEdit(null);
     setNewPassword('');
@@ -177,7 +192,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <header className="bg-gradient-to-r from-blue-600 to-green-500 shadow-lg">
-        <div className="container mx-auto px-8 py-4">
+        <div className="px-8 py-4">
           <div className="flex items-center gap-4">
             <Link to="/dashboard">
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/20"><ArrowLeft className="w-6 h-6" /></Button>
@@ -260,7 +275,7 @@ const Admin = () => {
                     </div>
                 </div>
             </div>
-
+            
             <div className="bg-slate-800 rounded-xl shadow-md">
               <div className="bg-green-600 p-4 rounded-t-xl text-white font-semibold flex items-center justify-between">
                 <span>Sugestões de Melhoria</span>
@@ -298,15 +313,15 @@ const Admin = () => {
                           <strong>Descrição:</strong> {suggestion.description}
                         </p>
 
-                        <div className="flex justify-end gap-3 pt-2">
+                        <div className="flex justify-end gap-2 pt-2">
                           <Button size="sm" onClick={() => setSuggestionToEdit(suggestion)} variant="outline" className="text-xs bg-blue-600 border-blue-500 hover:bg-blue-700 text-white flex items-center gap-1">
                             <Edit className="w-3 h-3" /> Editar
                           </Button>
                           <Button size="sm" onClick={() => handleUpdateSuggestionStatus(suggestion, 'approved')} className="text-xs bg-green-600 hover:bg-green-700">
                             Aprovar
                           </Button>
-                          <Button size="sm" onClick={() => handleUpdateSuggestionStatus(suggestion, 'rejected')} className="text-xs bg-red-600 hover:bg-red-700">
-                            Rejeitar
+                          <Button size="sm" onClick={() => setSuggestionToDelete(suggestion)} variant="destructive" className="text-xs flex items-center gap-1">
+                            <Trash2 className="w-3 h-3" /> Remover
                           </Button>
                         </div>
                       </div>
@@ -319,9 +334,15 @@ const Admin = () => {
         </div>
       </main>
 
+      {/* Modal Edição Sugestão */}
       <Dialog open={!!suggestionToEdit} onOpenChange={() => setSuggestionToEdit(null)}>
         <DialogContent className="bg-slate-800 border-slate-700 text-white">
-          <DialogHeader><DialogTitle>Editar Sugestão</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Editar Sugestão</DialogTitle>
+            <DialogDescription className="text-slate-400">
+                Altere os detalhes e o status da sugestão.
+            </DialogDescription>
+          </DialogHeader>
           <div className="space-y-4 py-4">
             <div><label className="text-sm font-medium">Título</label><Input className="bg-slate-700 border-slate-600" value={suggestionToEdit?.title || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, title: e.target.value} : null)} /></div>
             <div><label className="text-sm font-medium">Módulo</label><Input className="bg-slate-700 border-slate-600" value={suggestionToEdit?.module || ''} onChange={(e) => setSuggestionToEdit(s => s ? {...s, module: e.target.value} : null)} /></div>
@@ -345,9 +366,15 @@ const Admin = () => {
         </DialogContent>
       </Dialog>
       
+      {/* Modal Edição Usuário */}
       <Dialog open={!!userToEdit} onOpenChange={(isOpen) => { if (!isOpen) { setUserToEdit(null); setNewPassword(''); setShowPassword(false); } }}>
         <DialogContent className="bg-slate-800 border-slate-700 text-white">
-          <DialogHeader><DialogTitle>Editar Usuário</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+            <DialogDescription className="text-slate-400">
+                Atualize os dados do usuário. Deixe a senha em branco para não alterá-la.
+            </DialogDescription>
+          </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium">Email</label>
@@ -387,12 +414,34 @@ const Admin = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Modal Deleção Usuário */}
       <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
         <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
-          <AlertDialogHeader><AlertDialogTitle>Confirmar Exclusão de Usuário</AlertDialogTitle><AlertDialogDescription className="text-slate-400">Tem certeza que deseja remover o usuário <span className="font-bold text-white">{userToDelete?.email}</span>? Todos os seus dados serão perdidos. Esta ação é irreversível.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão de Usuário</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+                Tem certeza que deseja remover o usuário <span className="font-bold text-white">{userToDelete?.email}</span>? Todos os seus dados serão perdidos. Esta ação é irreversível.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive">Confirmar Exclusão</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal Deleção Sugestão */}
+      <AlertDialog open={!!suggestionToDelete} onOpenChange={() => setSuggestionToDelete(null)}>
+        <AlertDialogContent className="bg-slate-800 border-slate-700 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão da Sugestão</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+                Tem certeza que deseja remover esta sugestão? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSuggestion} className="bg-destructive">Confirmar Exclusão</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
