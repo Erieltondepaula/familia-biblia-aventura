@@ -4,6 +4,12 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   BookOpen,
   Trophy,
   Target,
@@ -17,7 +23,8 @@ import {
   HeartHandshake,
   Heart,
   Shield,
-  LogOut
+  LogOut,
+  Menu
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "@/hooks/useProgress";
@@ -72,24 +79,30 @@ const Dashboard = () => {
             </Link>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              {isAdmin && (
-                <Link to="/admin">
+
+              {/* Menu Desktop */}
+              <div className="hidden md:flex items-center gap-2">
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+                <Link to="/profiles">
                   <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Admin
+                    Perfis
                   </Button>
                 </Link>
-              )}
-              <Link to="/profiles">
-                <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
-                  Perfis
-                </Button>
-              </Link>
-              <Link to="/settings">
-                <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
-                  Configurações
-                </Button>
-              </Link>
+                <Link to="/settings">
+                  <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
+                    Configurações
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Itens Sempre Visíveis */}
               <div className="hover-scale">
                 <SuggestionsDialog />
               </div>
@@ -98,14 +111,41 @@ const Dashboard = () => {
                 className="text-white hover:bg-white/20 btn-interactive"
                 onClick={signOut}
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
+                <LogOut className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Sair</span>
               </Button>
-              <div className="ml-4 hover-scale">
+              <div className="ml-2 hover-scale">
                 <Avatar>
                   <AvatarImage src={currentProfile?.avatar_url || undefined} alt={currentProfile?.name} />
                   <AvatarFallback>{currentProfile?.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
+              </div>
+
+              {/* Menu Mobile (Hamburguer) */}
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                      <Menu className="w-6 h-6" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="w-full flex items-center">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/profiles" className="w-full">Perfis</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="w-full">Configurações</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -178,7 +218,6 @@ const Dashboard = () => {
           </Card>
 
           {/* Stats Cards */}
-          {/* === CORREÇÃO APLICADA AQUI === */}
           <div className="flex flex-col gap-8 animate-scale-in">
             <Card className="p-6 shadow-card bg-gradient-faith text-white hover-lift">
               <div className="flex items-center justify-between">
@@ -200,7 +239,7 @@ const Dashboard = () => {
               <p className="text-sm text-white/80">De 365 dias</p>
             </Card>
 
-            <Link to="/contribute" className="block"> {/* Adicionado 'block' para o link ocupar a largura toda */}
+            <Link to="/contribute" className="block">
                 <Card className="p-6 shadow-card hover:shadow-elevated transition-all duration-300 cursor-pointer bg-gradient-to-br from-amber-500/5 to-transparent hover-lift">
                     <div className="flex items-center justify-between mb-2">
                         <HeartHandshake className="w-8 h-8 text-amber-500" />
