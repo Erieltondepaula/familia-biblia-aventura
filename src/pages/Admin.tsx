@@ -309,7 +309,7 @@ const Admin = () => {
                             {suggestion.module}
                           </Badge>
                           <p className="text-xs text-muted-foreground">
-                            {suggestion.user_email} • {new Date(suggestion.created_at).toLocaleDateString('pt-BR')}
+                            ID: {suggestion.user_id.substring(0, 8)}... • {new Date(suggestion.created_at).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
                         <p className="text-sm p-3 bg-muted/50 rounded-md border border-border/50">

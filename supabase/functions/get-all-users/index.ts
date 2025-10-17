@@ -1,5 +1,4 @@
-// @deno-types="npm:@supabase/supabase-js@2.43.4"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.74.0';
 import { corsHeaders } from '../_shared/cors.ts';
 
 Deno.serve(async (req: Request) => {
