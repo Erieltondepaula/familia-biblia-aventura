@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 interface Suggestion {
   id: string;
-  user_email: string;
+  user_id: string;
   title: string;
   module: string;
   description: string;
