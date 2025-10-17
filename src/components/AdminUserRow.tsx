@@ -31,7 +31,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
     : 'Nunca';
 
   return (
-    <TableRow className="hover:bg-muted/50 transition-colors group">
+    <TableRow className="border-slate-700 hover:bg-slate-700/50">
       <TableCell className="font-medium">
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4 text-muted-foreground" />
@@ -41,7 +41,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
       <TableCell>
         <Badge 
           variant={isActive ? 'default' : 'secondary'}
-          className="hover-scale transition-all"
+          className="transition-all"
         >
           {isActive ? '🟢 Ativo' : '⚪ Inativo'}
         </Badge>
@@ -50,12 +50,13 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
         {lastLoginDate}
       </TableCell>
       <TableCell className="text-right">
-        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* A alteração foi feita aqui, removendo as classes de opacidade */}
+        <div className="flex items-center justify-end gap-1">
           {onEdit && (
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hover-scale hover:bg-blue-500/10" 
+              className="hover:bg-blue-500/10" 
               onClick={() => onEdit(user)}
               title="Editar usuário"
             >
@@ -66,7 +67,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hover-scale hover:bg-amber-500/10"
+              className="hover:bg-amber-500/10"
               onClick={() => onBlock(user)}
               title="Bloquear usuário"
             >
@@ -77,7 +78,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
             <Button 
               variant="ghost" 
               size="icon" 
-              className="hover-scale hover:bg-green-500/10"
+              className="hover:bg-green-500/10"
               onClick={() => onUnblock(user)}
               title="Desbloquear usuário"
             >
@@ -87,7 +88,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
           <Button 
             variant="ghost" 
             size="icon" 
-            className="hover-scale hover:bg-destructive/10" 
+            className="hover:bg-destructive/10" 
             onClick={() => onDelete(user)}
             title="Remover usuário"
           >
@@ -98,3 +99,4 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
     </TableRow>
   );
 };
+
