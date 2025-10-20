@@ -8,6 +8,7 @@ interface User {
   email: string | undefined;
   created_at: string;
   last_sign_in_at: string | undefined;
+  banned_until?: string | null;
 }
 
 interface AdminUserRowProps {
@@ -20,6 +21,8 @@ interface AdminUserRowProps {
 
 export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: AdminUserRowProps) => {
   const isActive = user.last_sign_in_at;
+  const isBlocked = user.banned_until && new Date(user.banned_until) > new Date();
+  
   const lastLoginDate = user.last_sign_in_at 
     ? new Date(user.last_sign_in_at).toLocaleString('pt-BR', {
         day: '2-digit',
@@ -39,12 +42,19 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
         </div>
       </TableCell>
       <TableCell>
-        <Badge 
-          variant={isActive ? 'default' : 'secondary'}
-          className="transition-all"
-        >
-          {isActive ? '🟢 Ativo' : '⚪ Inativo'}
-        </Badge>
+        <div className="flex gap-2">
+          <Badge 
+            variant={isActive ? 'default' : 'secondary'}
+            className="transition-all"
+          >
+            {isActive ? '🟢 Ativo' : '⚪ Inativo'}
+          </Badge>
+          {isBlocked && (
+            <Badge variant="destructive" className="transition-all">
+              🔒 Bloqueado
+            </Badge>
+          )}
+        </div>
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {lastLoginDate}
@@ -63,7 +73,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
               <Edit className="w-4 h-4 text-blue-500" />
             </Button>
           )}
-          {onBlock && (
+          {!isBlocked && onBlock && (
             <Button 
               variant="ghost" 
               size="icon" 
@@ -74,7 +84,7 @@ export const AdminUserRow = ({ user, onEdit, onDelete, onBlock, onUnblock }: Adm
               <Lock className="w-4 h-4 text-amber-500" />
             </Button>
           )}
-          {onUnblock && (
+          {isBlocked && onUnblock && (
             <Button 
               variant="ghost" 
               size="icon" 

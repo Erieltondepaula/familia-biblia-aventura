@@ -10,7 +10,8 @@ import { getCurrentDayReading } from '@/lib/mccheyneReadingPlan';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RichTextEditor } from '@/components/RichTextEditor'; // Importação adicionada
+import { RichTextEditor } from '@/components/RichTextEditor';
+import { SafeHTML } from '@/components/SafeHTML';
 
 const Devotional = () => {
   const { currentProfile } = useProfile();
@@ -184,8 +185,10 @@ const Devotional = () => {
                   Baseado em {todayReading.morningVerse}
                 </h2>
               </div>
-              <div className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1" dangerouslySetInnerHTML={{ __html: todayReading.morningDevotional }}>
-              </div>
+              <SafeHTML 
+                html={todayReading.morningDevotional}
+                className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1"
+              />
             </Card>
 
             <Card className="p-6 md:p-8 flex flex-col">
@@ -195,8 +198,10 @@ const Devotional = () => {
                   Baseado em {todayReading.eveningVerse}
                 </h2>
               </div>
-              <div className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1" dangerouslySetInnerHTML={{ __html: todayReading.eveningDevotional }}>
-              </div>
+              <SafeHTML 
+                html={todayReading.eveningDevotional}
+                className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1"
+              />
             </Card>
           </div>
 
@@ -205,8 +210,10 @@ const Devotional = () => {
               <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-secondary" />Perguntas para Reflexão</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-base leading-relaxed whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: todayReading.reflection }}>
-              </div>
+              <SafeHTML 
+                html={todayReading.reflection}
+                className="text-base leading-relaxed whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none"
+              />
             </CardContent>
           </Card>
 

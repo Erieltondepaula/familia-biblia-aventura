@@ -30,6 +30,7 @@ interface User {
   email: string | undefined;
   created_at: string;
   last_sign_in_at: string | undefined;
+  banned_until?: string | null;
 }
 
 const Admin = () => {
@@ -170,12 +171,42 @@ const Admin = () => {
   };
 
 
-  const handleBlockUser = (user: User) => {
-      toast.info(`Funcionalidade para bloquear ${user.email} a ser implementada.`);
+  const handleBlockUser = async (user: User) => {
+    try {
+      const { error } = await supabase.functions.invoke('block-user', {
+        body: { userId: user.id },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Usuário ${user.email} bloqueado com sucesso!`);
+      
+      // Recarregar lista de usuários
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao bloquear usuário:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao bloquear usuário.';
+      toast.error(errorMessage);
+    }
   };
 
-  const handleUnblockUser = (user: User) => {
-      toast.info(`Funcionalidade para desbloquear ${user.email} a ser implementada.`);
+  const handleUnblockUser = async (user: User) => {
+    try {
+      const { error } = await supabase.functions.invoke('unblock-user', {
+        body: { userId: user.id },
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Usuário ${user.email} desbloqueado com sucesso!`);
+      
+      // Recarregar lista de usuários
+      await loadData();
+    } catch (error) {
+      console.error('Erro ao desbloquear usuário:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao desbloquear usuário.';
+      toast.error(errorMessage);
+    }
   };
 
   if (adminLoading || !isAdmin) {

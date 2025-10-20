@@ -1,5 +1,3 @@
-// Copie e cole este código em: src/pages/SermonEditor.tsx
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProfile } from '@/hooks/useProfile';
@@ -13,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Save, Printer, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { SafeHTML } from '@/components/SafeHTML';
 
 const emptyPoint: SermonPoint = {
   title: '',
@@ -212,7 +211,9 @@ const SermonEditor = () => {
             
             <TabsContent value="preview" className="prose dark:prose-invert max-w-none mt-6">
                 <h2>Preview de Impressão</h2>
-                <div dangerouslySetInnerHTML={{ __html: `<h1>${formData.title}</h1><h2>${formData.theme}</h2><p><strong>Texto Base:</strong> ${formData.textBase}</p><h3>Introdução</h3>${formData.introduction}` }} />
+                <SafeHTML 
+                  html={`<h1>${formData.title}</h1><h2>${formData.theme}</h2><p><strong>Texto Base:</strong> ${formData.textBase}</p><h3>Introdução</h3>${formData.introduction}`}
+                />
             </TabsContent>
 
           </Tabs>
