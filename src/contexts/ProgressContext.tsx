@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo, ReactNode, useCallback
 import ProgressContextDef, { ProgressContextType, CompletedReading } from './progressContextDef';
 import { calculateLevel, calculateBibleProgress, xpForNextLevel, getLevelName } from '@/lib/progressCalculations';
 import { useProfile } from '@/hooks/useProfile';
+import { logger } from '@/lib/logger';
 import { 
   getReadingProgress, 
   saveReadingProgress, 
@@ -46,7 +47,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
       }));
       setCompletedReadings(formattedReadings);
     } catch (error) {
-      console.error('Erro ao carregar progresso:', error);
+      logger.error('Erro ao carregar progresso:', error);
     }
     setLoading(false);
   }, [profileId]);
@@ -117,7 +118,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
       setCompletedReadings(newReadings);
       setXp(newXp);
     } catch (error) {
-      console.error('Erro ao marcar capítulo como lido:', error);
+      logger.error('Erro ao marcar capítulo como lido:', error);
       throw error;
     }
   };
@@ -129,7 +130,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
       await addXPToProfile(profileId, amount);
       setXp(prev => prev + amount);
     } catch (error) {
-      console.error('Erro ao adicionar XP:', error);
+      logger.error('Erro ao adicionar XP:', error);
       throw error;
     }
   };
@@ -149,7 +150,7 @@ export const ProgressProvider: React.FC<{ children: ReactNode }> = ({ children }
       setXp(0);
       setCompletedReadings([]);
     } catch (error) {
-      console.error('Erro ao resetar progresso:', error);
+      logger.error('Erro ao resetar progresso:', error);
       throw error;
     }
   };

@@ -16,6 +16,7 @@ import { Lightbulb, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 export const SuggestionsDialog = () => {
   const { user } = useAuth();
@@ -53,7 +54,7 @@ export const SuggestionsDialog = () => {
       setDescription('');
       setOpen(false);
     } catch (error) {
-      console.error('Erro ao enviar sugestão:', error);
+      logger.error('Erro ao enviar sugestão:', error);
       toast.error('Erro ao enviar sugestão. Tente novamente.');
     } finally {
       setSending(false);

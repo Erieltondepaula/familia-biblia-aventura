@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.74.0';
 import { corsHeaders } from '../_shared/cors.ts';
 import { checkRateLimit, getRateLimitHeaders } from '../_shared/rate-limit.ts';
+import { userIdSchema, validateRequest } from '../_shared/validation.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -67,15 +68,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Pegar o userId do body
-    const { userId } = await req.json();
+    // Validate and parse request body
+    const body = await req.json();
+    const validation = validateRequest(userIdSchema, body);
 
-    if (!userId) {
+    if (!validation.success) {
       return new Response(
-        JSON.stringify({ error: 'userId é obrigatório' }),
+        JSON.stringify({ error: validation.error }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    const { userId } = validation.data;
 
     // Prevenir auto-bloqueio
     if (userId === user.id) {

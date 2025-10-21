@@ -5,6 +5,7 @@ import { ArrowLeft, Users, MessageSquare, Save, Edit, Eye, EyeOff, Trash2 } from
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableHeader, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogDescription } from "@/components/ui/dialog";
@@ -184,7 +185,7 @@ const Admin = () => {
       // Recarregar lista de usuários
       await loadData();
     } catch (error) {
-      console.error('Erro ao bloquear usuário:', error);
+      logger.error('Erro ao bloquear usuário:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao bloquear usuário.';
       toast.error(errorMessage);
     }
@@ -203,7 +204,7 @@ const Admin = () => {
       // Recarregar lista de usuários
       await loadData();
     } catch (error) {
-      console.error('Erro ao desbloquear usuário:', error);
+      logger.error('Erro ao desbloquear usuário:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro ao desbloquear usuário.';
       toast.error(errorMessage);
     }

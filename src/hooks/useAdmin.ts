@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
 
 export const useAdmin = () => {
   const { user } = useAuth();
@@ -20,13 +21,13 @@ export const useAdmin = () => {
           .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
         if (error) {
-          console.error('Erro ao verificar admin:', error);
+          logger.error('Erro ao verificar admin:', error);
           setIsAdmin(false);
         } else {
           setIsAdmin(data === true);
         }
       } catch (error) {
-        console.error('Erro ao verificar admin:', error);
+        logger.error('Erro ao verificar admin:', error);
         setIsAdmin(false);
       }
       setLoading(false);

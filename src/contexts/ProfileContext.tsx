@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { bibleVersions } from "@/lib/bibleVersions";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 import ProfileContextDef, { Profile, ProfileContextType } from "./profileContextDef";
 
 // O componente Provider continua aqui
@@ -81,14 +82,14 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let normalizedBibleVersion = normalizeBibleVersion(String(data.bible_version)) as Profile["bible_version"];
     // fallback automático para evitar 400s no DB
     if (!isBibleCode(String(normalizedBibleVersion))) {
-      console.warn('Fallback: bible_version não pôde ser normalizada, usando NVI como padrão. Valor original:', data.bible_version);
+      logger.warn('Fallback: bible_version não pôde ser normalizada, usando NVI como padrão. Valor original:', data.bible_version);
       toast(`Versão da Bíblia inválida: '${data.bible_version}'. Usando NVI como padrão.`);
       normalizedBibleVersion = 'NVI';
     }
     const toInsert = { ...data, bible_version: normalizedBibleVersion, user_id: user.id };
     const { data: newProfile, error } = await supabase.from('profiles').insert(toInsert).select().single();
     if (error) {
-      console.error("Erro ao adicionar perfil:", error);
+      logger.error("Erro ao adicionar perfil:", error);
       const msg = error.message || 'Erro ao adicionar perfil';
       toast.error(`Erro ao salvar perfil: ${msg}`);
     }
@@ -125,9 +126,9 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // If bible_version is present, normalize and perform isolated update first
     if (Object.prototype.hasOwnProperty.call(payload, 'bible_version')) {
       const raw = payload.bible_version as unknown as string | undefined;
-      console.debug('[DEBUG updateProfile] raw bible_version:', raw);
+      logger.debug('[DEBUG updateProfile] raw bible_version:', raw);
       const normalized = tryNormalize(raw) || 'NVI';
-      console.debug('[DEBUG updateProfile] normalized bible_version:', normalized);
+      logger.debug('[DEBUG updateProfile] normalized bible_version:', normalized);
       if (!isBibleCode(normalized)) {
         // safety: ensure final is a valid code
         payload.bible_version = 'NVI';
@@ -135,12 +136,12 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
         payload.bible_version = normalized;
       }
 
-      console.debug('[DEBUG updateProfile] payload before isolated update:', JSON.stringify(payload));
+      logger.debug('[DEBUG updateProfile] payload before isolated update:', JSON.stringify(payload));
 
       // Attempt isolated update for bible_version
   const { error: bibleErr } = await supabase.from('profiles').update({ bible_version: String(payload.bible_version) }).eq('id', id);
       if (bibleErr) {
-        console.error('Erro ao atualizar bible_version isoladamente:', bibleErr, { bible_version: payload.bible_version });
+        logger.error('Erro ao atualizar bible_version isoladamente:', bibleErr, { bible_version: payload.bible_version });
         const msg = (bibleErr.message as string) || '';
         if (msg.includes('profiles_bible_version_check') || msg.includes('violates check constraint')) {
           // Retry with fallback NVI
@@ -168,7 +169,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (Object.keys(payload).length > 0) {
       const { error } = await supabase.from('profiles').update(payload).eq('id', id);
       if (error) {
-        console.error('Erro ao atualizar perfil:', error, { payload });
+        logger.error('Erro ao atualizar perfil:', error, { payload });
         const msg = (error.message as string) || '';
         if (msg.includes('profiles_bible_version_check') || msg.includes('violates check constraint')) {
           // As a last resort, attempt to set bible_version to NVI and retry remaining fields
