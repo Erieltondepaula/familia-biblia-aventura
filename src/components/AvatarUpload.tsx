@@ -5,6 +5,7 @@ import { Camera, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
 
 interface AvatarUploadProps {
   avatarUrl?: string | null;
@@ -59,7 +60,7 @@ export const AvatarUpload = ({ avatarUrl, name, onUploadComplete }: AvatarUpload
       onUploadComplete(publicUrl);
       toast.success('Avatar atualizado com sucesso!');
     } catch (error) {
-      console.error('Erro ao fazer upload:', error);
+      logger.error('Erro ao fazer upload:', error);
       toast.error('Erro ao fazer upload da imagem');
     } finally {
       setUploading(false);

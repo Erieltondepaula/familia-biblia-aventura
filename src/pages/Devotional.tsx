@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RichTextEditor } from '@/components/RichTextEditor';
 import { SafeHTML } from '@/components/SafeHTML';
+import { logger } from '@/lib/logger';
 
 const Devotional = () => {
   const { currentProfile } = useProfile();
@@ -46,7 +47,7 @@ const Devotional = () => {
         setNotes('');
       }
     } catch (error) {
-      console.error('Erro ao carregar devocional:', error);
+      logger.error('Erro ao carregar devocional:', error);
       toast.error('Não foi possível carregar o progresso do devocional.');
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ const Devotional = () => {
       
       setIsCompleted(true);
     } catch (error) {
-      console.error('Erro ao salvar devocional:', error);
+      logger.error('Erro ao salvar devocional:', error);
       toast.error('Erro ao salvar devocional');
     }
   };

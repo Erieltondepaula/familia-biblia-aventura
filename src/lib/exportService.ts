@@ -2,6 +2,7 @@
 
 import { mcCheyneReadingPlan } from './mccheyneReadingPlan';
 import { toast } from 'sonner';
+import { logger } from './logger';
 
 export const exportReadingPlanToPDF = async () => {
   try {
@@ -60,7 +61,7 @@ export const exportReadingPlanToPDF = async () => {
     toast.success("Plano de leitura exportado para PDF!");
 
   } catch (error) {
-    console.error("Erro ao exportar para PDF:", error);
+    logger.error("Erro ao exportar para PDF:", error);
     toast.error("Ocorreu um erro ao exportar para PDF.");
   }
 };
@@ -101,7 +102,7 @@ export const exportReadingPlanToExcel = async () => {
     toast.success("Plano de leitura exportado para Excel!");
 
   } catch (error) {
-    console.error("Erro ao exportar para Excel:", error);
+    logger.error("Erro ao exportar para Excel:", error);
     toast.error("Ocorreu um erro ao exportar para Excel.");
   }
 };

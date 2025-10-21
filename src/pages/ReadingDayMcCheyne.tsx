@@ -42,6 +42,7 @@ import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
 import { toast } from "sonner";
 import { bibleAbbreviations } from "@/lib/bibleAbbreviations";
+import { logger } from "@/lib/logger";
 
 // Hook para detectar a largura da janela
 const useWindowWidth = () => {
@@ -103,7 +104,7 @@ const ChapterRow = ({
       if (!parsed) return null;
       return generateBibleUrl(bibleVersion, parsed.book, parsed.chapter);
     } catch (error) {
-      console.error("Erro ao gerar URL da Bíblia:", error);
+      logger.error("Erro ao gerar URL da Bíblia:", error);
       return null;
     }
   }, [bibleVersion, chapter]);
@@ -116,7 +117,7 @@ const ChapterRow = ({
       setIsEditing(false);
       toast.success("Anotação salva!");
     } catch (error) {
-      console.error("Erro ao salvar anotação:", error);
+      logger.error("Erro ao salvar anotação:", error);
       toast.error("Erro ao salvar anotação. Tente novamente.");
     }
   };
@@ -328,7 +329,7 @@ const ReadingDayMcCheyne = () => {
       await addXP(100);
       toast.success("Versículo memorizado! +100 XP");
     } catch (error) {
-      console.error("Erro ao memorizar versículo:", error);
+      logger.error("Erro ao memorizar versículo:", error);
       setMemorizedVerse(false);
       toast.error("Erro ao salvar. Tente novamente.");
     }

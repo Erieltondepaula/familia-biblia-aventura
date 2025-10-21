@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 // ============= PROGRESSO DE LEITURA =============
 
@@ -27,7 +28,7 @@ export const saveReadingProgress = async (profileId: string, day: number, chapte
     .single();
   
   if (error) {
-    console.error('Erro ao salvar progresso de leitura:', error);
+    logger.error('Erro ao salvar progresso de leitura:', error);
     throw error;
   }
   return data;
@@ -41,7 +42,7 @@ export const getReadingProgress = async (profileId: string): Promise<ReadingProg
     .order('day', { ascending: true });
   
   if (error) {
-    console.error('Erro ao buscar progresso de leitura:', error);
+    logger.error('Erro ao buscar progresso de leitura:', error);
     return [];
   }
   return data || [];
@@ -67,7 +68,7 @@ export const saveChapterNote = async (profileId: string, chapterRef: string, not
       .eq('profile_id', profileId)
       .eq('chapter_ref', chapterRef);
     
-    if (error) console.error('Erro ao deletar anotação:', error);
+    if (error) logger.error('Erro ao deletar anotação:', error);
     return;
   }
 
@@ -84,7 +85,7 @@ export const saveChapterNote = async (profileId: string, chapterRef: string, not
     .single();
   
   if (error) {
-    console.error('Erro ao salvar anotação:', error);
+    logger.error('Erro ao salvar anotação:', error);
     throw error;
   }
   return data;
@@ -99,7 +100,7 @@ export const getChapterNote = async (profileId: string, chapterRef: string): Pro
     .maybeSingle();
   
   if (error) {
-    console.error('Erro ao buscar anotação:', error);
+    logger.error('Erro ao buscar anotação:', error);
     return '';
   }
   return data?.notes || '';
@@ -113,7 +114,7 @@ export const getAllChapterNotes = async (profileId: string): Promise<ChapterNote
     .order('updated_at', { ascending: false });
   
   if (error) {
-    console.error('Erro ao buscar todas as anotações:', error);
+    logger.error('Erro ao buscar todas as anotações:', error);
     return [];
   }
   return data || [];
@@ -142,7 +143,7 @@ export const markVerseAsMemorized = async (profileId: string, day: number) => {
     .single();
   
   if (error) {
-    console.error('Erro ao marcar versículo como memorizado:', error);
+    logger.error('Erro ao marcar versículo como memorizado:', error);
     throw error;
   }
   return data;
@@ -157,7 +158,7 @@ export const isVerseMemorized = async (profileId: string, day: number): Promise<
     .maybeSingle();
   
   if (error) {
-    console.error('Erro ao verificar versículo memorizado:', error);
+    logger.error('Erro ao verificar versículo memorizado:', error);
     return false;
   }
   return !!data;
@@ -182,7 +183,7 @@ export const getProfileStats = async (profileId: string): Promise<ProfileStats |
     .maybeSingle();
   
   if (error) {
-    console.error('Erro ao buscar estatísticas do perfil:', error);
+    logger.error('Erro ao buscar estatísticas do perfil:', error);
     return null;
   }
   return data;
@@ -197,7 +198,7 @@ export const updateProfileStats = async (profileId: string, updates: Partial<Omi
     .single();
   
   if (error) {
-    console.error('Erro ao atualizar estatísticas do perfil:', error);
+    logger.error('Erro ao atualizar estatísticas do perfil:', error);
     throw error;
   }
   return data;
@@ -206,7 +207,7 @@ export const updateProfileStats = async (profileId: string, updates: Partial<Omi
 export const addXPToProfile = async (profileId: string, xpToAdd: number) => {
   const currentStats = await getProfileStats(profileId);
   if (!currentStats) {
-    console.error('Estatísticas do perfil não encontradas');
+    logger.error('Estatísticas do perfil não encontradas');
     return;
   }
 
@@ -230,7 +231,7 @@ export const getDevotionalProgress = async (profileId: string, day: number): Pro
     .maybeSingle();
 
   if (error) {
-    console.error('Erro ao verificar devocional:', error);
+    logger.error('Erro ao verificar devocional:', error);
     return false;
   }
   return !!data;

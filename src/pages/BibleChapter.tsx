@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 const BibleChapter = () => {
   const { book, chapter } = useParams();
@@ -46,7 +47,7 @@ const BibleChapter = () => {
           setChapterData(formattedData);
         }
       } catch (err) {
-        console.error('Erro ao carregar capítulo:', err);
+        logger.error('Erro ao carregar capítulo:', err);
         setError('Erro ao carregar capítulo. Tente novamente.');
       }
       

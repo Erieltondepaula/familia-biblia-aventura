@@ -28,6 +28,7 @@ import { markVerseAsMemorized, isVerseMemorized } from "@/lib/memorizationStorag
 import { calculateLevel } from "@/lib/progressCalculations";
 import LevelUpModal from "@/components/LevelUpModal";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 const ReadingDay = () => {
   const { day } = useParams();
@@ -112,7 +113,7 @@ const ReadingDay = () => {
           description: "Continue memorizando a Palavra!"
         });
       } catch (error) {
-        console.error('Erro ao memorizar versículo:', error);
+        logger.error('Erro ao memorizar versículo:', error);
         setMemorizedVerse(false);
         toast.error("Erro ao salvar. Tente novamente.");
       }

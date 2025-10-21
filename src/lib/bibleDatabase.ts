@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from './logger';
 
 export interface BibleVerse {
   id: string;
@@ -30,7 +31,7 @@ export const getBibleBook = async (bookKey: string): Promise<BibleBook | null> =
     .maybeSingle();
 
   if (error) {
-    console.error('Erro ao buscar livro:', error);
+    logger.error('Erro ao buscar livro:', error);
     return null;
   }
 
@@ -57,7 +58,7 @@ export const getBibleChapter = async (
     .maybeSingle();
 
   if (chapterError || !chapterData) {
-    console.error('Erro ao buscar capítulo:', chapterError);
+    logger.error('Erro ao buscar capítulo:', chapterError);
     return null;
   }
 
@@ -69,7 +70,7 @@ export const getBibleChapter = async (
     .order('verse_number', { ascending: true });
 
   if (versesError) {
-    console.error('Erro ao buscar versículos:', versesError);
+    logger.error('Erro ao buscar versículos:', versesError);
     return null;
   }
 
@@ -106,7 +107,7 @@ export const getAllBibleBooks = async (): Promise<BibleBook[]> => {
     .order('book_order', { ascending: true });
 
   if (error) {
-    console.error('Erro ao buscar livros:', error);
+    logger.error('Erro ao buscar livros:', error);
     return [];
   }
 
