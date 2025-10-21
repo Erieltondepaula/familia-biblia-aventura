@@ -6,6 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
+import { loginSchema, emailSchema } from '@/lib/validation';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { logger } from '@/lib/logger';
 
 // Passo 1: Importamos a imagem de fundo
 import heroBackground from '@/assets/hero-family.jpg';
@@ -22,32 +25,72 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (isPasswordReset) {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (error) toast.error(error.message);
-      else toast.info('Verifique seu e-mail para redefinir a senha.');
-      setIsPasswordReset(false);
-    } else if (isSigningUp) {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
-      });
-      if (error) toast.error(error.message);
-      else toast.info('Verifique seu e-mail para confirmar a conta.');
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
-      else {
-        toast.success('Login realizado com sucesso!');
-        navigate('/dashboard');
+    try {
+      if (isPasswordReset) {
+        // Validar e-mail
+        const validation = emailSchema.safeParse({ email });
+        if (!validation.success) {
+          toast.error(validation.error.errors[0].message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) {
+          logger.error('Erro ao redefinir senha:', error);
+          toast.error(error.message);
+        } else {
+          toast.success('E-mail de redefinição enviado! Verifique sua caixa de entrada.');
+        }
+        setIsPasswordReset(false);
+      } else if (isSigningUp) {
+        // Validar dados de cadastro
+        const validation = loginSchema.safeParse({ email, password });
+        if (!validation.success) {
+          toast.error(validation.error.errors[0].message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+          },
+        });
+        if (error) {
+          logger.error('Erro ao criar conta:', error);
+          toast.error(error.message);
+        } else {
+          toast.success('Conta criada! Verifique seu e-mail para confirmar.');
+        }
+      } else {
+        // Validar dados de login
+        const validation = loginSchema.safeParse({ email, password });
+        if (!validation.success) {
+          toast.error(validation.error.errors[0].message);
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          logger.error('Erro ao fazer login:', error);
+          toast.error('E-mail ou senha incorretos. Verifique e tente novamente.');
+        } else {
+          toast.success('Bem-vindo de volta! Login realizado com sucesso.');
+          navigate('/dashboard');
+        }
       }
+    } catch (error) {
+      logger.error('Erro inesperado:', error);
+      toast.error('Ocorreu um erro. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -108,10 +151,15 @@ const Login = () => {
                 />
               </div>
             )}
-            <Button type="submit" disabled={loading} className="w-full h-11 text-base font-semibold btn-interactive hover-lift">
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full h-11 text-base font-semibold btn-interactive hover-lift"
+              aria-label={isPasswordReset ? 'Enviar link de redefinição' : isSigningUp ? 'Criar nova conta' : 'Entrar na conta'}
+            >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  <LoadingSpinner size="sm" className="mr-2" />
                   Aguarde...
                 </>
               ) : isPasswordReset ? (
