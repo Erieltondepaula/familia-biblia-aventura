@@ -36,6 +36,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { SuggestionsDialog } from "@/components/SuggestionsDialog";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useAuth } from "@/hooks/useAuth";
+import { GuidedTour } from "@/components/GuidedTour";
 
 const Dashboard = () => {
   const { currentProfile } = useProfile();
@@ -67,6 +68,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <GuidedTour />
       {/* Header */}
       <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
         <div className="container mx-auto px-4 py-6">
@@ -90,12 +92,12 @@ const Dashboard = () => {
                     </Button>
                   </Link>
                 )}
-                <Link to="/profiles">
+                <Link to="/profiles" data-tour="profiles">
                   <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
                     Perfis
                   </Button>
                 </Link>
-                <Link to="/settings">
+                <Link to="/settings" data-tour="settings">
                   <Button variant="ghost" className="text-white hover:bg-white/20 btn-interactive">
                     Configurações
                   </Button>
@@ -156,7 +158,7 @@ const Dashboard = () => {
         {/* User Stats Section */}
         <div className="grid lg:grid-cols-3 gap-8 mb-12 animate-slide-up">
           {/* Main Progress Card */}
-          <Card className="lg:col-span-2 p-8 shadow-card hover-lift">
+          <Card className="lg:col-span-2 p-8 shadow-card hover-lift" data-tour="dashboard">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
               <div>
                 <h2 className="text-3xl font-bold mb-2">Olá, {currentProfile?.name || "Usuário"}! 👋</h2>
@@ -308,7 +310,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <Link to={`/reading/${todayReading.day}`}>
+            <Link to={`/reading/${todayReading.day}`} data-tour="reading-plan">
               <Button className="w-full btn-interactive hover-lift" size="lg" variant={isCompleted ? "success" : "default"}>
                 <BookOpen className="w-5 h-5 mr-2" />
                 {isCompleted ? "Ver Leitura Novamente" : "Começar Leitura"}
@@ -344,13 +346,13 @@ const Dashboard = () => {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6 animate-fade-in">
-          <Link to="/devotional" className="w-full">
+          <Link to="/devotional" className="w-full" data-tour="devotional">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Heart className="w-6 h-6" />
               <span className="text-xs md:text-sm">Devocional</span>
             </Button>
           </Link>
-          <Link to="/quiz" className="w-full">
+          <Link to="/quiz" className="w-full" data-tour="quiz">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Target className="w-6 h-6" />
               <span className="text-xs md:text-sm">Quiz Diário</span>
@@ -368,7 +370,7 @@ const Dashboard = () => {
               <span className="text-xs md:text-sm">Progresso</span>
             </Button>
           </Link>
-          <Link to="/achievements" className="w-full">
+          <Link to="/achievements" className="w-full" data-tour="achievements">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <Trophy className="w-6 h-6" />
               <span className="text-xs md:text-sm">Conquistas</span>
@@ -386,7 +388,7 @@ const Dashboard = () => {
               <span className="text-xs md:text-sm">Sermões</span>
             </Button>
           </Link>
-          <Link to="/reflections" className="w-full">
+          <Link to="/reflections" className="w-full" data-tour="reflections">
             <Button variant="outline" size="lg" className="w-full h-auto py-6 flex-col gap-2 hover-lift btn-interactive">
               <MessageSquare className="w-6 h-6" />
               <span className="text-xs md:text-sm">Reflexões</span>
