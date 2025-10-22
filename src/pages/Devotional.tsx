@@ -177,23 +177,9 @@ const Devotional = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-card rounded-lg border shadow-sm p-6 md:p-8 flex flex-col">
-              <div className="mb-4">
-                <Badge variant="secondary" className="mb-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
-                  ☀️ Devocional da Manhã
-                </Badge>
-                <h3 className="text-lg font-bold text-accent">
-                  Baseado em {todayReading.morningVerse}
-                </h3>
-              </div>
-              <SafeHTML 
-                html={todayReading.morningDevotional}
-                className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
-              />
-            </div>
-
-            <div className="bg-card rounded-lg border shadow-sm p-6 md:p-8 flex flex-col">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Coluna Esquerda - Noite */}
+            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
               <div className="mb-4">
                 <Badge variant="secondary" className="mb-3 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20">
                   🌙 Devocional da Noite
@@ -207,17 +193,34 @@ const Devotional = () => {
                 className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
               />
             </div>
-          </div>
 
-          <div className="bg-card rounded-lg border shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-secondary" />
-              Perguntas para Reflexão
-            </h2>
-            <SafeHTML 
-              html={todayReading.reflection}
-              className="text-sm leading-relaxed whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none"
-            />
+            {/* Coluna Centro - Reflexão */}
+            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-secondary" />
+                Perguntas para Reflexão
+              </h2>
+              <SafeHTML 
+                html={todayReading.reflection}
+                className="text-sm leading-relaxed whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
+              />
+            </div>
+
+            {/* Coluna Direita - Manhã */}
+            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
+              <div className="mb-4">
+                <Badge variant="secondary" className="mb-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
+                  ☀️ Devocional da Manhã
+                </Badge>
+                <h3 className="text-lg font-bold text-accent">
+                  Baseado em {todayReading.morningVerse}
+                </h3>
+              </div>
+              <SafeHTML 
+                html={todayReading.morningDevotional}
+                className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
+              />
+            </div>
           </div>
 
           <Card>
