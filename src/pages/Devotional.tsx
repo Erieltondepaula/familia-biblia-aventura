@@ -100,10 +100,11 @@ const Devotional = () => {
 
   if (loading) {
     return (
-        <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">
+        <div className="w-full px-4 md:px-6 lg:px-8 py-8 space-y-6">
             <Skeleton className="h-16 w-1/2" />
             <Skeleton className="h-24 w-full" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Skeleton className="h-64 w-full" />
                 <Skeleton className="h-64 w-full" />
                 <Skeleton className="h-64 w-full" />
             </div>
@@ -132,7 +133,7 @@ const Devotional = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-gradient-hero text-white shadow-elevated animate-fade-in">
-        <div className="container mx-auto px-4 py-6">
+        <div className="w-full px-4 md:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">
             <Link to="/dashboard">
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 btn-interactive">
@@ -150,7 +151,7 @@ const Devotional = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main className="w-full px-4 md:px-6 lg:px-8 py-8">
         <div className="space-y-6 animate-slide-up">
           {isCompleted && (
             <Card className="border-2 border-success bg-success/5">
@@ -177,9 +178,9 @@ const Devotional = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Coluna Esquerda - Noite */}
-            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
+            <div className="bg-card rounded-lg border shadow-sm p-4 md:p-6 flex flex-col min-h-[400px]">
               <div className="mb-4">
                 <Badge variant="secondary" className="mb-3 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20">
                   🌙 Devocional da Noite
@@ -195,7 +196,7 @@ const Devotional = () => {
             </div>
 
             {/* Coluna Centro - Reflexão */}
-            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
+            <div className="bg-card rounded-lg border shadow-sm p-4 md:p-6 flex flex-col min-h-[400px]">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-secondary" />
                 Perguntas para Reflexão
@@ -207,7 +208,7 @@ const Devotional = () => {
             </div>
 
             {/* Coluna Direita - Manhã */}
-            <div className="bg-card rounded-lg border shadow-sm p-6 flex flex-col">
+            <div className="bg-card rounded-lg border shadow-sm p-4 md:p-6 flex flex-col min-h-[400px]">
               <div className="mb-4">
                 <Badge variant="secondary" className="mb-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
                   ☀️ Devocional da Manhã
