@@ -166,57 +166,59 @@ const Devotional = () => {
             </Card>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary" />Versículo do Dia</CardTitle>
-              <CardDescription>Fundamento para a reflexão de hoje</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 bg-muted/50 rounded-lg border-l-4 border-primary">
-                <p className="text-lg font-semibold mb-2 italic">"{todayReading.verseOfDay}"</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mb-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary" />
+              Versículo do Dia
+            </h2>
+            <p className="text-sm text-muted-foreground mb-3">Fundamento para a reflexão de hoje</p>
+            <div className="p-6 bg-card rounded-lg border-2 border-primary/60 shadow-lg">
+              <p className="text-lg font-medium italic leading-relaxed">"{todayReading.verseOfDay}"</p>
+            </div>
+          </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="p-6 md:p-8 flex flex-col">
+            <div className="bg-card rounded-lg border shadow-sm p-6 md:p-8 flex flex-col">
               <div className="mb-4">
-                <Badge variant="outline" className="mb-3">🌅 Devocional da Manhã</Badge>
-                <h2 className="text-xl font-bold text-amber-700 dark:text-amber-400">
+                <Badge variant="secondary" className="mb-3 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
+                  ☀️ Devocional da Manhã
+                </Badge>
+                <h3 className="text-lg font-bold text-accent">
                   Baseado em {todayReading.morningVerse}
-                </h2>
+                </h3>
               </div>
               <SafeHTML 
                 html={todayReading.morningDevotional}
-                className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1"
+                className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
               />
-            </Card>
+            </div>
 
-            <Card className="p-6 md:p-8 flex flex-col">
+            <div className="bg-card rounded-lg border shadow-sm p-6 md:p-8 flex flex-col">
               <div className="mb-4">
-                <Badge variant="outline" className="mb-3">🌙 Devocional da Noite</Badge>
-                <h2 className="text-xl font-bold text-indigo-700 dark:text-indigo-400">
+                <Badge variant="secondary" className="mb-3 bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20">
+                  🌙 Devocional da Noite
+                </Badge>
+                <h3 className="text-lg font-bold text-accent">
                   Baseado em {todayReading.eveningVerse}
-                </h2>
+                </h3>
               </div>
               <SafeHTML 
                 html={todayReading.eveningDevotional}
-                className="text-base leading-relaxed text-foreground/90 whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none flex-1"
+                className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none flex-1"
               />
-            </Card>
+            </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-secondary" />Perguntas para Reflexão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SafeHTML 
-                html={todayReading.reflection}
-                className="text-base leading-relaxed whitespace-pre-line prose prose-p:my-2 dark:prose-invert max-w-none"
-              />
-            </CardContent>
-          </Card>
+          <div className="bg-card rounded-lg border shadow-sm p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-secondary" />
+              Perguntas para Reflexão
+            </h2>
+            <SafeHTML 
+              html={todayReading.reflection}
+              className="text-sm leading-relaxed whitespace-pre-line prose prose-sm prose-p:my-2 dark:prose-invert max-w-none"
+            />
+          </div>
 
           <Card>
             <CardHeader>
