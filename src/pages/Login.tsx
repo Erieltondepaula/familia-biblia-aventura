@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { loginSchema, emailSchema } from '@/lib/validation';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { logger } from '@/lib/logger';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Passo 1: Importamos a imagem de fundo
 import heroBackground from '@/assets/hero-family.jpg';
@@ -20,6 +21,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,16 +141,44 @@ const Login = () => {
             {!isPasswordReset && (
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-left block">Senha</label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  required
-                  className="h-11 text-base"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mínimo 6 caracteres"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="h-11 text-base pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-11 w-10 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="show-password"
+                    checked={showPassword}
+                    onCheckedChange={(checked) => setShowPassword(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="show-password"
+                    className="text-sm text-muted-foreground cursor-pointer select-none"
+                  >
+                    Mostrar senha
+                  </label>
+                </div>
               </div>
             )}
             <Button 
