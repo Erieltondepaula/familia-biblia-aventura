@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useProfile } from '@/contexts/useProfile';
 
 export interface TourStep {
   target: string;
@@ -59,27 +60,37 @@ export const tourSteps: TourStep[] = [
 ];
 
 export const useTour = () => {
+  const { currentProfile } = useProfile();
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem('hasSeenTour');
-    if (!hasSeenTour) {
-      setShowWelcome(true);
+    if (currentProfile?.id) {
+      const tourKey = `hasSeenTour_${currentProfile.id}`;
+      const hasSeenTour = localStorage.getItem(tourKey);
+      if (!hasSeenTour) {
+        setShowWelcome(true);
+      }
     }
-  }, []);
+  }, [currentProfile?.id]);
 
   const startTour = () => {
-    setShowWelcome(false);
-    setIsActive(true);
-    setCurrentStep(0);
-    localStorage.setItem('hasSeenTour', 'true');
+    if (currentProfile?.id) {
+      setShowWelcome(false);
+      setIsActive(true);
+      setCurrentStep(0);
+      const tourKey = `hasSeenTour_${currentProfile.id}`;
+      localStorage.setItem(tourKey, 'true');
+    }
   };
 
   const skipTour = () => {
-    setShowWelcome(false);
-    localStorage.setItem('hasSeenTour', 'true');
+    if (currentProfile?.id) {
+      setShowWelcome(false);
+      const tourKey = `hasSeenTour_${currentProfile.id}`;
+      localStorage.setItem(tourKey, 'true');
+    }
   };
 
   const nextStep = () => {

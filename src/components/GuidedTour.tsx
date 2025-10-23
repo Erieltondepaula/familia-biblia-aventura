@@ -40,26 +40,66 @@ export const GuidedTour = () => {
           const rect = element.getBoundingClientRect();
           const position = currentStepData.position || 'bottom';
           
+          const tooltipWidth = 384; // max-w-sm (24rem)
+          const tooltipHeight = 300; // estimativa
+          const padding = 20;
+          
           let top = 0;
           let left = 0;
 
           switch (position) {
             case 'bottom':
-              top = rect.bottom + window.scrollY + 20;
-              left = rect.left + window.scrollX + rect.width / 2;
+              top = rect.bottom + padding;
+              left = rect.left + rect.width / 2;
+              // Ajustar se sair da tela
+              if (top + tooltipHeight > window.innerHeight) {
+                top = rect.top - tooltipHeight - padding;
+              }
               break;
             case 'top':
-              top = rect.top + window.scrollY - 20;
-              left = rect.left + window.scrollX + rect.width / 2;
+              top = rect.top - tooltipHeight - padding;
+              left = rect.left + rect.width / 2;
+              // Ajustar se sair da tela
+              if (top < 0) {
+                top = rect.bottom + padding;
+              }
               break;
             case 'left':
-              top = rect.top + window.scrollY + rect.height / 2;
-              left = rect.left + window.scrollX - 20;
+              top = rect.top + rect.height / 2;
+              left = rect.left - tooltipWidth - padding;
+              // Ajustar se sair da tela
+              if (left < 0) {
+                left = rect.right + padding;
+              }
               break;
             case 'right':
-              top = rect.top + window.scrollY + rect.height / 2;
-              left = rect.right + window.scrollX + 20;
+              top = rect.top + rect.height / 2;
+              left = rect.right + padding;
+              // Ajustar se sair da tela
+              if (left + tooltipWidth > window.innerWidth) {
+                left = rect.left - tooltipWidth - padding;
+              }
               break;
+          }
+
+          // Garantir que o tooltip não saia da tela horizontalmente
+          if (position === 'top' || position === 'bottom') {
+            const halfWidth = tooltipWidth / 2;
+            if (left - halfWidth < padding) {
+              left = halfWidth + padding;
+            } else if (left + halfWidth > window.innerWidth - padding) {
+              left = window.innerWidth - halfWidth - padding;
+            }
+          }
+
+          // Garantir que o tooltip não saia da tela verticalmente
+          if (position === 'left' || position === 'right') {
+            const halfHeight = tooltipHeight / 2;
+            if (top - halfHeight < padding) {
+              top = halfHeight + padding;
+            } else if (top + halfHeight > window.innerHeight - padding) {
+              top = window.innerHeight - halfHeight - padding;
+            }
           }
 
           setTooltipPosition({ top, left });
@@ -96,21 +136,66 @@ export const GuidedTour = () => {
 
   if (!isActive || !currentStepData || !targetElement) return null;
 
+  const getArrowStyles = () => {
+    const arrowSize = 12;
+    const position = currentStepData?.position || 'bottom';
+    
+    switch (position) {
+      case 'bottom':
+        return {
+          top: '-12px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          borderLeft: `${arrowSize}px solid transparent`,
+          borderRight: `${arrowSize}px solid transparent`,
+          borderBottom: `${arrowSize}px solid hsl(var(--card))`,
+        };
+      case 'top':
+        return {
+          bottom: '-12px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          borderLeft: `${arrowSize}px solid transparent`,
+          borderRight: `${arrowSize}px solid transparent`,
+          borderTop: `${arrowSize}px solid hsl(var(--card))`,
+        };
+      case 'left':
+        return {
+          right: '-12px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          borderTop: `${arrowSize}px solid transparent`,
+          borderBottom: `${arrowSize}px solid transparent`,
+          borderLeft: `${arrowSize}px solid hsl(var(--card))`,
+        };
+      case 'right':
+        return {
+          left: '-12px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          borderTop: `${arrowSize}px solid transparent`,
+          borderBottom: `${arrowSize}px solid transparent`,
+          borderRight: `${arrowSize}px solid hsl(var(--card))`,
+        };
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/60 z-[100] pointer-events-none" />
+      <div className="fixed inset-0 bg-black/70 z-[100] pointer-events-none" />
       
-      {/* Highlight */}
+      {/* Highlight com pulse animation */}
       <div
-        className="fixed z-[101] pointer-events-none"
+        className="fixed z-[101] pointer-events-none animate-pulse"
         style={{
-          top: `${targetElement.getBoundingClientRect().top}px`,
-          left: `${targetElement.getBoundingClientRect().left}px`,
-          width: `${targetElement.offsetWidth}px`,
-          height: `${targetElement.offsetHeight}px`,
-          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.5)',
-          borderRadius: '8px',
+          top: `${targetElement.getBoundingClientRect().top - 4}px`,
+          left: `${targetElement.getBoundingClientRect().left - 4}px`,
+          width: `${targetElement.offsetWidth + 8}px`,
+          height: `${targetElement.offsetHeight + 8}px`,
+          boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 30px 5px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.3)',
+          borderRadius: '12px',
+          border: '3px solid rgb(59, 130, 246)',
           transition: 'all 0.3s ease'
         }}
       />
@@ -122,15 +207,21 @@ export const GuidedTour = () => {
           top: `${tooltipPosition.top}px`,
           left: `${tooltipPosition.left}px`,
           transform: currentStepData.position === 'top' 
-            ? 'translate(-50%, -100%)' 
+            ? 'translate(-50%, 0)' 
             : currentStepData.position === 'bottom'
             ? 'translate(-50%, 0)'
             : currentStepData.position === 'left'
-            ? 'translate(-100%, -50%)'
+            ? 'translate(0, -50%)'
             : 'translate(0, -50%)'
         }}
       >
-        <div className="bg-card border shadow-lg rounded-lg p-6 max-w-sm relative">
+        <div className="bg-card border-2 border-primary shadow-2xl rounded-lg p-6 max-w-sm relative">
+          {/* Seta indicadora */}
+          <div 
+            className="absolute w-0 h-0"
+            style={getArrowStyles()}
+          />
+          
           <Button
             variant="ghost"
             size="icon"
